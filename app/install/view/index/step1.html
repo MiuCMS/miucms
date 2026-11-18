@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>米柚CMS安装</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<link rel="stylesheet" href="{__ADMIN__}/layui/css/layui.css" media="all">
+	<style>
+		body {
+			width: 100%;
+			height: 100%;
+			background-size: cover;
+			background: url("{__ADMIN__}/images/bg_pattern.png"), #7b4397;
+			background: url("{__ADMIN__}/images/bg_pattern.png"), -webkit-linear-gradient(to left, #34a853, #4285f4);
+			background: url("{__ADMIN__}/images/bg_pattern.png"), linear-gradient(to left, #34a853, #4285f4);
+		}
+	</style>
+</head>
+
+<body>
+	<div style="width:200px;margin: 20px auto;"><img src="{__ADMIN__}/images/login_logo.png" alt="米柚CMS安装" width="200"></div>
+	<div style="width:888px;margin:0 auto 30px;">
+		<div class="layui-layout layui-layout-admin">
+			<div class="layui-header layui-bg-green" style="border-radius:12px 12px 0 0; position:relative;">
+				<div class="layui-logo" style="color: #fff; width:100px;">安装引导</div>
+				<ul class="layui-nav layui-layout-right">
+					<li class="layui-nav-item">版本：v{:CMS_VERSION}</li>
+				</ul>
+			</div>
+			<div id="agreement-content" style="padding:20px; background-color:#fff;line-height:25px; border-bottom:1px solid #e7e7e7; max-height:50vh; overflow-y:auto; overflow-x:hidden;">
+				<p style="font-size:18px;font-weight:bold;margin-bottom:10px;">欢迎使用 MiuCMS 米柚内容管理系统。</p>
+				<p><strong>MiuCMS 使用协议</strong></p>
+				<p>MiuCMS 基于 ThinkPHP{$TP_VERSION}、Layui 和 MySQL 开发，提供内容管理、模板标签及插件扩展等建站能力。MiuCMS 核心程序永久免费。</p>
+				<p>为帮助您正确使用本系统，请在安装前阅读以下说明。MiuCMS 源代码的复制、修改、发布和分发遵循项目随附的 Apache License 2.0（以下简称 Apache-2.0）；通过本安装程序安装并运营网站，还应遵守本协议中的署名要求。</p>
+
+				<p><strong>一、使用与授权</strong></p>
+				<p>1. MiuCms 核心程序永久免费，可用于商业项目，无需另行购买软件授权。基于 MiuCMS 搭建并运营的网站，无论以任何用途、程度、方式（修改或美化），只要使用MiuCMS的整体或任何部分，未获得版权标识修改许可，网站页面的版权标识（"本站使用 MiuCMS 搭建"或"Powered by MiuCMS © MiuCMS.com")和MiuCMS网站（www.miucms.com）的超链接都必须保留且清晰可见，不得隐藏，清除或修改。</p>
+				<p>2. 您分发本软件或其衍生作品时，请遵守 Apache-2.0，包括向接收方提供许可证副本、在修改过的文件中说明修改、保留适用的版权和归属声明；若软件包含 NOTICE 文件，也应按许可证要求保留其中适用的声明。完整条款请查看项目根目录的 LICENSE 文件。</p>
+				<p>3. Apache-2.0 不授予 MiuCMS 或第三方的商标使用权。未经许可，请勿使用 MiuCMS 名称、标识或官方网站信息，使他人误认为您的产品、服务或修改版本由 MiuCMS 官方发布或认可。</p>
+				<p>4. 您使用本系统搭建的网站及自行提交的内容，其权利归相应权利人所有。您应确保拥有相关内容的合法使用权，并自行承担内容发布、数据处理及网站运营所产生的法律责任。</p>
+				<p>5. 不得利用本系统制作、发布、传播或存储所在地法律法规禁止的内容；您应确保网站内容及运营行为符合所在地适用的法律法规。</p>
+				<p><strong>二、第三方组件与服务</strong></p>
+				<p>1. 本项目包含或可接入第三方软件、插件、模板及在线服务。它 们可能采用各自的许可协议或计费规则，请在安装、使用或分发前查看相应说明。</p>
+				<p>2. AI 翻译、AI 写作、图片生成、短信、邮件及其他第三方接口由对应服务提供方运行。相关服务可能产生费用，其可用性、输出内容和服务条款由服务提供方负责；请在使用前确认其规则和费用。</p>
+				<p><strong>三、免责声明</strong></p>
+				<p>1. MiuCMS 源码按 Apache-2.0 许可提供，网站运营还应遵守本协议中的署名要求。除适用法律另有规定或另有书面约定外，项目不对软件作明示或默示的保证。您应结合自身业务评估并使用本系统，正式运行前请做好测试、数据备份和安全配置。</p>
+				<p>2. 因您发布的内容、服务器环境、配置或操作、第三方软件及服务等产生的争议、损失或服务中断，由相应责任方依法承担。项目维护者不对超出 Apache-2.0 及适用法律规定的责任作额外承诺。</p>
+				<p>3. 除 Apache-2.0 和适用法律规定外，项目维护者不承诺为所有用户提供持续的安装、升级或故障排查服务。</p>
+				<p><strong>四、协议接受</strong></p>
+				<p>点击“接受协议”并继续安装或使用本软件，即表示您已阅读并理解本说明、Apache-2.0 和 MiuCms 补充使用条款。若您不同意，请停止安装和使用。各版本的具体条款以该版本随附的 LICENSE 文件为准。</p>
+				<p>协议说明更新日期：2026年10月16日</p>
+				<p>MiuCMS 官方网站：<a href="{:config('official.website')}" target="_blank" rel="noopener noreferrer">{:config('official.website')}</a></p>
+				<p>MiuCMS 演示站：<a href="{:config('official.demo')}" target="_blank" rel="noopener noreferrer">{:config('official.demo')}</a></p>
+			</div>
+			<div style="padding:20px; background-color:#fff;text-align: center; border-radius:0 0 12px 12px; ">
+				<a id="accept-agreement" data-href="{$baseFile}?s=install/index/step2" class="layui-btn layui-bg-blue layui-btn-disabled" aria-disabled="true" tabindex="-1">接受协议</a>
+			</div>
+		</div>
+	</div>
+	<script src="{__ADMIN__}/layui/layui.js" charset="utf-8"></script>
+	<script>
+		(function () {
+			var agreement = document.getElementById('agreement-content');
+			var acceptButton = document.getElementById('accept-agreement');
+			if (!agreement || !acceptButton) return;
+
+			function enableAcceptButton() {
+				acceptButton.href = acceptButton.getAttribute('data-href');
+				acceptButton.classList.remove('layui-btn-disabled');
+				acceptButton.removeAttribute('aria-disabled');
+				acceptButton.removeAttribute('tabindex');
+			}
+
+			function checkAgreementScroll() {
+				if (agreement.scrollTop + agreement.clientHeight >= agreement.scrollHeight - 2) {
+					enableAcceptButton();
+				}
+			}
+
+			agreement.addEventListener('scroll', checkAgreementScroll);
+			window.addEventListener('load', checkAgreementScroll);
+			setTimeout(checkAgreementScroll, 0);
+		})();
+	</script>
+</body>
+
+</html>

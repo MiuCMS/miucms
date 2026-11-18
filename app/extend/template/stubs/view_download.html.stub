@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body>
+{include file="header" /}
+<main id="main" class="section container reading-layout">
+    {miu:position /}
+    <header class="document-heading"><h1>{$doc.title}</h1><p>{$doc.title_ext_1|default=''}</p></header>
+    <section class="software-summary">
+        {notempty name="doc.litpic"}<img src="{$doc.litpic}" alt="{$doc.title}">{/notempty}
+        <dl class="parameter-list">
+            <div><dt>{miu:lang key='softwareSize' /}</dt><dd>{$doc.size|default=''}</dd></div>
+            <div><dt>{miu:lang key='softwareLanguage' /}</dt><dd>{$doc.language|default=''}</dd></div>
+            <div><dt>{miu:lang key='softwareType' /}</dt><dd>{$doc.softtype|default=''}</dd></div>
+            <div><dt>{miu:lang key='authorization' /}</dt><dd>{$doc.authorization|default=''}</dd></div>
+            <div><dt>{miu:lang key='updated' /}</dt><dd>{$doc.updatetime|default=''}</dd></div>
+            <div><dt>{miu:lang key='category' /}</dt><dd>{$doc.typecate|default=''}</dd></div>
+        </dl>
+    </section>
+    {include file="document_body" /}
+    <section class="download-resources"><h2>{miu:lang key='downloads' /}</h2>
+        <!-- 下载按钮使用 endpoint，由后端读取真实地址；不要把原始 url 放入 HTML。 -->
+        {volist name="doc.downloads" id="vo" empty=""}<div class="download-row"><div><strong>{$vo.btn_name}</strong><span>{$vo.file_type} {$vo.size}</span>{notempty name="vo.code"}<small>{miu:lang key='extractCode' /}：{$vo.code}</small>{/notempty}</div><a class="button" href="{$vo.endpoint}" target="_blank" rel="noopener noreferrer">{miu:lang key='download' /}</a></div>{/volist}
+        {empty name="doc.downloads"}<p class="empty-state">{miu:lang key='empty' /}</p>{/empty}
+    </section>
+    {include file="detail_end" /}
+</main>
+{include file="footer" /}
+</body>
+</html>

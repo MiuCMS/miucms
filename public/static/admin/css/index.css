@@ -1,0 +1,932 @@
+/**
+ * 后台首页（框架页）样式
+ * 由 app/admin/view/index/index.html 的 {block name="style"} 引入
+ */
+
+/* ===== 以下框架布局样式原先在 miu.css，只有后台首页模板在用，所以移到这里 ===== */
+
+/*layout start*/
+.miucms-layout .layui-header {position: fixed; top: 0;left: 0; width: 100%; height: 50px; border-bottom: 1px solid #eeeeee;box-sizing: border-box;background-color: #fff}
+.miucms-layout .layui-header a,
+.miucms-layout .layui-header a cite {color: #162a48;font-size: 12px;}
+.miucms-layout .layui-header a:hover {color: #000}
+.miucms-layout .layui-header .miucms-head-avatar .layui-nav-child dd a {color: #162a48 !important}
+.miucms-layout .layui-header .miucms-head-avatar .layui-nav-child dd a:hover {color: #000 !important}
+.miucms-head-item{display:block; padding:0 10px; height:50px; line-height:50px; float:left;}
+.miucms-head-item .layui-nav{background:0 0;padding:0;}
+.miucms-head-item .layui-nav .layui-nav-item a{padding:0;}
+.miu-effects:hover{background: #f0f2f5;}
+.miu-effects i{display: inline-block; transform-origin: center center;}
+.miu-effects:hover i{animation: miu-effects-pop .45s ease-out both;}
+@keyframes miu-effects-pop{
+    0%{transform: scale(.5);}
+    55%{transform: scale(1.25);}
+    75%{transform: scale(.92);}
+    100%{transform: scale(1);}
+}
+
+.layui-layout-right .miucms-head-message{position:relative;}
+.layui-layout-right .miucms-message-num{height: 18px;position: absolute; top: -12px;margin-left: 0px;left: 50%;}
+.layui-layout-right .miucms-message-num span {    height: 14px;
+    margin: 0;
+    padding: 0 4px;
+    display: inline-block;
+    font-size: 11px;
+    line-height: 14px;
+    text-align: center;
+    background-color: #FF5722;
+    color: #fff;
+    border-radius: 12px;
+    cursor: pointer;}
+/* 未读消息角标：页面打开后一直放大缩小地闪，跑满 1 分钟后自动停（1s × 60 次） */
+.layui-layout-right .miucms-message-num span{animation: miu-badge-pulse 1s ease-in-out 60;}
+@keyframes miu-badge-pulse{
+    0%,100%{transform: scale(1);}
+    50%{transform: scale(1.3);}
+}
+
+.miucms-head-avatar img{width:28px; height:28px; border-radius:50%; margin-right:3px;}
+.miucms-head-avatar i.layui-icon{font-size:14px;position: relative;}
+.layui-layout-right .layui-nav .layui-nav-item{height: 50px;line-height: 50px}
+.miucms-head-item .layui-nav .layui-this:after{display:none;}
+
+.miucms-layout .layui-side {width: 120px;top: 0;z-index: 1001}
+.miucms-layout .layui-logo {position: fixed;left: 0; top: 0; z-index: 1001; width: 120px; height: 49px; text-align:center; line-height:49px; overflow: hidden;background-color: #001529;  border-bottom: 1px solid #011120; cursor:pointer;}
+.miucms-layout .layui-logo,
+.miucms-layout .layui-logo a {color: #f1f1f1; text-align:center;}
+
+.layui-side-menu {box-shadow: 1px 0 2px 0 rgba(0, 0, 0, .05);background-color: #001529; color: #fff}
+.layui-side-menu .layui-side-scroll {width: 100%}
+.layui-side-menu .layui-nav {width: 120px; margin-top: 50px; background: 0 0}
+.layui-side-menu .layui-nav .layui-nav-item a {height: 40px;line-height: 40px; padding-left: 60px; padding-right: 20px}
+.layui-side-menu .layui-nav .layui-nav-item>a {padding-top: 2px;padding-bottom: 2px}
+.layui-side-menu .layui-nav .layui-nav-itemed>.layui-nav-child { padding: 0}
+.layui-side-menu .layui-nav .layui-nav-item .icon,
+.layui-side-menu .layui-nav .layui-nav-item .iconfont,
+.layui-side-menu .layui-nav .layui-nav-item .layui-icon{position: absolute; top: 50%;left: 32px; margin-top: -20px}
+.side-spread .layui-side-menu .layui-nav .layui-nav-item .icon,
+.side-spread .layui-side-menu .layui-nav .layui-nav-item .iconfont,
+.side-spread .layui-side-menu .layui-nav .layui-nav-item .layui-icon{ left: 18px;}
+.layui-side-menu .layui-nav .layui-nav-item .icon,
+.layui-side-menu .layui-nav .layui-nav-item .iconfont{font-size:16px;}
+.layui-side-menu .layui-nav .layui-nav-item .layui-nav-more {margin-top: -24px; color:#677C91}
+.layui-side-menu .layui-nav .layui-nav-child .layui-nav-more {margin-top: -20px; color:#677C91}
+
+.layui-side-menu .layui-nav .layui-nav-child .layui-nav-child { background: 0 0 !important}
+.layui-side-menu .layui-nav .layui-nav-child .layui-nav-child a {padding-left: 58px}
+.layui-side-menu .layui-nav .layui-nav-more {right: 12px}
+
+.layui-nav-tree .layui-nav-child dd.layui-this,
+.layui-nav-tree .layui-nav-child dd.layui-this a,
+.layui-nav-tree .layui-this,
+.layui-nav-tree .layui-this>a,
+.layui-nav-tree .layui-this>a:hover {background-color: #192A3B;color: #3C9CFF;}
+
+.layui-side .layui-nav-tree .layui-nav-child dd a:hover{background-color:#192A3B;}
+.layui-side .layui-nav-tree .layui-nav-bar{background-color: #3C9CFF;width:3px;}
+
+.layui-side-white{background-color: #fff; color: #323232}
+.layui-side-white .layui-logo {background-color: #ffffff;border-bottom: 1px solid #eeeeee;color:#3e3e3e;}
+.layui-side-white .layui-nav .layui-nav-item a{color: #323232}
+.layui-side-white .layui-nav .layui-nav-item .iconfont{font-weight:600;}
+.layui-side-white .layui-nav-itemed>.layui-nav-child{background-color:#fff!important;}
+.layui-side-white .layui-nav-itemed>a,
+.layui-side-white .layui-nav-tree .layui-nav-title a,
+.layui-side-white .layui-nav-tree .layui-nav-title a:hover{color:#187FDD!important;}
+.layui-side-white .layui-nav-tree .layui-nav-child dd.layui-this,
+.layui-side-white .layui-nav-tree .layui-nav-child dd.layui-this a,
+.layui-side-white .layui-nav-tree .layui-this,
+.layui-side-white .layui-nav-tree .layui-this>a,
+.layui-side-white .layui-nav-tree .layui-this>a:hover {background-color: #ECF6FF;color: #187FDD;}
+.layui-side-white .layui-nav-tree .layui-nav-child dd a:hover{background-color:#ffffff;color: #187FDD;}
+.layui-side-white .layui-nav-tree .layui-nav-bar{background-color: #187FDD;width:3px;left:inherit;right:0}
+
+.layui-side-blue{background-color:#192A5E; color: #C5C9D2}
+.layui-side-blue .layui-logo {background-color: #122150;border-bottom: 1px solid #122150;}
+.layui-side-blue .layui-nav .layui-nav-item a{color: #C5C9D2}
+.layui-side-blue .layui-nav .layui-nav-item .iconfont{font-weight:600;}
+.layui-side-blue .layui-nav-itemed>.layui-nav-child{background-color:#122150!important;}
+.layui-side-blue .layui-nav-itemed>a,
+.layui-side-blue .layui-nav-tree .layui-nav-title a,
+.layui-side-blue .layui-nav-tree .layui-nav-title a:hover{color:#C5C9D2!important;}
+.layui-side-blue .layui-nav-tree .layui-nav-child dd.layui-this,
+.layui-side-blue .layui-nav-tree .layui-nav-child dd.layui-this a,
+.layui-side-blue .layui-nav-tree .layui-this,
+.layui-side-blue .layui-nav-tree .layui-this>a,
+.layui-side-blue .layui-nav-tree .layui-this>a:hover {background-color: #3c508c;color: #fff;}
+.layui-side-blue .layui-nav-tree .layui-nav-child dd a:hover{background-color:#2b3e79;color: #C5C9D2;}
+.layui-side-blue .layui-nav-tree .layui-nav-bar{background-color: #122150;width:3px;left:inherit;right:0}
+
+.page-tabs{ position: fixed;top: 50px;right: 0; z-index: 999; height: 34px; line-height: 34px; padding: 0 40px 0 0; background-color: #fff;box-sizing: border-box; box-shadow: 0 1px 3px rgb(0 0 0 / 10%);}
+.page-tabs,
+.miucms-layout .layui-body,
+.miucms-layout .layui-footer,
+.miucms-layout .layui-layout-left {left: 160px}
+
+.page-tabs,
+.miucms-layout .layui-body,
+.miucms-layout .layui-footer,
+.miucms-layout .layui-header .layui-layout-right,
+.miucms-layout .layui-header .layui-nav .layui-nav-item,
+.miucms-layout .layui-layout-left,
+.miucms-layout .layui-logo,
+.miucms-layout .layui-side {transition: all .3s;-webkit-transition: all .3s}
+
+.miucms-layout .layui-body {top: 84px;bottom: 0;position: fixed;}
+.miucms-layout .miucms-tab-page {position: absolute; top: 0; bottom: 0;left: 0; right: 0; display: none; overflow: hidden;}
+.miucms-layout .layui-footer {padding: 10px 0;text-align: center; box-shadow: 0 -1px 2px 0 rgba(0, 0, 0, .05)}
+.miucms-body-shade {position: fixed; display: none;left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(0, 0, 0, .3); z-index: 1000}
+
+.page-tabs .miucms-tabs-control { position: absolute; top: 0;width: 40px; height: 100%;text-align: center; cursor: pointer;box-sizing: border-box; border-left: 1px solid #eeeeee;
+    transition: all .3s;
+    -webkit-transition: all .3s;
+}
+.page-tabs .miucms-tabs-control:hover {background-color: #fafafa}
+.page-tabs .layui-icon-prev {left: 0; border-left: none; border-right: 1px solid #eeeeee}
+.page-tabs .layui-icon-next {right: 40px}
+.page-tabs .layui-icon-down {right: 0}
+
+/* 左右滚动箭头：默认隐藏（标签没超出时用不到），标签超出可视宽度时由 JS 给 #pageTabs 加 .tabs-overflow 才显示 */
+.page-tabs .layui-icon-prev,
+.page-tabs .layui-icon-next {display: none}
+.page-tabs.tabs-overflow .layui-icon-prev,
+.page-tabs.tabs-overflow .layui-icon-next {display: block}
+/* 未超出时左侧不留箭头空间；超出时再让出左右各一个箭头的位置 */
+.page-tabs.tabs-overflow {padding: 0 80px 0 40px}
+.page-tabs .layui-tab {margin: 0; overflow: hidden}
+.page-tabs .layui-tab-title {height: 34px;border: none}
+.page-tabs .layui-tab-title i{font-size:18px; font-weight:600}
+
+.page-tabs .layui-tab-title li { min-width: 0; line-height: 34px; max-width: 160px; text-overflow: ellipsis; padding-left:12px; padding-right: 32px;overflow: hidden;border-right: 1px solid #eeeeee;vertical-align: top}
+/* 拖动排序：可拖的标签给 move 光标（lay-id=0 的首页是 draggable="false"，保持 pointer）；
+   拖动过程中别把标签文字选中 */
+.page-tabs .layui-tab-title li[draggable="true"] { cursor: default; }
+.page-tabs .layui-tab-title li { user-select: none; -webkit-user-select: none; }
+.page-tabs .layui-tab-title li.tab-dragging { opacity: .5; }
+/* 拖动排序的落点：红色虚线框，框住「新标签会落到的位置」。
+   位置和尺寸由 JS 按目标标签算出来；box-sizing 用 border-box，
+   这样框的外框尺寸跟标签完全一致。
+   注意：框是 #pageTabs 的直接子元素，不在 .layui-tab-title 里面，别写成后代选择器 */
+.page-tabs > .tab-drop-line {
+    display: none;
+    position: absolute;
+    box-sizing: border-box;
+    border: 1px dashed #f56c6c;
+    z-index: 10;
+    pointer-events: none;
+}
+.page-tabs .layui-tab-title li:first-child {padding-right: 15px}
+.page-tabs .layui-tab-title li .layui-tab-close { position: absolute;right: 8px; top: 50%;margin: -8px 0 0; width: 16px; height: 16px;line-height: 16px;border-radius: 50%;font-size: 12px;cursor:default;}
+.page-tabs .layui-tab-title li:after { content: ''; position: absolute; top: 0; left: 0;width: 0; height: 2px; border-radius: 0; background-color: #1E9FFF;
+    transition: all .3s;
+    -webkit-transition: all .3s
+}
+
+.page-tabs .layui-tab-title li:hover:after {width: 100%}
+
+.page-tabs .layui-tab-title li.layui-this,
+.page-tabs .layui-tab-title li:hover { background-color: #fafafa; color:#187FDD}
+
+.page-tabs .layui-tab-title li.layui-this:after {width: 100%; border: none;height: 2px; background-color: #1E9FFF}
+
+.page-tabs .layui-tab-title li:first-child .layui-tab-close,
+.miucms-tabs-select.layui-nav .layui-nav-bar,
+.miucms-tabs-select.layui-nav .layui-nav-more {display: none}
+
+.miucms-tabs-select.layui-nav { position: absolute; left: 0; top: 0; width: 100%; height: 100%; padding: 0; background: 0 0}
+.miucms-tabs-select.layui-nav .layui-nav-item { line-height: 34px}
+.miucms-tabs-select.layui-nav .layui-nav-item>a {height: 34px}
+.miucms-tabs-select.layui-nav .layui-nav-item a {color: #666}
+.miucms-tabs-select.layui-nav .layui-nav-child {top: 34px;left: auto;right: 0}
+
+.miucms-tabs-select.layui-nav .layui-nav-child dd.layui-this,
+.miucms-tabs-select.layui-nav .layui-nav-child dd.layui-this a {background-color: #f2f2f2 !important;color: #333}
+
+.miucms-layout .layui-logo .logo{display: none}
+.side-spread .miucms-layout .layui-logo {width: 53px;}
+.side-spread .miucms-layout .layui-logo .syslogo{display: none}
+.side-spread .miucms-layout .layui-logo .logo{display: inline-block}
+.side-spread .layui-side {left: 0;width: 53px}
+
+.side-spread .page-tabs,
+.side-spread .miucms-layout .layui-body,
+.side-spread .miucms-layout .layui-footer,
+.side-spread .miucms-layout .layui-layout-left {left: 53px}
+
+.side-spread .layui-side-menu .layui-nav {position: static; width: 53px}
+.side-spread .layui-side-menu .layui-nav-item {position: static}
+.side-spread .layui-side-menu .layui-nav-item>a {padding-right: 0;padding-left:55px;}
+
+.side-spread .layui-side-menu .layui-nav-item cite,
+.side-spread .layui-side-menu .layui-nav>.layui-nav-item>.layui-nav-child,
+.side-spread .layui-side-menu .layui-nav>.layui-nav-item>a .layui-nav-more {display: none; padding: 8px 0;width: 180px}
+
+.side-spread .layui-side-menu .layui-nav>.layui-nav-itemed>a {background: rgba(0, 0, 0, .3)}
+
+.side-layout .layui-layer-TipsG.layui-layer-TipsR{display:none;}
+.side-layout.layui-layer-tips .layui-layer-content{padding:0!important; border-radius:0!important;}
+.side-layout .layui-nav-tree .layui-nav-bar{background-color: #3C9CFF;width:3px;}
+
+@media screen and (max-width:992px) {
+    .miucms-layout .layui-side {
+        transform: translate3d(-200px, 0, 0);
+        -webkit-transform: translate3d(-200px, 0, 0);
+        width: 200px
+    }
+    .page-tabs,
+    .miucms-layout .layui-body,
+    .miucms-layout .layui-footer,
+    .miucms-layout .layui-layout-left {
+        left: 0
+    }
+	.miucms-head-screen,
+	.miucms-head-refresh,
+	.miucms-head-cache,
+	.miucms-head-home{display:none;}
+}
+
+.side-spread-sm .layui-side {
+    transform: translate3d(0,0,0);
+    -webkit-transform: translate3d(0,0,0);
+}
+.side-spread-sm .page-tabs,
+.side-spread-sm .miucms-layout .layui-body,
+.side-spread-sm .miucms-layout .layui-footer,
+.side-spread-sm .miucms-layout .layui-layout-left {
+    left: 0;
+    transform: translate3d(200px,0,0);
+    -webkit-transform: translate3d(200px,0,0);
+}
+.side-spread-sm .miucms-body-shade {
+    display: block;
+}
+
+.miucms-tab-page.layui-show {animation:moveTop .4s;-webkit-animation:moveTop .4s;animation-fill-mode:both;-webkit-animation-fill-mode:both;position:relative;height:100%;-webkit-overflow-scrolling:touch;}
+@keyframes moveTop {0% {opacity:0;-webkit-transform:translateY(20px);-ms-transform:translateY(20px);transform:translateY(20px);}
+    100% {opacity:1;-webkit-transform:translateY(0);-ms-transform:translateY(0);transform:translateY(0);}
+}
+@-o-keyframes moveTop {0% {opacity:0;-webkit-transform:translateY(20px);-ms-transform:translateY(20px);transform:translateY(20px);}
+    100% {opacity:1;-webkit-transform:translateY(0);-ms-transform:translateY(0);transform:translateY(0);}
+}
+@-moz-keyframes moveTop {0% {opacity:0;-webkit-transform:translateY(20px);-ms-transform:translateY(20px);transform:translateY(20px);}
+    100% {opacity:1;-webkit-transform:translateY(0);-ms-transform:translateY(0);transform:translateY(0);}
+}
+@-webkit-keyframes moveTop {0% {opacity:0;-webkit-transform:translateY(20px);-ms-transform:translateY(20px);transform:translateY(20px);}
+    100% {opacity:1;-webkit-transform:translateY(0);-ms-transform:translateY(0);transform:translateY(0);}
+}
+/*layout end*/
+
+    /* ===== 三列布局核心覆盖 ===== */
+    .miucms-layout-three .layui-side .layui-side-scroll,.miucms-layout-three .layui-logo span {
+        font-size: 18px;
+    }
+    .miucms-layout-three .layui-logo span{
+        font-weight: 700;
+        font-family: Georgia, "Times New Roman", serif;
+    }
+    /* 左侧一级菜单：隐藏所有子菜单和展开箭头 */
+    .miucms-layout-three #menuList .layui-nav-child,
+    .miucms-layout-three #menuList .layui-nav-more {
+        display: none !important;
+    }
+    /* 一级菜单项：图标+文字横向排列 */
+    .miucms-layout-three #menuList > li > a {
+        padding: 0 24px 0 8px !important;
+        text-align: center;
+        line-height: 60px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        height: 60px !important;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    .miucms-layout-three #menuList > li > a .icon,
+    .miucms-layout-three #menuList > li > a .iconfont,
+    .miucms-layout-three #menuList > li > a .layui-icon {
+        position: static !important;
+        display: inline-block;
+        font-size: 16px;
+        margin: 0 6px 0 0;
+        flex-shrink: 0;
+    }
+    .miucms-layout-three #menuList > li > a .menu-text {
+        display: inline;
+        font-size: 16px;
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color:#fff;
+    }
+    .miucms-layout-three #menuList > li > a .menu-content {
+        display:inline-block;
+        white-space:nowrap;
+    }
+    /* 选中态 */
+    .miucms-layout-three #menuList > li.active > a,
+    .miucms-layout-three #menuList > li.layui-this > a {
+        background-color: rgba(255,255,255,.15);
+    }
+    .miucms-layout-three #menuList > li.active > a .menu-content,
+    .miucms-layout-three #menuList > li.layui-this > a .menu-content,
+    .miucms-layout-three #menuList > li:hover > a .menu-content{
+        background:linear-gradient(180deg, #fff 0%, #fff 30%, #b13ef0 100%);
+        background-clip:text;
+        -webkit-background-clip:text;
+        color:transparent;
+        -webkit-text-fill-color:transparent;
+        text-shadow:none;
+    }
+    .miucms-layout-three #menuList > li.active > a .menu-content *,
+    .miucms-layout-three #menuList > li.layui-this > a .menu-content *,
+    .miucms-layout-three #menuList > li:hover > a .menu-content *{
+        color:transparent!important;
+        -webkit-text-fill-color:transparent;
+        text-shadow:none!important;
+    }
+
+    /* ===== 中间二级菜单面板 ===== */
+    .miucms-layout-three .miucms-sub-side {
+        position: fixed;
+        top: 50px;
+        left: 120px;
+        bottom: 0;
+        width: 160px;
+        background: #fff;
+        border-right: 1px solid #eeeeee;
+        z-index: 999;
+        display: none;
+        flex-direction: column;
+        box-shadow: 1px 0 2px 0 rgba(0,0,0,.05);
+    }
+    .miucms-layout-three.has-sub .miucms-sub-side {
+        display: flex;
+    }
+    /* 中间面板折叠按钮 */
+    .miucms-layout-three .miucms-sub-side .miucms-sub-toggle {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 18px;
+        height: 60px;
+        background: #f0f2f5;
+        border: 1px solid #e2e4e9;
+        border-right: none;
+        border-radius: 4px 0 0 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        transition: background .2s;
+    }
+    .miucms-layout-three .miucms-sub-side .miucms-sub-toggle:hover {
+        background: #e8eaf0;
+    }
+    .miucms-layout-three .miucms-sub-side .miucms-sub-toggle i {
+        font-size: 12px;
+        color: #666;
+        transition: transform .3s ease;
+    }
+    /* 折叠状态：中间栏保留 18px 按钮占位 */
+    .miucms-layout-three.sub-collapsed .miucms-sub-side {
+        display: flex !important;
+        width: 18px !important;
+        border-right: none;
+        overflow: hidden;
+        background: #f5f7fa;
+        border-left: 1px solid #e2e4e9;
+    }
+    .miucms-layout-three.sub-collapsed .miucms-sub-side .miucms-sub-title,
+    .miucms-layout-three.sub-collapsed .miucms-sub-side .miucms-sub-scroll {
+        opacity: 0;
+        pointer-events: none;
+    }
+    .miucms-layout-three.sub-collapsed .miucms-sub-side .miucms-sub-toggle {
+        right: 0;
+        left: auto;
+        border-radius: 0 4px 4px 0;
+        border: 1px solid #e2e4e9;
+        border-left: none;
+    }
+    .miucms-layout-three.sub-collapsed .miucms-sub-side .miucms-sub-toggle i {
+        transform: rotate(180deg);
+    }
+    /* 折叠时右侧区域跟随缩进（左侧 120px + 按钮 18px = 138px） */
+    .miucms-layout-three.sub-collapsed .page-tabs,
+    .miucms-layout-three.sub-collapsed .layui-body,
+    .miucms-layout-three.sub-collapsed .layui-footer,
+    .miucms-layout-three.sub-collapsed .layui-layout-left {
+        left: 138px !important;
+    }
+    .miucms-layout-three .miucms-sub-side .miucms-sub-title {
+        height: 48px;
+        line-height: 48px;
+        padding: 0 14px 0 0px;
+        font-size: 14px;
+        color: #333;
+        border-bottom: 1px solid #f0f0f0;
+        flex-shrink: 0;
+        background: #fafbfc;
+        text-align: center;
+        color:#999;
+    }
+    .miucms-layout-three .miucms-sub-side .miucms-sub-title i{position:relative;top:2px;}
+    .miucms-layout-three .miucms-sub-side .miucms-sub-scroll {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    /* ===== 二级菜单树（layui tree 组件），与内容列表页左侧栏目树结构一致 ===== */
+    .miucms-layout-three .miucms-sub-side .miucms-sub-tree {
+        padding: 6px 0;
+    }
+    /* 中间栏只有 160px，收窄每级缩进，保证三级菜单也放得下 */
+    .miucms-layout-three .miucms-sub-side .layui-tree-line .layui-tree-pack {
+        padding-left: 18px;
+    }
+    /* 让文字在整行里上下居中 */
+    .miucms-layout-three .miucms-sub-side .layui-tree-entry {
+        display: flex;
+        align-items: center;
+    }
+    /* main 撑满整行，文字才能在超出时正确显示省略号 */
+    .miucms-layout-three .miucms-sub-side .layui-tree-main {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        min-width: 0;
+        overflow: hidden;
+    }
+    .miucms-layout-three .miucms-sub-side .layui-tree-iconClick {
+        flex-shrink: 0;
+    }
+    .miucms-layout-three .miucms-sub-side .layui-tree-txt {
+        flex: 1;
+        min-width: 0;
+        color: #666;
+        font-size: 14px;
+        line-height: 1.4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .miucms-layout-three .miucms-sub-side .layui-tree-txt:hover {
+        color: #1A75FF;
+    }
+    /* 当前栏目整行高亮 */
+    .miucms-layout-three .miucms-sub-side .layui-tree-entry.sub-nav-active {
+        background: #3C9CFF;
+        border-radius: 2px;
+    }
+    .miucms-layout-three .miucms-sub-side .layui-tree-entry.sub-nav-active .layui-tree-txt,
+    .miucms-layout-three .miucms-sub-side .layui-tree-entry.sub-nav-active .layui-icon {
+        color: #fff;
+    }
+    /* 高亮行 hover 时保持白字，避免被 layui 的 tree-line hover 规则改成灰字加下划线 */
+    .miucms-layout-three .miucms-sub-side .layui-tree-entry.sub-nav-active:hover .layui-tree-txt {
+        color: #fff;
+        text-decoration: none;
+    }
+
+    /* ===== 右侧内容区让出两列宽度 ===== */
+    .miucms-layout-three .page-tabs,
+    .miucms-layout-three .layui-body,
+    .miucms-layout-three .layui-footer,
+    .miucms-layout-three .layui-layout-left {
+        left: 280px !important; /* 120 + 120 */
+    }
+    /* 无中间面板时，右侧只让出左侧宽度 */
+    .miucms-layout-three.no-sub .page-tabs,
+    .miucms-layout-three.no-sub .layui-body,
+    .miucms-layout-three.no-sub .layui-footer,
+    .miucms-layout-three.no-sub .layui-layout-left {
+        left: 120px !important; /* 只有左侧宽度 */
+    }
+
+    /* ===== 移动端适配 ===== */
+    @media screen and (max-width: 992px) {
+        .miucms-layout-three .miucms-sub-side {
+            display: none !important;
+        }
+        .miucms-layout-three .layui-side.layui-side-menu {
+            transform: translate3d(-120px, 0, 0);
+            -webkit-transform: translate3d(-120px, 0, 0);
+            width: 120px;
+        }
+        .miucms-layout-three .page-tabs,
+        .miucms-layout-three .layui-body,
+        .miucms-layout-three .layui-footer,
+        .miucms-layout-three .layui-layout-left {
+            left: 0 !important;
+        }
+        /* 移动端展开侧边栏时恢复全宽 */
+        .side-spread-sm.miucms-layout-three .layui-side {
+            transform: translate3d(0, 0, 0);
+            width: 200px;
+        }
+        .side-spread-sm.miucms-layout-three .page-tabs,
+        .side-spread-sm.miucms-layout-three .layui-body,
+        .side-spread-sm.miucms-layout-three .layui-footer,
+        .side-spread-sm.miucms-layout-three .layui-layout-left {
+            left: 0 !important;
+            transform: translate3d(200px, 0, 0);
+        }
+    }
+
+    /* ===== 主题兼容：白色主题下的一级菜单 ===== */
+    .miucms-layout-three .layui-side-white #menuList > li > a {
+        color: #323232;
+    }
+    .miucms-layout-three .layui-side-white #menuList > li.active > a,
+    .miucms-layout-three .layui-side-white #menuList > li.layui-this > a {
+        background-color: #ECF6FF;
+        color: #187FDD;
+    }
+    .miucms-layout-three .layui-side-white #menuList .menu-content,
+    .miucms-layout-three .layui-side-white #menuList .menu-content * {
+        background: none !important;
+        background-clip: border-box !important;
+        -webkit-background-clip: border-box !important;
+        text-shadow: none !important;
+    }
+    .miucms-layout-three .layui-side-white #menuList .layui-font-black {
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+    }
+
+    /* ===== 主题兼容：蓝色主题下的一级菜单 ===== */
+    .layui-side-blue.miucms-layout-three #menuList > li > a {
+        color: #C5C9D2;
+    }
+    .layui-side-blue.miucms-layout-three #menuList > li.active > a,
+    .layui-side-blue.miucms-layout-three #menuList > li.layui-this > a {
+        background-color: #3c508c;
+        color: #fff;
+    }
+    .miucms-layout-three #menuList > li:not(.active):not(.layui-this):hover > a {
+        background-color: transparent !important;
+    }
+
+    /* ===== 锁屏 ===== */
+    /* z-index 要比后台自身的元素高，但低于 layui 的 layer（19891014），
+       这样解锁时的 layer.msg / layer.load 提示能显示在锁屏之上 */
+    .miu-lock-screen {
+        position: fixed;
+        left: 0; top: 0; right: 0; bottom: 0;
+        z-index: 999999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        background: linear-gradient(160deg, #16307a 0%, #2551c4 45%, #3f7bea 100%);
+        user-select: none;
+    }
+    .miu-lock-screen.miu-lock-show { display: flex; }
+    .miu-lock-inner {
+        width: 100%;
+        max-width: 520px;
+        padding: 0 20px;
+        box-sizing: border-box;
+        text-align: center;
+        transform: translateY(-60px);
+    }
+    .lock-icon { font-size: 44px; color: #fff; opacity: .95; }
+    .miu-lock-time {
+        font-size: 86px;
+        line-height: 1.1;
+        font-weight: 300;
+        letter-spacing: 3px;
+        margin-top: 12px;
+    }
+    /* 每个数字/冒号各占固定宽度。
+       当前字体（Segoe UI / 微软雅黑）的数字本身不等宽，而 font-variant-numeric: tabular-nums
+       对它们不起作用，所以只能靠固定槽位保证整行宽度不变，秒数跳动时就不会左右晃 */
+    .miu-lock-digit { display: inline-block; width: .56em; text-align: center; }
+    .miu-lock-colon { display: inline-block; width: .28em; text-align: center; }
+    .miu-lock-date { font-size: 20px; opacity: .9; margin-top: 8px; }
+    .miu-lock-form { display: flex; justify-content: center; margin-top: 46px; }
+    .miu-lock-input {
+        width: 260px;
+        height: 40px;
+        line-height: 40px;
+        padding: 0 10px;
+        box-sizing: border-box;
+        border: 1px solid rgba(255,255,255,.65);
+        border-radius: 2px;
+        border-top-right-radius:0;
+        border-bottom-right-radius:0;
+        background: rgba(255,255,255,.12);
+        color: #fff;
+        outline: none;
+        /* 输入框是 type="text"（不是 password，免得浏览器弹自动填充），
+           靠这个属性把字符打点遮起来；Firefox 不支持，那边由 JS 退回 password 类型 */
+        -webkit-text-security: disc;
+    }
+    .miu-lock-input::placeholder { color: rgba(255,255,255,.6); }
+    .miu-lock-btn {
+        width: 64px;
+        height: 40px;
+        margin-left: 0px;
+        border: 1px solid rgba(255,255,255,.65);
+        border-radius: 2px;
+        border-top-left-radius:0;
+        border-bottom-left-radius:0;
+        border-left:none;
+        background: rgba(255,255,255,.12);
+        color: #bcd4ff;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    .miu-lock-btn:hover { background: rgba(255,255,255,.2); }
+    .miu-lock-tip { margin-top: 18px; font-size: 14px; color: #bcd4ff; }
+
+    /* ===== 顶部「功能搜索」弹层 =====
+       弹层放在外层（不塞在按钮里），用 fixed 定位，left 由 JS 按搜索图标位置算 */
+    .miu-search {
+        display: none;
+        position: fixed;
+        top: 60px;
+        left: 0;
+        width: 325px;
+        padding: 8px;
+        background: #fff;
+        border: 1px solid #e4e7ed;
+        border-radius: 4px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .12);
+        z-index: 1100;
+    }
+    .miu-search.show { display: block; }
+    /* 指向上面那个搜索图标的小箭头 */
+    .miu-search-arrow {
+        position: absolute;
+        top: -6px;
+        left: 50%;
+        margin-left: -6px;
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        border-left: 1px solid #e4e7ed;
+        border-top: 1px solid #e4e7ed;
+        transform: rotate(45deg);
+    }
+    .miu-search-field { position: relative; }
+    .miu-search-field > i {
+        position: absolute;
+        left: 5px;
+        top: 40%;
+        margin-top: -8px;
+        font-size: 16px;
+        color: #c0c4cc;
+        pointer-events: none;
+    }
+    .miu-search-field input {
+        width: 100%;
+        height: 32px;
+        line-height: 32px;
+        padding: 0 10px 0 30px;
+        box-sizing: border-box;
+        border: 1px solid #dcdfe6;
+        border-radius: 4px;
+        outline: none;
+        font-size: 13px;
+        color: #333;
+    }
+    .miu-search-field input:focus { border-color: #1e9fff; }
+    .miu-search-list {
+        display: none;
+        max-height: 264px;
+        overflow-y: auto;
+        margin-top: 6px;
+    }
+    .miu-search-list.show { display: block; }
+    .miu-search-list li { border-radius: 4px; }
+    .miu-search-list li:hover { background: #f2f8ff; }
+    .miu-search-list li a {
+        display: block;
+        padding: 6px 10px;
+        font-size: 13px;
+        line-height: 1.5;
+        color: #333;
+        text-decoration: none;
+    }
+    .miu-search-list li:hover a { color: #1e9fff; }
+    .miu-search-list li .path { display: block; font-size: 12px; color: #999; }
+    .miu-search-list li:hover .path { color: #7fb6ff; }
+    .miu-search-empty { padding: 10px 0; text-align: center; font-size: 13px; color: #bbb; }
+
+    /* ===== 顶部「系统通知」弹层（鼠标移入显示） =====
+       弹层放在外层（不塞在按钮里），用 fixed 定位，left 由 JS 按消息图标位置算。
+       注意：未读角标 .miucms-message-num 还靠 .miucms-head-message 的 position:relative 定位，
+       那条规则在 miu.css 里，这里不要动 */
+    .miu-notice {
+        display: none;
+        position: fixed;
+        top: 60px;
+        left: 0;
+        width: 325px;
+        padding: 8px 8px 15px 8px;
+        background: #fff;
+        border: 1px solid #e4e7ed;
+        border-radius: 4px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .12);
+        z-index: 1100;
+    }
+    .miu-notice.show { display: block; }
+    .miu-notice-arrow {
+        position: absolute;
+        top: -6px;
+        left: 50%;
+        margin-left: -6px;
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        border-left: 1px solid #e4e7ed;
+        border-top: 1px solid #e4e7ed;
+        transform: rotate(45deg);
+    }
+    .miu-notice-title {
+        padding: 2px 8px 8px;
+        font-size: 14px;
+        color: #333;
+        border-bottom: 1px solid #f2f2f2;
+    }
+    .miu-notice-list { padding-top: 6px; }
+    .miu-notice-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        border-bottom: 1px dashed #dcdfe6;
+    }
+    .miu-notice-item:hover { background: #f2f8ff; }
+    .miu-notice .miu-notice-icon {
+        flex: 0 0 auto;
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* 避免全局 miu- 类名规则覆盖 Layui 图标字体。 */
+        font-family: layui-icon !important;
+        font-size: 26px;
+        color: #16baaa;
+    }
+    .miu-notice-text { min-width: 0; }
+    .miu-notice-text .t { font-size: 13px; line-height: 1.5; color: #333; }
+    .miu-notice-text .d { font-size: 12px; line-height: 1.5; color: #999; }
+    .miu-notice-empty { padding: 14px 0; text-align: center; font-size: 13px; color: #bbb; }
+    .miu-notice-title.index-tip{line-height: 30px;}
+
+    /* 搜索弹层的「点外部关闭」遮罩：盖住顶栏以下（含 iframe），点一下收起弹层。
+       iframe 是独立 document，里面的点击不会冒泡到父页面，所以得靠这层接住 */
+    .miu-search-mask {
+        display: none;
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 50px;
+        bottom: 0;
+        z-index: 1050;
+        background: transparent;
+    }
+    .miu-search-mask.show { display: block; }
+
+    /* ===== 顶部「本地便签」：用 layui 弹窗，右下角可拖动拉伸宽高 =====
+       选择器带上 .layui-layer，确保盖过 layui.css / miu.css 里的同名规则 */
+    .layui-layer.miu-note-layer .layui-layer-title {
+        height: 32px;
+        line-height: 32px;
+        padding: 0 36px 0 10px;
+        background: #2f363c;
+        color: #fff;
+        font-size: 13px;
+        border-bottom: none;
+    }
+    .layui-layer.miu-note-layer .layui-layer-setwin { top: 8px; right: 10px; }
+    .layui-layer.miu-note-layer .layui-layer-setwin .layui-layer-close { color: #c8c8c8; }
+    .layui-layer.miu-note-layer .layui-layer-setwin .layui-layer-close:hover { color: #fff; opacity: 1; }
+    /* 内容区铺满：textarea 绝对定位填满，弹窗拉伸时跟着变 */
+    .layui-layer.miu-note-layer .layui-layer-content { overflow: hidden; }
+    /* 右下角拉伸手柄：layer 自带那个 span 是透明的（能拖但看不见），补上斜线纹路 */
+    .layui-layer.miu-note-layer .layui-layer-resize {
+        width: 16px;
+        height: 16px;
+        right: 1px;
+        bottom: 1px;
+        z-index: 10;
+        background: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cg stroke='%23b7b7b7' stroke-width='1.4' stroke-linecap='round' fill='none'%3E%3Cpath d='M14.5 1.5 1.5 14.5'/%3E%3Cpath d='M14.5 7 7 14.5'/%3E%3Cpath d='M14.5 12 12 14.5'/%3E%3C/g%3E%3C/svg%3E") center / 16px 16px no-repeat;
+    }
+    .layui-layer.miu-note-layer .miu-note-body {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        padding: 8px 10px;
+        border: none;
+        outline: none;
+        resize: none;
+        box-sizing: border-box;
+        font-family: inherit;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #333;
+        background: #fff;
+    }
+    .layui-layer.miu-note-layer .miu-note-body::placeholder { color: #bbb; }
+
+    /* ===== 标签卡右键菜单（位置由 JS 按鼠标坐标设） ===== */
+    .miu-tab-menu {
+        display: none;
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 1200;
+        min-width: 130px;
+        padding: 4px 0;
+        background: #fff;
+        border: 1px solid #e4e7ed;
+        border-radius: 4px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .12);
+        user-select: none;
+    }
+    .miu-tab-menu.show { display: block; }
+    .miu-tab-menu li {
+        display: flex;
+        align-items: center;
+        height: 34px;
+        padding: 0 14px;
+        font-size: 13px;
+        line-height: 34px;
+        color: #333;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .miu-tab-menu li:hover { background: #f2f8ff; color: #1e9fff; }
+    .miu-tab-menu li i {
+        width: 16px;
+        margin-right: 8px;
+        font-size: 14px;
+        color: #909399;
+        text-align: center;
+    }
+    .miu-tab-menu li:hover i { color: #1e9fff; }
+
+/* 后台顶部语言切换 */
+.layui-layout-right .miucms-head-lang { padding: 0 6px; }
+.miu-lang-switcher { position: relative; display: inline-block; height: 50px; }
+.miu-lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 32px;
+    margin-top: 9px;
+    padding: 0 9px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    background: #fff;
+    color: #344054;
+    font: inherit;
+    font-size: 12px;
+    line-height: 30px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.miu-lang-toggle:hover, .miu-lang-switcher.open .miu-lang-toggle { border-color: #b8d8ff; color: #1677ff; background: #f7fbff; }
+.miu-lang-toggle .layui-icon { font-size: 14px; }
+.miu-lang-toggle .miuui-lang-arrow { font-size: 10px; }
+.miu-lang-menu {
+    display: none;
+    position: absolute;
+    z-index: 1200;
+    top: 46px;
+    right: 0;
+    min-width: 132px;
+    padding: 5px;
+    border: 1px solid #e5e7eb;
+    border-radius: 5px;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(16, 24, 40, .14);
+}
+.miu-lang-switcher.open .miu-lang-menu { display: block; }
+.miu-lang-menu button {
+    display: block;
+    width: 100%;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    color: #344054;
+    font: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+}
+.miu-lang-menu button:hover, .miu-lang-menu button.active { background: #f2f7ff; color: #1677ff; }
+.layui-layout-right .miu-lang-menu button { margin: 3px 0; padding: 4px 10px; line-height: 18px; }

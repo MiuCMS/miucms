@@ -1,0 +1,175 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+
+<div class="p-3">
+	<table class="layui-hide" id="recycleTable" lay-filter="recycleTable"></table>
+</div>
+
+<script type="text/html" id="recycleToolbar">
+	<div class="layui-btn-container">
+		<button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="restoreBtn">
+			<i class="layui-icon layui-icon-refresh-3 layui-font-14"></i>批量恢复
+		</button>
+		<button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="purgeBtn">
+			<i class="layui-icon layui-icon-delete layui-font-14"></i>批量彻底删除
+		</button>
+		<button class="layui-btn layui-btn-sm layui-btn-danger table-btn-pull-right" lay-event="clearBtn">
+			<i class="layui-icon layui-icon-fire layui-font-14"></i>清空回收站
+		</button>
+	</div>
+</script>
+<script type="text/html" id="handle">
+	<button class="layui-btn layui-btn-normal layui-btn-xs" lay-event="restore">恢复</button>
+	<button class="layui-btn layui-btn-danger layui-btn-xs" lay-event="purge">彻底删除</button>
+</script>
+<script type="text/html" id="delete_time">
+	{{= d.delete_time > 0 ? formatTime(d.delete_time) : '-' }}
+</script>
+
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.config({base:'/static/admin/layui/components/',}).extend({tool:'tool'}).use(['tool'],function(){
+		var table = layui.table, tool = layui.tool;
+
+		layui.pageTable = table.render({
+			id: 'recycleTable',
+			elem: '#recycleTable',
+			title: '栏目回收站',
+			toolbar: '#recycleToolbar',
+			url: "{:url('admin/nav/recycle')}",
+			page: false,
+			height: 'full-60',
+			cellMinWidth: 100,
+			cols: [[
+				{type: 'checkbox', fixed: 'left', align: 'center'},
+				{field: 'id', width: 80, title: 'ID', align: 'center'},
+				{field: 'title', title: '栏目名称'},
+				{field: 'title_en', width: 220, title: '别名'},
+				{field: 'channel_title', width: 120, title: '所属模型', align: 'center'},
+				{field: 'delete_time', width: 170, title: '删除时间', align: 'center', toolbar: '#delete_time'},
+				{title: '操作', width: 150, align: 'center', toolbar: '#handle'}
+			]]
+		});
+
+		// 刷新父页面的栏目列表（栏目列表用的是 treeTable，挂在 layui.trees 上）
+		function reloadParent() {
+			if (parent.layui && parent.layui.trees && typeof parent.layui.trees.reloadData === 'function') {
+				parent.layui.trees.reloadData();
+			}
+		}
+
+		// 行操作：恢复 / 彻底删除
+		table.on('tool(recycleTable)', function(obj){
+			if (obj.event === 'restore') {
+				layer.confirm('确定要把该栏目恢复到正常列表吗？', {
+					icon: 3,
+					title: '提示'
+				}, function(index){
+					tool.post("{:url('admin/nav/restore')}", { id: obj.data.id }, function(e){
+						layer.msg(e.msg, {icon: e.code == 0 ? 1 : 2});
+						if (e.code == 0) {
+							obj.del();
+							reloadParent();
+						}
+					});
+					layer.close(index);
+				});
+			}
+			if (obj.event === 'purge') {
+				layer.confirm('彻底删除后无法恢复，确定要删除该栏目吗？', {
+					icon: 3,
+					title: '警告',
+					btn: ['确定彻底删除', '取消']
+				}, function(index){
+					tool.post("{:url('admin/nav/purge')}", { id: obj.data.id }, function(e){
+						layer.msg(e.msg, {icon: e.code == 0 ? 1 : 2});
+						if (e.code == 0) {
+							obj.del();
+						}
+					});
+					layer.close(index);
+				});
+			}
+			return false;
+		});
+
+		//表头工具栏：批量恢复 / 批量彻底删除
+		table.on('toolbar(recycleTable)', function(obj){
+			if (obj.event === 'restoreBtn') {
+				var checkData = table.checkStatus(obj.config.id).data;
+				if (checkData.length === 0) {
+					return layer.msg('请先选择要恢复的栏目');
+				}
+				var ids = checkData.map(function(item){ return item.id; });
+				layer.confirm('确定要把选中的 ' + ids.length + ' 个栏目恢复到正常列表吗？', {
+					icon: 3,
+					title: '提示'
+				}, function(index){
+					tool.post("{:url('admin/nav/restore')}", { id: ids }, function(e){
+						layer.msg(e.msg, {icon: e.code == 0 ? 1 : 2});
+						if (e.code == 0) {
+							layui.pageTable.reloadData('recycleTable');
+							reloadParent();
+						}
+					});
+					layer.close(index);
+				});
+			}
+			if (obj.event === 'purgeBtn') {
+				var checkData = table.checkStatus(obj.config.id).data;
+				if (checkData.length === 0) {
+					return layer.msg('请先选择要彻底删除的栏目');
+				}
+				var ids = checkData.map(function(item){ return item.id; });
+				layer.confirm('彻底删除后无法恢复，确定要删除选中的 ' + ids.length + ' 个栏目吗？', {
+					icon: 3,
+					title: '警告',
+					btn: ['确定彻底删除', '取消']
+				}, function(index){
+					tool.post("{:url('admin/nav/purge')}", { id: ids }, function(e){
+						layer.msg(e.msg, {icon: e.code == 0 ? 1 : 2});
+						if (e.code == 0) {
+							layui.pageTable.reloadData('recycleTable');
+						}
+					});
+					layer.close(index);
+				});
+			}
+			if (obj.event === 'clearBtn') {
+				// 第一层警告
+				layer.confirm('确定要清空回收站吗？<br><span style="color:#FF5722;font-weight:700;">回收站里的全部栏目都会被彻底删除，此操作不可恢复！</span>', {
+					icon: 3,
+					title: '警告',
+					btn: ['我已知晓，继续', '取消']
+				}, function(index){
+					layer.close(index);
+					// 第二层警告：再确认一次，防止误点
+					layer.confirm('最后确认：真的要清空整个回收站吗？<br><span style="color:#FF5722;font-weight:700;">删除后数据无法找回，请确认已经做好数据库备份！</span>', {
+						icon: 3,
+						title: '危险操作',
+						btn: ['确认清空回收站', '我再想想']
+					}, function(index2){
+						layer.close(index2);
+						layer.load(2);
+						tool.post("{:url('admin/nav/clear')}", {}, function(e){
+							layer.closeAll('loading');
+							layer.msg(e.msg, {icon: e.code == 0 ? 1 : 2});
+							if (e.code == 0) {
+								layui.pageTable.reloadData('recycleTable');
+								reloadParent();
+							}
+						});
+					});
+				});
+			}
+			return false;
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

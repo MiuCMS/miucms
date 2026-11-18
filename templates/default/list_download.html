@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="{$nav.seo_description}"/>
+    <meta name="keywords" content="{$nav.seo_keywords}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="{miu:global name='site_name'/}" />
+    <meta property="og:title" content="{$page_title}" />
+    <meta property="og:description" content="{$nav.seo_description}"/>
+    <title>{$page_title}</title>
+    {include file="head" /}
+</head>
+<body data-page="news">
+{include file="header"/}
+<main id="main">
+    <section class="page-intro page-intro--downloads">
+        <div class="container">
+            <div class="breadcrumbs">
+                {miu:positionraw name='vo'}
+                {if condition="$vo.url"}<a href="{$vo.url}">{$vo.name}</a><span>/</span>{else/}{$vo.name}{/if}
+                {/miu:positionraw}
+            </div>
+
+            <h1>{$nav.title}</h1>
+            <p class="intro-copy">{$nav.title_ext_1}</p>
+        </div>
+    </section>
+    <section class="container listing-section downloads-layout">
+        <div class="downloads-main">
+            <div class="download-list download-list--software is-horizontal" id="download-list">
+                {miu:list name='vo' pagesize='10' order='click' sort='desc'}
+                <article class="download-item download-item--software" data-category="{$vo.nav_name}">
+                    <div class="download-item-heading">
+                        <h2><a href="{$vo.url}">{$vo.title}</a></h2>
+                        <span class="download-item-category">【{$vo.nav_name}】</span>
+                    </div>
+                    <div class="download-item-content">
+                        <a class="download-item-thumb" href="{$vo.url}" aria-label="{miu:lang key='list.view_detail_prefix' /}{$vo.title}{miu:lang key='list.detail_suffix' /}">
+                            {if condition="$vo.litpic neq ''"}
+                            <img src="{$vo.litpic}" alt="{$vo.title}" loading="lazy" />
+                            {else/}
+                            <span class="file-icon" aria-hidden="true">File</span>
+                            {/if}
+                        </a>
+                        <div class="download-item-info">
+                            <div class="download-item-meta">
+                                {if condition="isset($vo['size']) && $vo['size'] neq ''"}<span>{miu:lang key='list.size' /}{$vo.size}</span>{/if}
+                                {if condition="isset($vo['updatetime']) && $vo['updatetime'] neq ''"}<span>{miu:lang key='list.updated' /}{$vo.updatetime}</span>{else/}<span>{miu:lang key='list.updated' /}{$vo.date}</span>{/if}
+                                {if condition="isset($vo['language']) && $vo['language'] neq ''"}<span class="download-item-language">{$vo.language}</span>{/if}
+                            </div>
+                            <p>{miu:lang key='list.download_intro' /}{if condition="$vo.title_ext_1"}{$vo.title_ext_1}{else/}{miu:lang key='common.not_available' /}{/if}</p>
+                        </div>
+                        <a class="download-button" href="{$vo.url}">{miu:lang key='list.view_detail' /}↗</a>
+                    </div>
+                </article>
+                {/miu:list}
+            </div>
+            {miu:pagelist type='full' listitem='index,pre,pageno,next,end' /}
+        </div>
+        <aside class="download-aside">
+            <span class="aside-icon">i</span>
+            <h3>{miu:lang key='list.download_guide' /}</h3>
+            <p>
+                {$nav.title_ext_1}
+            </p>
+        </aside>
+    </section>
+</main>
+{include file="footer" /}
+</body>
+</html>

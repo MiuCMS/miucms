@@ -1,0 +1,290 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<style>
+	body{background:#fff;}
+	.msg-cells{line-height:1.7;white-space:normal;word-break:break-all;}
+	.msg-cells .k{color:#999;}
+	/* 留言内容列要能撑高，别被表格默认的单行高度裁掉 */
+	.layui-table-cell.msg-cell{min-height:38px;padding-top:6px;padding-bottom:6px;overflow:hidden;white-space:normal;}
+</style>
+<div class="p-3">
+	<form class="layui-form miucms-form-bar border-t border-x">
+		<div class="layui-input-inline" style="width:240px;">
+			<select name="form_id" lay-filter="formFilter">
+				<option value="0">全部表单</option>
+				{volist name="forms" id="f"}
+				<option value="{$f.id}" {eq name="form_id" value="$f.id"}selected{/eq}>{$f.form_name}</option>
+				{/volist}
+			</select>
+		</div>
+		<div class="layui-input-inline" style="width:260px;">
+			<input type="text" name="keywords" placeholder="按留言内容搜索" class="layui-input" />
+		</div>
+		<div class="layui-input-inline" style="width:150px">
+			<button class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="table-search" id="msgSearchBtn"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+		</div>
+	</form>
+
+	<div class="layui-tab layui-tab-brief" lay-filter="countTab" style="margin:0;">
+		<ul class="layui-tab-title">
+			<li class="layui-this" data-count-type="">全部（{$count_all}）</li>
+			<li data-count-type="unread">未读（{$count_unread}）</li>
+			<li data-count-type="read">已读</li>
+			<li data-count-type="star">星标</li>
+		</ul>
+	</div>
+
+	<table class="layui-hide" id="message" lay-filter="message"></table>
+</div>
+
+<script type="text/html" id="toolbarDemo">
+	<div class="layui-btn-container">
+		<button class="layui-btn layui-btn-sm layui-btn-danger layui-btn-color layui-btn-radius" lay-event="batchDel">批量删除</button>
+		<button class="layui-btn layui-btn-sm layui-btn-color layui-btn-radius" lay-event="batchRead">标记已读</button>
+	</div>
+</script>
+<script type="text/html" id="barDemo">
+<div class="layui-btn-group">
+	<a class="layui-btn layui-btn-xs" lay-event="detail">详情</a>
+	<a class="layui-btn layui-btn-xs layui-bg-cyan" lay-event="reply">回复</a>
+	<a class="layui-btn layui-btn-xs layui-bg-orange" lay-event="star">{{ d.is_star == 1 ? '取消星标' : '星标' }}</a>
+	<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</div>
+</script>
+<script type="text/html" id="contentTpl">
+	{{# if(d.fields && d.fields.length){ }}
+	<div class="msg-cells">
+		{{# layui.each(d.fields, function(i, f){ }}
+		<div><span class="k">{{ f.name }}：</span>{{ f.value }}</div>
+		{{# }); }}
+	</div>
+	{{# } else { }}
+	<span style="color:#ccc;">—</span>
+	{{# } }}
+</script>
+<script type="text/html" id="stateTpl">
+	{{# if(d.is_read == 0){ }}<span class="layui-badge">未读</span>{{# } else { }}<span class="layui-badge layui-bg-gray">已读</span>{{# } }}
+	{{# if(d.is_star == 1){ }} <i class="layui-icon layui-icon-rate-solid" style="color:#ffb800;" title="已加星标"></i>{{# } }}
+	{{# if(d.examine == 2){ }} <span class="layui-badge layui-bg-orange">不通过</span>{{# } }}
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	//把留言详情拼成一段 HTML（弹层内容：内容多了撑高，超过 420px 出滚动条）
+	function msgDetailHtml(d) {
+		var info = d.info || {}, esc = layui.util.escape;
+		var row = function (k, v) {
+			return '<div style="display:flex;padding:7px 0;border-bottom:1px dashed #eee;">'
+				+ '<div style="flex:0 0 90px;color:#999;">' + esc(k) + '</div>'
+				+ '<div style="flex:1 1 auto;word-break:break-all;">' + v + '</div></div>';
+		};
+
+		var html = '';
+		layui.each(d.fields || [], function (i, f) {
+			html += row(f.name, esc(f.value || '') || '<span style="color:#ccc;">—</span>');
+		});
+		html += row('所属表单', esc((d.form && d.form.form_name) || '（表单已删除）'));
+		html += row('提交时间', esc(formatTime(info.add_time)));
+		html += row('提交 IP', esc(info.ip || '—'));
+		html += row('提交来源', info.source == 2 ? '手机端' : '电脑端');
+		if (info.reply) {
+			html += row('回复内容', esc(info.reply));
+		}
+
+		return '<div style="padding:16px 20px;max-height:420px;overflow-y:auto;box-sizing:border-box;">' + html + '</div>';
+	}
+
+	layui.use(['tool','tablePlus','element'],function(){
+		var table = layui.tablePlus, tool = layui.tool, form = layui.form,
+			element = layui.element, layer = layui.miulayer, $ = layui.jquery;
+
+		//当前状态筛选（tab 上选的）
+		var countType = '';
+
+		layui.pageTable = table.render({
+			elem: '#message',
+			id: 'message',
+			title: '留言列表',
+			toolbar: '#toolbarDemo',
+			defaultToolbar: [],
+			url: "{:url('admin/form/message')}",
+			page: true,
+			limit: 20,
+			lineStyle: 'height: 95px;max-height:150px;',
+			where: {form_id: '{$form_id}'},
+			done: function () {
+				//留言内容列放开高度
+				$('.msg-cells').closest('.layui-table-cell').addClass('msg-cell');
+			},
+			cols: [
+				[
+					{type: 'checkbox', width: 50},
+					{field: 'id', title: 'ID号', width: 70, align: 'center'},
+					{field: 'form_name', title: '所属表单', width: 130},
+					{field: 'fields', title: '留言内容', minWidth: 300, toolbar: '#contentTpl'},
+					{field: 'ip', title: 'IP', width: 130},
+					{field: 'add_time', title: '提交时间', width: 165, templet: function (d) {
+						return formatTime(d.add_time);
+					}},
+					{field: 'is_read', title: '状态', width: 110, align: 'center', toolbar: '#stateTpl'},
+					{field: 'right', title: '操作', toolbar: '#barDemo', width: 270, align: 'center'}
+				]
+			]
+		});
+
+		//切换表单：自动重新拉一次
+		form.on('select(formFilter)', function () {
+			document.getElementById('msgSearchBtn').click();
+		});
+
+		//切换状态 tab
+		element.on('tab(countTab)', function () {
+			countType = $(this).attr('data-count-type') || '';
+			layui.pageTable.reload({where: {form_id: $('select[name="form_id"]').val() || 0, count_type: countType, keywords: $('input[name="keywords"]').val() || ''}, page: {curr: 1}});
+		});
+
+		//勾选的留言id
+		function checkedIds() {
+			var ids = [];
+			layui.each(table.checkStatus('message').data, function (i, row) {
+				ids.push(row.id);
+			});
+			return ids;
+		}
+
+		//打开回复窗口（列表行的「回复」和详情弹窗的「回复」都用它）
+		//afterOk：回复成功后额外要做的事（详情弹窗用它把自己关掉）
+		function openReply(id, oldReply, afterOk) {
+			layer.prompt({
+				formType: 2,
+				title: '回复留言',
+				area: ['520px', 'auto'],
+				maxlength: 1000,
+				value: oldReply || '',
+				//自适应高度：内容多了撑高，超过 300px 出滚动条
+				success: function (layero) {
+					layero.find('.layui-layer-input').css({'height': 'auto', 'min-height': '110px', 'max-height': '300px', 'overflow-y': 'auto'});
+				}
+			}, function (value, index) {
+				tool.post("{:url('admin/form/message_reply')}", {id: id, reply: value}, function (e) {
+					layer.msg(e.msg);
+					if (e.code == 0) {
+						layer.close(index);
+						layui.pageTable.reload();
+						if (typeof top.window.__miuUpdateFormUnread === 'function' && e.data && e.data.unread !== undefined) {
+							top.window.__miuUpdateFormUnread(e.data.unread);
+						}
+						if (typeof afterOk === 'function') { afterOk(); }
+					}
+				});
+			});
+		}
+
+		//表头工具栏
+		table.on('toolbar(message)', function (obj) {
+			var ids = checkedIds();
+			if (!ids.length) {
+				layer.msg('请先勾选留言');
+				return;
+			}
+			if (obj.event === 'batchRead') {
+				tool.post("{:url('admin/form/message_read')}", {ids: ids.join(','), is_read: 1}, function (e) {
+					layer.msg(e.msg);
+					if (e.code == 0) {
+						layui.pageTable.reload();
+						if (typeof top.window.__miuUpdateFormUnread === 'function' && e.data && e.data.unread !== undefined) {
+							top.window.__miuUpdateFormUnread(e.data.unread);
+						}
+					}
+				});
+				return;
+			}
+			if (obj.event === 'batchDel') {
+				layer.confirm('确定删除选中的 ' + ids.length + ' 条留言吗？', {icon: 3, title: '提示',focus:true}, function (index) {
+					tool.delete("{:url('admin/form/message_delete')}", {ids: ids.join(',')}, function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layui.pageTable.reload();
+							if (typeof top.window.__miuUpdateFormUnread === 'function' && e.data && e.data.unread !== undefined) {
+								top.window.__miuUpdateFormUnread(e.data.unread);
+							}
+						}
+					});
+					layer.close(index);
+				});
+			}
+		});
+
+		//行操作
+		table.on('tool(message)', function (obj) {
+			var data = obj.data;
+
+			if (obj.event === 'detail') {
+				//详情用 ajax 拿数据、前端自己拼弹层，这样弹层高度能自适应（内容多了出滚动条）
+				$.get("{:url('admin/form/message')}", {id: data.id}, function (res) {
+					if (res.code !== 0) {
+						layer.msg(res.msg || '留言不存在');
+						return;
+					}
+					layer.open({
+						type: 1,
+						title: '留言详情',
+						area: ['720px', 'auto'],
+						shadeClose: true,
+						btn: ['回复', '关闭'],
+						btnAlign: 'c',
+						content: msgDetailHtml(res.data),
+						//点「回复」：在上面弹出回复窗口，回复成功后把详情一起关掉
+						yes: function (i) {
+							openReply(res.data.info.id, res.data.info.reply, function () {
+								layer.close(i);
+							});
+						},
+						btn2: function (i) { layer.close(i); }
+					});
+					//详情里已经把它标成已读了，刷新一下列表
+					layui.pageTable.reload();
+					if (typeof top.window.__miuUpdateFormUnread === 'function' && res.unread !== undefined) {
+						top.window.__miuUpdateFormUnread(res.unread);
+					}
+				});
+				return;
+			}
+
+			if (obj.event === 'reply') {
+				openReply(data.id, data.reply);
+				return;
+			}
+
+			if (obj.event === 'star') {
+				var to = data.is_star == 1 ? 0 : 1;
+				tool.post("{:url('admin/form/message_star')}", {id: data.id, is_star: to}, function (e) {
+					layer.msg(e.msg);
+					if (e.code == 0) { layui.pageTable.reload(); }
+				});
+				return;
+			}
+
+			if (obj.event === 'del') {
+				layer.confirm('确定删除这条留言吗？', {icon: 3, title: '提示',focus:true}, function (index) {
+					tool.delete("{:url('admin/form/message_delete')}", {ids: data.id}, function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							obj.del();
+							if (typeof top.window.__miuUpdateFormUnread === 'function' && e.data && e.data.unread !== undefined) {
+								top.window.__miuUpdateFormUnread(e.data.unread);
+							}
+						}
+					});
+					layer.close(index);
+				});
+			}
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

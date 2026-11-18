@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>{:get_system_config('admin_title')}-后台登录</title>
+	<link rel="stylesheet" href="{__ADMIN__}/layui/css/layui.css" />
+	<link rel="stylesheet" href="{__ADMIN__}/css/login.css" />
+<script src="{__ADMIN__}/i18n.js?v={:CMS_VERSION}&rev=9"></script>
+</head>
+<body>
+
+<div class="miu-lang-switcher login-language-switcher" data-miu-lang-switcher>
+	<button type="button" class="miu-lang-toggle" data-miu-lang-toggle aria-expanded="false" aria-label="切换语言" title="切换语言">
+		<i class="layui-icon layui-icon-website"></i><span class="layui-hide" data-miu-lang-current>简体中文</span>
+	</button>
+	<div class="miu-lang-menu" role="menu">
+		<button type="button" data-miu-lang-option="zh-CN" role="menuitem">简体中文</button>
+		<button type="button" data-miu-lang-option="zh-HK" role="menuitem">繁體中文</button>
+		<button type="button" data-miu-lang-option="en" role="menuitem">English</button>
+	</div>
+</div>
+
+<!-- ================= 右上角主题切换 ================= -->
+<div class="theme-switcher">
+	<i class="layui-icon layui-icon-theme theme-btn" title="切换登录风格"></i>
+	<div class="theme-menu">
+		<div class="theme-item" data-theme="ink"><span class="theme-dot" style="background:#b03a2e;"></span>水墨国风<i class="layui-icon layui-icon-ok"></i></div>
+		<div class="theme-item" data-theme="tech"><span class="theme-dot" style="background:#22d3ee;"></span>极夜科技<i class="layui-icon layui-icon-ok"></i></div>
+		<div class="theme-item active" data-theme="corp"><span class="theme-dot" style="background:#2563eb;"></span>商务蓝<i class="layui-icon layui-icon-ok"></i></div>
+		<div class="theme-item" data-theme="flat"><span class="theme-dot" style="background:#10b981;"></span>清新扁平<i class="layui-icon layui-icon-ok"></i></div>
+	</div>
+</div>
+
+<main>
+
+<!-- ============ 风格 1：极夜科技 ============ -->
+<section class="scene scene-tech" id="scene-tech" aria-label="科技风格登录页">
+	<div class="grid-overlay" aria-hidden="true"></div>
+	<div class="glow-orb orb-a" aria-hidden="true"></div>
+	<div class="glow-orb orb-b" aria-hidden="true"></div>
+
+	<form class="card-tech login-form" novalidate>
+		<div class="tech-logo">
+			<span class="logo-mark" aria-hidden="true">
+				<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M4.25 19V5.5L12 15.25L19.75 5.5V19" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path>
+				</svg>
+			</span>
+			<div>
+				<h1>MIUCMS</h1>
+				<p>Intelligent Management Console</p>
+			</div>
+		</div>
+		<span class="tech-tag">SECURE ACCESS · 2FA READY</span>
+		<h2>欢迎回来</h2>
+		<p class="sub">登录到管理系统，继续你的工作流。</p>
+
+		<div class="field">
+			<label for="tech-user">用户名</label>
+			<div class="input-wrap">
+				<span class="icon" aria-hidden="true">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="8" r="3.4"></circle>
+						<path d="M5 19.5c1.2-3.2 3.8-5 7-5s5.8 1.8 7 5"></path>
+					</svg>
+				</span>
+				<input class="input" id="tech-user" name="username" type="text" placeholder="请输入用户名" autocomplete="username">
+			</div>
+		</div>
+
+		<div class="field">
+			<label for="tech-pass">密码</label>
+			<div class="input-wrap">
+				<span class="icon" aria-hidden="true">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+						<rect x="4.5" y="10.5" width="15" height="9.5" rx="2.2"></rect>
+						<path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7"></path>
+					</svg>
+				</span>
+				<input class="input" id="tech-pass" name="password" type="password" placeholder="请输入密码" autocomplete="current-password">
+				<button class="pw-toggle" type="button" aria-label="显示密码" aria-pressed="false">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="eye">
+						<path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z"></path>
+						<circle cx="12" cy="12" r="2.8"></circle>
+					</svg>
+				</button>
+			</div>
+		</div>
+
+		<div class="field">
+			<label for="tech-cap">验证码</label>
+			<div class="captcha-row">
+				<input class="input" id="tech-cap" name="captcha" type="text" placeholder="输入右侧字符" autocomplete="off" maxlength="4" autocapitalize="characters">
+				<button type="button" class="captcha-box" aria-label="刷新验证码" title="点击刷新验证码">
+					<img class="captcha-img" alt="captcha" data-src="{:captcha_src()}">
+				</button>
+			</div>
+		</div>
+
+		<div class="row-between">
+			<label class="check">
+				<input type="checkbox" name="remember"> 记住账号
+			</label>
+			<a class="link" href="javascript:;" data-forgot>忘记密码?</a>
+		</div>
+
+		<button class="btn-primary" type="submit" data-login>登 录</button>
+		<p class="hint">© 2024-{:date('Y')} MIUCMS · 米柚内容管理系统</p>
+	</form>
+
+	<footer class="tech-footer">© 2024-{:date('Y')} MIUCMS · Secure Management Console</footer>
+</section>
+
+<!-- ============ 风格 2：商务蓝 ============ -->
+<section class="scene scene-corp active" id="scene-corp" aria-label="商务风格登录页">
+	<div class="dot-layer" aria-hidden="true"></div>
+
+	<form class="card-corp login-form" novalidate>
+		<div class="corp-head">
+			<span class="logo-mark" aria-hidden="true">
+				<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M4.25 19V5.5L12 15.25L19.75 5.5V19" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+				</svg>
+			</span>
+			<div>
+				<h1>MIUCMS 内容管理系统</h1>
+				<p>统一登录入口</p>
+			</div>
+		</div>
+		<h2>账号登录</h2>
+		<p class="sub">请使用管理员分配的账号信息登录</p>
+
+		<div class="field-corp">
+			<label for="corp-user">用户名</label>
+			<input class="corp-input" id="corp-user" name="username" type="text" placeholder="请输入用户名" autocomplete="username">
+		</div>
+
+		<div class="field-corp">
+			<label for="corp-pass">密码</label>
+			<input class="corp-input" id="corp-pass" name="password" type="password" placeholder="请输入密码" autocomplete="current-password">
+		</div>
+
+		<div class="field-corp">
+			<label for="corp-cap">验证码</label>
+			<div class="captcha-row captcha-row-c">
+				<input class="corp-input" id="corp-cap" name="captcha" type="text" placeholder="输入右侧字符" autocomplete="off" maxlength="4" autocapitalize="characters">
+				<button type="button" class="captcha-box" aria-label="刷新验证码" title="点击刷新验证码">
+					<img class="captcha-img" alt="captcha" data-src="{:captcha_src()}">
+				</button>
+			</div>
+		</div>
+
+		<div class="row-between" style="margin-top:4px;">
+			<label class="check" style="color:#475569;">
+				<input type="checkbox" name="remember"> 记住我
+			</label>
+			<a class="link" href="javascript:;" data-forgot style="color:var(--accent);">忘记密码?</a>
+		</div>
+
+		<button class="btn-corp" type="submit" data-login>立即登录</button>
+		<p class="corp-foot">© 2024-{:date('Y')} MIUCMS 管理系统 · 建议使用 Chrome / Edge 访问</p>
+	</form>
+</section>
+
+<!-- ============ 风格 3：清新扁平 ============ -->
+<section class="scene scene-flat" id="scene-flat" aria-label="扁平风格登录页">
+	<div class="blob blob-a" aria-hidden="true"></div>
+	<div class="blob blob-b" aria-hidden="true"></div>
+
+	<form class="card-flat login-form" novalidate>
+		<div class="flat-panel">
+			<div>
+				<span class="flat-panel-badge">
+					<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l9 4v6c0 5-3.8 8.5-9 10-5.2-1.5-9-5-9-10V6z"></path></svg>
+					MIUCMS ADMIN
+				</span>
+				<h2>效率办公，<br>从一次登录开始</h2>
+				<p class="lead">聚合内容、用户与数据分析，一站式管理你的站点生态。</p>
+			</div>
+			<ul class="flat-features">
+				<li><span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 4.4-3.2 7.6-8 9-4.8-1.4-8-4.6-8-9V7z"></path><path d="M9 12l2 2 4-4"></path></svg></span> 数据安全加密传输</li>
+				<li><span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"></rect><path d="M8 21h8M12 18v3"></path><path d="M7 10l3 3 5-5"></path></svg></span> 全链路操作审计</li>
+				<li><span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg></span> 全站内容智能编排</li>
+			</ul>
+		</div>
+		<div class="flat-form">
+			<div class="brand">
+				<span class="logo-mark" aria-hidden="true">
+					<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M4.25 19V5.5L12 15.25L19.75 5.5V19" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</span>
+				<h1>米柚 CMS</h1>
+			</div>
+			<p class="sub">欢迎回来，请登录你的工作台</p>
+
+			<div class="field-flat">
+				<label for="flat-user">用户名</label>
+				<input class="flat-input" id="flat-user" name="username" type="text" placeholder="请输入用户名" autocomplete="username">
+			</div>
+			<div class="field-flat">
+				<label for="flat-pass">密码</label>
+				<input class="flat-input" id="flat-pass" name="password" type="password" placeholder="请输入密码" autocomplete="current-password">
+			</div>
+			<div class="field-flat">
+				<label for="flat-cap">验证码</label>
+				<div class="captcha-row captcha-row-f">
+					<input class="flat-input" id="flat-cap" name="captcha" type="text" placeholder="输入右侧字符" autocomplete="off" maxlength="4" autocapitalize="characters">
+					<button type="button" class="captcha-box" aria-label="刷新验证码" title="点击刷新验证码">
+						<img class="captcha-img" alt="captcha" data-src="{:captcha_src()}">
+					</button>
+				</div>
+			</div>
+
+			<div class="row-between" style="margin:2px 0 20px;">
+				<label class="check" style="color:#47605a;">
+					<input type="checkbox" name="remember"> 保持登录
+				</label>
+				<a class="link" href="javascript:;" data-forgot style="color:var(--accent);">忘记密码?</a>
+			</div>
+
+			<button class="btn-flat" type="submit" data-login>登 录</button>
+			<p class="flat-foot">© 2024-{:date('Y')} 米柚 CMS · 让内容管理更简单</p>
+		</div>
+	</form>
+</section>
+
+<!-- ============ 风格 4：水墨国风（默认） ============ -->
+<section class="scene scene-ink" id="scene-ink" aria-label="国风登录页">
+	<div class="ink-mountains" aria-hidden="true">
+		<svg viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice">
+			<path d="M0 210 C 180 150, 300 250, 450 195 S 720 90, 880 150 S 1140 240, 1280 190 S 1420 170, 1440 190 L1440 320 L0 320 Z" fill="rgba(120,105,80,0.10)"/>
+			<path d="M0 250 C 160 210, 260 265, 420 235 S 700 150, 860 210 S 1160 268, 1320 235 L1440 245 L1440 320 L0 320 Z" fill="rgba(100,88,66,0.14)"/>
+			<path d="M0 285 C 200 250, 320 300, 500 275 S 820 225, 1000 270 S 1300 300, 1440 275 L1440 320 L0 320 Z" fill="rgba(80,70,52,0.17)"/>
+			<circle cx="1120" cy="90" r="10" fill="rgba(176,58,46,0.30)"></circle>
+			<circle cx="1120" cy="90" r="26" fill="none" stroke="rgba(176,58,46,0.18)" stroke-width="1.5"></circle>
+		</svg>
+	</div>
+
+	<form class="card-ink ink-form login-form" novalidate>
+		<div class="ink-title">
+			<div>
+				<h1>米柚内容管理系统</h1>
+				<p>MIUCMS MANAGEMENT SYSTEM</p>
+			</div>
+			<span class="ink-seal" aria-hidden="true" title="点击重新盖印">M</span>
+		</div>
+		<div class="ink-divider"><span>帐号登录 · 欢迎归来</span></div>
+
+		<div class="field-ink">
+			<label for="ink-user">用户名</label>
+			<input class="ink-input" id="ink-user" name="username" type="text" placeholder="请输入用户名" autocomplete="username">
+		</div>
+		<div class="field-ink">
+			<label for="ink-pass">密码</label>
+			<input class="ink-input" id="ink-pass" name="password" type="password" placeholder="请输入密码" autocomplete="current-password">
+		</div>
+		<div class="field-ink">
+			<label for="ink-cap">验证码</label>
+			<div class="captcha-row captcha-row-k">
+				<input class="ink-input" id="ink-cap" name="captcha" type="text" placeholder="输入右侧字符" autocomplete="off" maxlength="4" autocapitalize="characters" style="border-bottom:1.5px solid #cbbfa5;">
+				<button type="button" class="captcha-box" aria-label="刷新验证码" title="点击刷新验证码">
+					<img class="captcha-img" alt="captcha" data-src="{:captcha_src()}">
+				</button>
+			</div>
+		</div>
+
+		<div class="row-between" style="margin:4px 0 20px;">
+			<label class="check" style="color:#5b5346;">
+				<input type="checkbox" name="remember"> 记住我
+			</label>
+			<a class="link" href="javascript:;" data-forgot style="color:var(--accent);">忘记密码?</a>
+		</div>
+
+		<button class="btn-ink" type="submit" data-login>登 录</button>
+		<p class="ink-foot">© 二〇二四-{:num_to_cn(date('Y'))} · 米柚内容管理系统</p>
+	</form>
+</section>
+
+</main>
+
+<script>
+	//配置的后台路径
+	var ADMIN_PATH = "/" + "{:config('adminconfig.admin_path')}"
+	//静态文件路径
+	var STATIC_PATH = "{:config('adminconfig.static_path')}"
+	//登录提交接口
+	var LOGIN_SUBMIT_URL = "{:url('admin/login/login_submit')}"
+	//登录成功跳转地址
+	var LOGIN_INDEX_URL = "{:url('admin/index/index')}"
+</script>
+
+<script src="{__ADMIN__}/js/jquery-3.6.0.min.js"></script>
+<script src="{__ADMIN__}/layui/layui.js"></script>
+<script src="{__ADMIN__}/js/login.js"></script>
+
+</body>
+</html>

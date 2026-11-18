@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body class="theme-image">
+{include file="header" /}
+<main id="main" class="image-detail container">
+    {miu:position /}
+    <header class="image-detail-heading"><p class="image-kicker">{$doc.nav_name}</p><h1>{$doc.title}</h1><p>{$doc.title_ext_1|default=''}</p><time>{$doc.date}</time></header>
+    {include file="gallery" /}
+    <article class="reading-layout image-detail-copy">{include file="document_body" /}</article>
+    {include file="detail_end" /}
+</main>
+{include file="footer" /}
+</body>
+</html>

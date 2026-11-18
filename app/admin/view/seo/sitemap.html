@@ -1,0 +1,339 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<div class="layui-fluid">
+	<div class="layui-card">
+		<div class="layui-card-body setting" style="padding: 15px;">
+			<style>
+				form.sitemap-form .layui-form-label { width: 130px; }
+				form.sitemap-form .layui-input-block { margin-left: 160px; }
+				form.sitemap-form .layui-form-item { margin-bottom: 18px; }
+				form.sitemap-form .notic { color: #999; margin-top: 6px; line-height: 1.7; }
+				form.sitemap-form .notic2 { color: #ff5722; margin-left: 8px; }
+				form.sitemap-form .none { display: none !important; }
+				form.sitemap-form .sg-row { display: flex; align-items: center; margin-bottom: 8px; }
+				form.sitemap-form .sg-row .layui-form-checkbox[lay-skin=primary] { margin: 0; top: 0; flex: 0 0 120px; width: 120px; }
+				form.sitemap-form .sg-link { margin-left: 6px; line-height: 18px; }
+				form.sitemap-form .sg-link a { color: #1e9fff; }
+			</style>
+			<form class="layui-form sitemap-form" action="" lay-filter="sitemapform">
+				<div class="layui-col-sm12">
+					<div class="layui-col-sm6">
+						<div class="layui-collapse">
+							<div class="layui-colla-item">
+								<div class="layui-colla-title">自动定时任务定时生成sitemap</div>
+								<div class="layui-colla-content">
+									<pre class="layui-code code-area" lay-options="{}">
+/**
+ * 生成 sitemap 地图文件
+ *
+ * 用法：
+ *   php think sitemap                按后台「SEO → Sitemap」勾选的地图类型生成
+ *   php think sitemap --type=all     强制生成 xml / txt / html / llms 四种地图
+ *   php think sitemap --type=llms    只生成 llms.txt（也可指定 xml / txt / html）
+ *
+ * 建议挂定时任务（比如每小时一次）
+ */
+</pre>
+								</div>
+							</div>
+							<div class="layui-colla-item">
+								<div class="layui-colla-title">自动定时任务定时提交到百度搜索资源平台</div>
+								<div class="layui-colla-content">
+									<pre class="layui-code code-area" lay-options="{}">
+/**
+ * 百度普通收录（API 推送）
+ *
+ * 用法：
+ *   php think baidu-push                       推送最新的一批文档（数量取后台「生成数量」）
+ *   php think baidu-push --num=10              推送最新 10 篇
+ *
+ * 建议挂定时任务（比如每天一次）
+ * 注意：百度普通收录接口每天有配额（一般个人站 10~100 条/天），
+ * 返回里会带今日剩余条数，别把 --num 设太大浪费配额。
+ */
+</pre>
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+
+				<div class="layui-col-sm12">
+					<div class="layui-col-sm6">
+						<div style="padding: 4px 16px;" class="layui-bg-gray layui-font-gray layui-margin-2">Sitemap设置</div>
+					</div>
+				</div>
+				<!-- ================= 地图类型 ================= -->
+				<div class="layui-form-item">
+					<label class="layui-form-label">地图类型</label>
+					<div class="layui-input-block">
+						<div class="sg-row">
+							<input type="checkbox" name="sitemap_xml" value="1" title="xml地图" lay-skin="primary" lay-filter="sitemapType" {eq name="config.sitemap_xml" value="1"}checked{/eq}>
+							<span class="sg-link {eq name='config.sitemap_xml' value='0'}none{/eq}" id="sg_sitemap_xml">
+								<a href="{$siteUrl}/sitemap.xml" target="_blank">{$siteUrl}/sitemap.xml</a>
+								<a href="javascript:void(0);" class="manual" data-type="xml">手工更新</a>
+							</span>
+						</div>
+						<div class="sg-row">
+							<input type="checkbox" name="sitemap_txt" value="1" title="txt地图" lay-skin="primary" lay-filter="sitemapType" {eq name="config.sitemap_txt" value="1"}checked{/eq}>
+							<span class="sg-link {eq name='config.sitemap_txt' value='0'}none{/eq}" id="sg_sitemap_txt">
+								<a href="{$siteUrl}/sitemap.txt" target="_blank">{$siteUrl}/sitemap.txt</a>
+								<a href="javascript:void(0);" class="manual" data-type="txt">手工更新</a>
+							</span>
+						</div>
+						<div class="sg-row">
+							<input type="checkbox" name="sitemap_html" value="1" title="html地图" lay-skin="primary" lay-filter="sitemapType" {eq name="config.sitemap_html" value="1"}checked{/eq}>
+							<span class="sg-link {eq name='config.sitemap_html' value='0'}none{/eq}" id="sg_sitemap_html">
+								<a href="{$siteUrl}/sitemap.html" target="_blank">{$siteUrl}/sitemap.html</a>
+								<a href="javascript:void(0);" class="manual" data-type="html">手工更新</a>
+							</span>
+						</div>
+						<div class="sg-row">
+							<input type="checkbox" name="sitemap_llms" value="1" title="llms.txt（AI地图）" lay-skin="primary" lay-filter="sitemapType" {eq name="config.sitemap_llms" value="1"}checked{/eq}>
+							<span class="sg-link {eq name='config.sitemap_llms' value='0'}none{/eq}" id="sg_sitemap_llms">
+								<a href="{$siteUrl}/llms.txt" target="_blank">{$siteUrl}/llms.txt</a>
+								<a href="javascript:void(0);" class="manual" data-type="llms">手工更新</a>
+							</span>
+						</div>
+					</div>
+				</div>
+
+				<!-- ================= 自动更新 ================= -->
+				<div class="layui-form-item">
+					<label class="layui-form-label">自动更新</label>
+					<div class="layui-input-block">
+						<input type="radio" name="sitemap_auto" value="1" title="开启" {eq name="config.sitemap_auto" value="1"}checked{/eq}>
+						<input type="radio" name="sitemap_auto" value="0" title="关闭" {eq name="config.sitemap_auto" value="0"}checked{/eq}>
+						<p class="notic">新增/修改文档/栏目时，地图会同步更新</p>
+					</div>
+				</div>
+
+				<!-- ================= 过滤规则 ================= -->
+				<div class="layui-form-item">
+					<label class="layui-form-label">过滤规则</label>
+					<div class="layui-input-block">
+						<input type="checkbox" name="sitemap_not1" value="1" title="过滤隐藏栏目" lay-skin="primary" {eq name="config.sitemap_not1" value="1"}checked{/eq}>
+						<input type="checkbox" name="sitemap_not2" value="1" title="过滤外部链接" lay-skin="primary" {eq name="config.sitemap_not2" value="1"}checked{/eq}>
+					</div>
+				</div>
+
+				<!-- ================= 仅 xml 地图：更新频率 / 优先级别 ================= -->
+				<div id="div_sitemap_xml" class="{eq name='config.sitemap_xml' value='0'}none{/eq}">
+					<div class="layui-form-item">
+						<label class="layui-form-label">更新频率</label>
+						<div class="layui-input-block">
+							<div class="layui-inline">
+								<label class="layui-form-label" style="width:auto;padding-right:8px;">首页</label>
+								<div class="layui-input-inline" style="width:110px;">
+									<select name="sitemap_changefreq_index">
+										<option value="always" {eq name="config.sitemap_changefreq_index" value="always"}selected{/eq}>经常</option>
+										<option value="hourly" {eq name="config.sitemap_changefreq_index" value="hourly"}selected{/eq}>每小时</option>
+										<option value="daily" {eq name="config.sitemap_changefreq_index" value="daily"}selected{/eq}>每天</option>
+										<option value="weekly" {eq name="config.sitemap_changefreq_index" value="weekly"}selected{/eq}>每周</option>
+										<option value="monthly" {eq name="config.sitemap_changefreq_index" value="monthly"}selected{/eq}>每月</option>
+										<option value="yearly" {eq name="config.sitemap_changefreq_index" value="yearly"}selected{/eq}>每年</option>
+										<option value="never" {eq name="config.sitemap_changefreq_index" value="never"}selected{/eq}>从不</option>
+									</select>
+								</div>
+							</div>
+							<div class="layui-inline">
+								<label class="layui-form-label" style="width:auto;padding-right:8px;">列表页</label>
+								<div class="layui-input-inline" style="width:110px;">
+									<select name="sitemap_changefreq_list">
+										<option value="always" {eq name="config.sitemap_changefreq_list" value="always"}selected{/eq}>经常</option>
+										<option value="hourly" {eq name="config.sitemap_changefreq_list" value="hourly"}selected{/eq}>每小时</option>
+										<option value="daily" {eq name="config.sitemap_changefreq_list" value="daily"}selected{/eq}>每天</option>
+										<option value="weekly" {eq name="config.sitemap_changefreq_list" value="weekly"}selected{/eq}>每周</option>
+										<option value="monthly" {eq name="config.sitemap_changefreq_list" value="monthly"}selected{/eq}>每月</option>
+										<option value="yearly" {eq name="config.sitemap_changefreq_list" value="yearly"}selected{/eq}>每年</option>
+										<option value="never" {eq name="config.sitemap_changefreq_list" value="never"}selected{/eq}>从不</option>
+									</select>
+								</div>
+							</div>
+							<div class="layui-inline">
+								<label class="layui-form-label" style="width:auto;padding-right:8px;">内容页</label>
+								<div class="layui-input-inline" style="width:110px;">
+									<select name="sitemap_changefreq_view">
+										<option value="always" {eq name="config.sitemap_changefreq_view" value="always"}selected{/eq}>经常</option>
+										<option value="hourly" {eq name="config.sitemap_changefreq_view" value="hourly"}selected{/eq}>每小时</option>
+										<option value="daily" {eq name="config.sitemap_changefreq_view" value="daily"}selected{/eq}>每天</option>
+										<option value="weekly" {eq name="config.sitemap_changefreq_view" value="weekly"}selected{/eq}>每周</option>
+										<option value="monthly" {eq name="config.sitemap_changefreq_view" value="monthly"}selected{/eq}>每月</option>
+										<option value="yearly" {eq name="config.sitemap_changefreq_view" value="yearly"}selected{/eq}>每年</option>
+										<option value="never" {eq name="config.sitemap_changefreq_view" value="never"}selected{/eq}>从不</option>
+									</select>
+								</div>
+							</div>
+							<p class="notic">xml地图文件使用，你输入的网站的网页内容更新的频率。</p>
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">优先级别</label>
+						<div class="layui-input-block">
+							<div class="layui-inline">
+								<label class="layui-form-label" style="width:auto;padding-right:8px;">首页</label>
+								<div class="layui-input-inline" style="width:110px;">
+									<select name="sitemap_priority_index">
+										<option value="0.1" {eq name="config.sitemap_priority_index" value="0.1"}selected{/eq}>0.1</option>
+										<option value="0.2" {eq name="config.sitemap_priority_index" value="0.2"}selected{/eq}>0.2</option>
+										<option value="0.3" {eq name="config.sitemap_priority_index" value="0.3"}selected{/eq}>0.3</option>
+										<option value="0.4" {eq name="config.sitemap_priority_index" value="0.4"}selected{/eq}>0.4</option>
+										<option value="0.5" {eq name="config.sitemap_priority_index" value="0.5"}selected{/eq}>0.5</option>
+										<option value="0.6" {eq name="config.sitemap_priority_index" value="0.6"}selected{/eq}>0.6</option>
+										<option value="0.7" {eq name="config.sitemap_priority_index" value="0.7"}selected{/eq}>0.7</option>
+										<option value="0.8" {eq name="config.sitemap_priority_index" value="0.8"}selected{/eq}>0.8</option>
+										<option value="0.9" {eq name="config.sitemap_priority_index" value="0.9"}selected{/eq}>0.9</option>
+										<option value="1.0" {eq name="config.sitemap_priority_index" value="1.0"}selected{/eq}>1.0</option>
+									</select>
+								</div>
+							</div>
+							<div class="layui-inline">
+								<label class="layui-form-label" style="width:auto;padding-right:8px;">列表页</label>
+								<div class="layui-input-inline" style="width:110px;">
+									<select name="sitemap_priority_list">
+										<option value="0.1" {eq name="config.sitemap_priority_list" value="0.1"}selected{/eq}>0.1</option>
+										<option value="0.2" {eq name="config.sitemap_priority_list" value="0.2"}selected{/eq}>0.2</option>
+										<option value="0.3" {eq name="config.sitemap_priority_list" value="0.3"}selected{/eq}>0.3</option>
+										<option value="0.4" {eq name="config.sitemap_priority_list" value="0.4"}selected{/eq}>0.4</option>
+										<option value="0.5" {eq name="config.sitemap_priority_list" value="0.5"}selected{/eq}>0.5</option>
+										<option value="0.6" {eq name="config.sitemap_priority_list" value="0.6"}selected{/eq}>0.6</option>
+										<option value="0.7" {eq name="config.sitemap_priority_list" value="0.7"}selected{/eq}>0.7</option>
+										<option value="0.8" {eq name="config.sitemap_priority_list" value="0.8"}selected{/eq}>0.8</option>
+										<option value="0.9" {eq name="config.sitemap_priority_list" value="0.9"}selected{/eq}>0.9</option>
+										<option value="1.0" {eq name="config.sitemap_priority_list" value="1.0"}selected{/eq}>1.0</option>
+									</select>
+								</div>
+							</div>
+							<div class="layui-inline">
+								<label class="layui-form-label" style="width:auto;padding-right:8px;">内容页</label>
+								<div class="layui-input-inline" style="width:110px;">
+									<select name="sitemap_priority_view">
+										<option value="0.1" {eq name="config.sitemap_priority_view" value="0.1"}selected{/eq}>0.1</option>
+										<option value="0.2" {eq name="config.sitemap_priority_view" value="0.2"}selected{/eq}>0.2</option>
+										<option value="0.3" {eq name="config.sitemap_priority_view" value="0.3"}selected{/eq}>0.3</option>
+										<option value="0.4" {eq name="config.sitemap_priority_view" value="0.4"}selected{/eq}>0.4</option>
+										<option value="0.5" {eq name="config.sitemap_priority_view" value="0.5"}selected{/eq}>0.5</option>
+										<option value="0.6" {eq name="config.sitemap_priority_view" value="0.6"}selected{/eq}>0.6</option>
+										<option value="0.7" {eq name="config.sitemap_priority_view" value="0.7"}selected{/eq}>0.7</option>
+										<option value="0.8" {eq name="config.sitemap_priority_view" value="0.8"}selected{/eq}>0.8</option>
+										<option value="0.9" {eq name="config.sitemap_priority_view" value="0.9"}selected{/eq}>0.9</option>
+										<option value="1.0" {eq name="config.sitemap_priority_view" value="1.0"}selected{/eq}>1.0</option>
+									</select>
+								</div>
+							</div>
+							<p class="notic">xml地图文件使用，所抓取页面在您网站的重要性，告诉搜索引擎抓取的优先级。数值越大，优先级越高。</p>
+						</div>
+					</div>
+
+				</div>
+
+				<!-- ================= 生成数量 ================= -->
+				<div class="layui-form-item">
+					<label class="layui-form-label">生成数量</label>
+					<div class="layui-input-block">
+						文档&nbsp;<input type="text" id="sitemap_archives_num" name="sitemap_archives_num" class="layui-input" style="width:80px;display:inline-block;" value="{$config.sitemap_archives_num}">&nbsp;篇
+						&nbsp;&nbsp;&nbsp;
+						TAG&nbsp;<input type="text" id="sitemap_tags_num" name="sitemap_tags_num" class="layui-input" style="width:80px;display:inline-block;" value="{$config.sitemap_tags_num}">&nbsp;篇
+						<p class="notic2">文档加TAG数量不能超过5000条；数值大对更新文档速度有影响</p>
+					</div>
+				</div>
+
+				<!-- ================= 百度推送 ================= -->
+				<div class="layui-form-item">
+					<label class="layui-form-label">百度推送</label>
+					<div class="layui-input-block">
+						<input type="radio" name="sitemap_baidu_push" value="1" title="开启" lay-filter="sitemapBaiduPush" {eq name="config.sitemap_baidu_push" value="1"}checked{/eq}>
+						<input type="radio" name="sitemap_baidu_push" value="0" title="关闭" lay-filter="sitemapBaiduPush" {eq name="config.sitemap_baidu_push" value="0"}checked{/eq}>
+						<p class="notic">开启后，发布或编辑文档时会自动将文档地址推送到百度搜索资源平台；请填写下方 token，未配置时会跳过推送。</p>
+					</div>
+				</div>
+				<div class="layui-form-item {eq name='config.sitemap_baidu_push' value='0'}none{/eq}" id="sitemap_baidu_token_item">
+					<label class="layui-form-label">百度推送token</label>
+					<div class="layui-input-block">
+						<input type="text" id="sitemap_zzbaidutoken" name="sitemap_zzbaidutoken" autocomplete="off" class="layui-input" style="width:420px;" value="{$config.sitemap_zzbaidutoken}" placeholder="请输入百度推送 token">
+						<p class="notic">在<a href="https://ziyuan.baidu.com" target="_blank" rel="noopener">百度搜索资源平台</a>获取 token 并填入；也可以执行 <code>php think baidu-push</code> 手动或定时推送。</p>
+					</div>
+				</div>
+
+				<div class="layui-form-item">
+					<div class="layui-input-block">
+						<button class="layui-btn layui-bg-blue" lay-submit lay-filter="sitemapform">确认提交</button>
+					</div>
+				</div>
+
+			</form>
+		</div>
+	</div>
+</div>
+{/block}
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+layui.use(['form','tool','code'], function(){
+	var form = layui.form, tool = layui.tool;
+
+	form.render();
+	$('#sitemap_baidu_token_item').toggleClass('none', $('input[name="sitemap_baidu_push"]:checked').val() !== '1');
+
+	layui.code({
+		elem: '.code-area',
+		title: '',
+		header: true,
+		codeStyle :'color:gray',
+		theme:'light',
+		preview:false,
+		ln:true,
+		lang: 'html'
+	});
+	// ===== 地图类型勾选：显示/隐藏对应的访问链接，「xml地图」还联动更新频率/优先级别 =====
+	// 用切 .none 类而不是 toggle()：.none 带 !important，jQuery 的显示（把行内 display 置空）压不住它
+	form.on('checkbox(sitemapType)', function(data){
+		var name    = data.elem.name;
+		var checked = data.elem.checked;
+		if (name === 'sitemap_xml') {
+			$('#div_sitemap_xml').toggleClass('none', !checked);
+		}
+		$('#sg_' + name).toggleClass('none', !checked);
+	});
+	form.on('radio(sitemapBaiduPush)', function(data){
+		$('#sitemap_baidu_token_item').toggleClass('none', data.value !== '1');
+	});
+
+	// ===== 手工更新：调前台 /home/sitemap/build 重新生成 =====
+	// （生成要读前台的 URL 规则，只能在 home 应用里跑，所以这里发个请求过去）
+	$('.manual').on('click', function(){
+		var type = $(this).data('type');
+		var that = this;
+		layer.load(2);
+		$.post("{:url('home/sitemap/build')}", {type: type}, function(res){
+			layer.closeAll('loading');
+			layer.msg(res.msg || '操作完成', {icon: res.code == 0 ? 1 : 2});
+		}, 'json').fail(function(){
+			layer.closeAll('loading');
+			layer.msg('生成失败，请检查网站是否可访问', {icon: 2});
+		});
+	});
+
+	// ===== 提交 =====
+	form.on('submit(sitemapform)', function (data) {
+		//复选框没勾选时不会提交，这里补成 0，避免保存后变空
+		['sitemap_xml','sitemap_txt','sitemap_html','sitemap_llms','sitemap_auto','sitemap_not1','sitemap_not2','sitemap_baidu_push'].forEach(function(k){
+			if(data.field[k] === undefined){ data.field[k] = 0; }
+		});
+		tool.post("{:url('admin/seo/sitemap')}", data.field, function(e){
+			layer.msg(e.msg, { icon: e.code == 0 ? 1 : 2 });
+			if(e.code == 0){
+				setTimeout(function(){ location.reload(); }, 1000);
+			}
+		});
+		return false;
+	});
+});
+</script>
+{/block}
+<!-- /脚本 -->

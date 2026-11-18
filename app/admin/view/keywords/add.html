@@ -1,0 +1,101 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<style>
+	body{background: #fff;}
+	.layui-card{padding-bottom: 50px;}
+	.layui-form-item{margin-bottom: 20px;}
+</style>
+<div class="layui-card">
+	<form class="layui-form conf-layout p-page" lay-filter="webform">
+	<h3 class="pb-3">关键字</h3>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">关键字名称<font>*</font></label>
+		<div class="layui-input-block">
+			<input type="text" name="title" lay-verify="required" lay-reqText="请输入关键字名称" placeholder="请输入关键字名称" autocomplete="off" class="layui-input" value="{$keywords.title|default=''}">
+		</div>
+	</div>
+
+	{include file="common/i18n_fields" /}
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">分组</label>
+		<div class="layui-input-block">
+			<select name="group_id">
+				<option value="0">未分组</option>
+				{volist name="groups" id="g"}
+				<option value="{$g.id}" {eq name="$group_id" value="$g.id"}selected{/eq}>{$g.title}</option>
+				{/volist}
+			</select>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">排序</label>
+		<div class="layui-input-block">
+			<input type="text" name="sort" placeholder="请输入排序，数字" autocomplete="off" class="layui-input" value="{$keywords.sort|default='0'}">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">状态</label>
+		<div class="layui-input-block">
+			{if condition="$id eq 0"}
+			<input type="radio" name="status" value="1" title="正常" checked>
+			<input type="radio" name="status" value="0" title="禁用">
+			{else/}
+			<input type="radio" name="status" value="1" title="正常" {eq name="$keywords.status" value="1"} checked{/eq}>
+			<input type="radio" name="status" value="0" title="禁用" {eq name="$keywords.status" value="0"} checked{/eq}>
+			{/if}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<div class="layui-input-block">
+			<input type="hidden" name="id" value="{$id}" />
+			<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+			<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+		</div>
+	</div>
+	</form>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['tool'],function(){
+		var form = layui.form,tool=layui.tool;
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			var loadIndex = layer.msg('正在提交...', { icon: 16, shade: 0.01,time:0 });
+			let callback = function (e) {
+				layer.close(loadIndex);
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.sideClose(1000);
+				}
+			}
+
+			tool.post("{:url('admin/keywords/add')}", data.field, callback, {
+				timeout: 660000,
+				error: function (xhr, status) {
+					var errorMessage = status === 'timeout'
+						? '提交等待超时，请先确认标签是否已保存，再决定是否重试。'
+						: tool.responseMessage(xhr);
+					if (!errorMessage) {
+						errorMessage = xhr && xhr.status
+							? '提交失败（HTTP ' + xhr.status + '），请检查服务器日志后重试。'
+							: '提交失败，请检查网络后重试。';
+					}
+					layer.msg(errorMessage, { icon: 2, time: 6000 });
+				}
+			});
+			return false;
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

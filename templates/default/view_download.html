@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="{$nav.seo_description}"/>
+    <meta name="keywords" content="{$nav.seo_keywords}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="{miu:global name='site_name'/}" />
+    <meta property="og:title" content="{$page_title}" />
+    <meta property="og:description" content="{$nav.seo_description}"/>
+    <title>{$page_title}</title>
+    {include file="head" /}
+</head>
+<body data-page="newsDetail">
+{include file="header"/}
+<main id="main">
+    <section class="page-intro page-intro--downloads">
+        <div class="container">
+            <div class="breadcrumbs">
+                {miu:positionraw name='vo'}
+                {if condition="$vo.url"}<a href="{$vo.url}">{$vo.name}</a><span>/</span>{else/}{$vo.name}{/if}
+                {/miu:positionraw}
+            </div>
+
+            <h1>{$doc.title}</h1>
+            <p class="intro-copy">{$doc.title_ext_1}</p>
+        </div>
+    </section>
+    <section class="container download-detail">
+        <div class="download-detail-main">
+            <section class="download-software-summary" aria-labelledby="download-software-heading">
+                <div class="download-software-cover">
+                    {if condition="$doc.litpic neq ''"}
+                    <img src="{$doc.litpic}" alt="{$doc.title}" loading="lazy" />
+                    {else/}
+                    <span>{miu:lang key='download.no_thumbnail' /}</span>
+                    {/if}
+                </div>
+                <div class="download-software-info">
+                    <h2 id="download-software-heading">{miu:lang key='download.specs' /}</h2>
+                    <dl class="download-software-specs">
+                        <div><dt>{miu:lang key='download.software_size' /}</dt><dd>{$doc.size}</dd></div>
+                        <div><dt>{miu:lang key='download.language' /}</dt><dd>{$doc.language}</dd></div>
+                        <div><dt>{miu:lang key='download.type' /}</dt><dd>{$doc.softtype}</dd></div>
+                        <div><dt>{miu:lang key='download.license' /}</dt><dd>{$doc.authorization}</dd></div>
+                        <div><dt>{miu:lang key='download.updated' /}</dt><dd>{$doc.updatetime}</dd></div>
+                        <div><dt>{miu:lang key='download.category' /}</dt><dd>{$doc.typecate}</dd></div>
+                    </dl>
+                </div>
+                <div class="download-jump-actions" aria-label="{miu:lang key='download.quick_jump' /}">
+                    <a href="#download-list-heading">{miu:lang key='download.local' /}</a>
+                    <a href="#download-list-heading">{miu:lang key='download.remote' /}</a>
+                </div>
+            </section>
+            <section class="download-content" aria-labelledby="download-content-heading">
+                <h2 id="download-content-heading">{miu:lang key='download.intro' /}</h2>
+                <div class="rich-copy">{$doc.content|raw}</div>
+            </section>
+            <div class="download-list-heading" id="download-list-heading">
+                <div>
+
+                    <div class="download-resource-title">{miu:lang key='download.links' /} <span class="eyebrow">DOWNLOAD</span></div>
+                </div>
+                <span>{$doc.download_count}{miu:lang key='download.addresses_suffix' /}</span>
+            </div>
+            {if condition="$doc.download_count gt 0"}
+            <ul class="download-resource-list">
+                {volist name="doc.downloads" id="download"}
+                <li class="download-resource">
+                    <span class="download-resource-icon" aria-hidden="true">{$download.file_type}</span>
+                    <div class="download-resource-info">
+                        <h4>{$download.btn_name}</h4>
+                        <div class="download-resource-meta">
+                            {if condition="$download.size neq ''"}<span>{miu:lang key='list.size' /}{$download.size}</span>{/if}
+                            {if condition="$download.code neq ''"}<span>{miu:lang key='download.extract_code' /}{$download.code}</span>{/if}
+                        </div>
+                    </div>
+                    {if condition="$download.external eq 1"}
+                    <a class="download-action" href="{$download.endpoint}" target="_blank" rel="noopener noreferrer" download><span class="download-action-label">{miu:lang key='download.click' /}</span><span class="download-action-icon" aria-hidden="true">↗</span></a>
+                    {else/}
+                    <a class="download-action" href="{$download.endpoint}" target="_blank" rel="noopener noreferrer" download><span class="download-action-label">{miu:lang key='download.click' /}</span><span class="download-action-icon" aria-hidden="true">↓</span></a>
+                    {/if}
+                </li>
+                {/volist}
+            </ul>
+            {else/}
+            <div class="download-empty">{miu:lang key='download.empty' /}</div>
+            {/if}
+        </div>
+        <aside class="download-help">
+            <p class="eyebrow">DOWNLOAD GUIDE</p>
+            <h2>{miu:lang key='download.instructions' /}</h2>
+            <p>{miu:lang key='download.choose' /}</p>
+            <dl>
+
+            </dl>
+            {miu:nav id='vo' navid='$doc.top_navid'}
+            <a class="text-link" href="{$vo.url}">← {miu:lang key='common.back_prefix' /}{$vo.title}</a>
+            {/miu:nav}
+        </aside>
+    </section>
+    {include file="detail_collect" /}
+</main>
+{include file="footer" /}
+</body>
+</html>

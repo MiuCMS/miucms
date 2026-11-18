@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body class="theme-portal">
+{include file="header" /}
+<main id="main">
+    <section class="portal-masthead"><div class="container"><p class="portal-kicker">{miu:lang key='newsIndex' /}</p><h1>{miu:global name='site_title' /}</h1><p>{miu:global name='site_desc' /}</p></div></section>
+    <section class="container portal-front"><div class="portal-section-heading"><h2>{miu:lang key='latest' /}</h2><a href="{:miu_search_url()}">{miu:lang key='search' /} ↗</a></div>
+        <div class="portal-top-grid">{miu:list id='vo' limit='3'}<article class="portal-top-story"><a class="portal-story-image" href="{$vo.url}">{notempty name="vo.litpic"}<img src="{$vo.litpic}" alt="{$vo.title}" loading="lazy">{else/}<span>{miu:lang key='noImage' /}</span>{/notempty}</a><div><span>{$vo.nav_name} · {$vo.date}</span><h3><a href="{$vo.url}">{$vo.title}</a></h3><p>{$vo.seo_description|default=''}</p></div></article>{/miu:list}</div>
+    </section>
+    <section class="portal-channels"><div class="container"><div class="portal-section-heading"><h2>{miu:lang key='channelPicks' /}</h2></div>
+        {miu:nav id='sectionNav' limit='5'}
+        <section class="portal-channel"><header><h3><a href="{$sectionNav.url}">{$sectionNav.title}</a></h3><a class="portal-channel-link" href="{$sectionNav.url}">{miu:lang key='browseChannel' /} ↗</a></header><ol>
+            {miu:list id='vo' navid='$sectionNav.id' limit='4'}<li><time>{$vo.date}</time><a href="{$vo.url}">{$vo.title}</a></li>{/miu:list}
+        </ol></section>
+        {/miu:nav}
+    </div></section>
+</main>
+{include file="footer" /}
+</body>
+</html>

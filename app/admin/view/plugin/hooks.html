@@ -1,0 +1,67 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-3">
+	<div class="layui-card">
+		<div class="layui-card-body">
+			<table class="layui-hide" id="hookTable" lay-filter="hookTable"></table>
+		</div>
+	</div>
+</div>
+
+<script type="text/html" id="statusTpl">
+	{{# if(d.plugins && d.plugins.length){ }}
+		<span class="layui-badge layui-bg-green">已被监听</span>
+	{{# } else { }}
+		<span class="layui-badge layui-bg-gray">暂无监听</span>
+	{{# } }}
+</script>
+
+<script type="text/html" id="pluginsTpl">
+	{{# if(d.plugins && d.plugins.length){ }}
+		{{# layui.each(d.plugins, function(i, p){ }}
+			<span class="layui-badge layui-bg-blue" style="margin:2px 4px 2px 0;">{{p}}</span>
+		{{# }); }}
+	{{# } else { }}
+		<span class="layui-text">-</span>
+	{{# } }}
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+layui.use(['table'], function () {
+	var table = layui.table;
+
+	//把 PHP 的钩子清单 + 监听情况拼成表格数据
+	var hookList = {:json_encode($hookList)};
+	var registered = {:json_encode($registered)};
+	var hookRoutes = {:json_encode($hookRoutes)};
+	var data = [];
+	for (var name in hookList) {
+		data.push({
+			name: name,
+			title: hookList[name],
+			route: hookRoutes[name] || '-',
+			plugins: registered[name] || []
+		});
+	}
+
+	table.render({
+		elem: '#hookTable',
+		cols: [[
+			{ field: 'name', title: '钩子名称', width: 180 },
+			{ field: 'title', title: '触发时机', width: 160 },
+			{ field: 'route', title: '模块/控制器/方法', minWidth: 250 },
+			{ title: '状态', width: 110, align: 'center', templet: '#statusTpl' },
+			{ title: '监听的插件', minWidth: 260, templet: '#pluginsTpl' }
+		]],
+		data: data,
+		page: false
+	});
+});
+</script>
+{/block}
+<!-- /脚本 -->

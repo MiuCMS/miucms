@@ -1,0 +1,478 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<div class="layui-container">
+	<div class="layui-row">
+		<div class="layui-card-body setting" style="padding:15px;">
+			<style>
+				/* 顶部提示条 */
+				.gen-tip{background:#fff8e6;border:1px solid #ffe1a8;color:#8a6d3b;border-radius:4px;padding:12px 14px;line-height:1.9;margin-bottom:18px;}
+				.gen-tip a{color:#1e9fff;text-decoration:underline;}
+				.gen-tip .layui-icon{margin-right:6px;color:#ffb800;}
+
+				.gen-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;}
+				.gen-action-item{box-sizing:border-box;flex:0 0 100%;}
+				.gen-action-item.grid-demo.layui-btn-container{margin-bottom:0;text-align:center;}
+				.gen-action-item .layui-btn{margin:0;}
+				@media (min-width:768px){.gen-action-item{flex-basis:calc((100% - 16px) / 2);}}
+				@media (min-width:992px){.gen-action-item{flex-basis:calc((100% - 32px) / 3);}}
+
+				/* 生成进度弹窗 */
+				.gen-box{padding:22px 24px;}
+				.gen-box .gen-total{font-size:14px;color:#333;margin-bottom:16px;}
+				.gen-box .gen-total b{color:#1e9fff;font-size:16px;padding:0 2px;}
+				.gen-box .gen-cur{color:#999;margin-top:14px;line-height:20px;height:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+				/* 生成结果弹窗 */
+				.gen-done{text-align:center;padding:26px 20px 18px;}
+				.gen-done .layui-icon{font-size:52px;color:#16baaa;}
+				.gen-done p{font-size:16px;color:#333;margin-top:12px;}
+				.gen-done p.sub{font-size:13px;color:#999;margin-top:6px;}
+				.gen-err{max-height:260px;overflow-y:auto;padding:14px 18px;line-height:2;color:#666;}
+				.gen-err li{list-style:disc;margin-left:18px;word-break:break-all;}
+
+				/* 栏目多选下拉（layui 的 select 不支持 multiple，这里用 layui 的 checkbox 拼一个） */
+				.miu-ms{position:relative;}
+				.miu-ms-box{border:1px solid #e6e6e6;border-radius:2px;height:38px;line-height:36px;padding:0 30px 0 10px;cursor:pointer;background:#fff;overflow:hidden;box-sizing:border-box;}
+				.miu-ms-box .miu-ms-txt{color:#999;}
+				.miu-ms-box.has-val .miu-ms-txt{color:#333;}
+				.miu-ms-box .layui-icon-down{position:absolute;right:10px;top:2px;color:#c2c2c2;}
+				.miu-ms-panel{display:none;position:absolute;z-index:999;left:0;right:0;top:42px;background:#fff;border:1px solid #e6e6e6;border-radius:2px;box-shadow:0 2px 8px rgba(0,0,0,.12);}
+				.miu-ms-bar{padding:6px 10px;border-bottom:1px solid #f2f2f2;font-size:12px;}
+				.miu-ms-bar a{margin-right:14px;color:#1e9fff;}
+				.miu-ms-list{max-height:250px;overflow-y:auto;padding:8px 10px 4px;}
+				/* 主题 miu.css 给 primary 勾选框加了 top:8px/margin-left:12px，列表里要归零才对齐 */
+				.miu-ms-list .layui-form-checkbox[lay-skin=primary]{display:block;width:100%;margin:0 0 6px 0;top:0;}
+				.layui-layer-btn-c{margin-bottom:15px;}
+			</style>
+
+			{if condition="$ready eq false"}
+			<div class="gen-tip">
+				<i class="layui-icon layui-icon-tips"></i>
+				当前「URL模式」是 <b>{$pseudoText}</b>，不是「生成静态」，不能生成静态页面。
+				请先到 <a href="{:url('admin/seo/index')}" class="tab-a" data-href="{:url('admin/seo/index')}" data-title="URL配置" data-id="1026">SEO → URL配置</a> 把「URL模式」切换成「生成静态」再回来。
+			</div>
+			{/if}
+			<blockquote class="layui-elem-quote layui-quote-nm">
+				生成的文件放在站点根目录（public/）：首页是 index.html，其余按「页面保存目录 + 页面地址」落盘。
+			</blockquote>
+
+			<div class="gen-actions">
+				<div class="gen-action-item grid-demo grid-demo-bg1 layui-padding-3 layui-btn-container">
+					<button type="button" class="layui-btn  gen-act layui-btn-color layui-btn-radius" data-act="all">一键生成</button>
+				</div>
+				<div class="gen-action-item grid-demo grid-demo-bg1 layui-padding-3 layui-btn-container">
+					<button type="button" class="layui-btn gen-act layui-btn-color layui-btn-radius" data-act="home">生成首页</button>
+				</div>
+				<div class="gen-action-item grid-demo grid-demo-bg1 layui-padding-3 layui-btn-container">
+					<button type="button" class="layui-btn  gen-act layui-btn-color layui-btn-radius" data-act="nav">生成栏目页</button>
+				</div>
+				<div class="gen-action-item grid-demo grid-demo-bg1 layui-padding-3 layui-btn-container">
+					<button type="button" class="layui-btn  gen-act layui-btn-color layui-btn-radius" data-act="doc">生成文档页</button>
+				</div>
+				<div class="gen-action-item grid-demo grid-demo-bg1 layui-padding-3 layui-btn-container">
+					<button type="button" class="layui-btn  gen-act layui-btn-color layui-btn-radius" data-act="tags">生成tag页</button>
+				</div>
+				<div class="gen-action-item grid-demo grid-demo-bg1 layui-padding-3 layui-btn-container">
+					<button type="button" class="layui-btn  gen-act layui-btn-color layui-btn-radius" data-act="sitemap">生成Sitemap</button>
+				</div>
+
+			</div>
+
+		</div>
+	</div>
+</div>
+
+{/block}
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+var GEN_READY = "{$ready}" === "1";
+var GEN_NAVS  = {$navsJson|raw};
+// 「生成Sitemap」弹窗默认勾选哪几种地图：跟「SEO → Sitemap」里设置的地图类型一致
+var GEN_SITEMAP_TYPES = {$sitemapTypesJson|raw};
+var GEN_URL   = {
+	start: "{:url('home/createhtml/start')}",
+	step:  "{:url('home/createhtml/step')}"
+};
+
+layui.use(['form','layer','laydate','element','tool'], function(){
+	var form = layui.form, layer = layui.miulayer, laydate = layui.laydate, element = layui.element;
+
+	// 生成范围切换：全局注册一次就够（form.on 是追加，放弹窗里会越绑越多）
+	form.on('radio(genScope)', function(data){
+		$('#genDateRange').toggle(data.value === 'date');
+	});
+
+	// 多选里勾选变化 → 更新下拉框上显示的文字
+	// （用 layui 的 checkbox 事件，别用原生 change：layui 点的是它自己渲染出来的 div）
+	form.on('checkbox(msItem)', function(data){
+		refreshMsText($(data.elem).closest('.miu-ms'));
+	});
+
+	// ================= 生成入口 =================
+	$('.gen-act').on('click', function(){
+		var act = $(this).data('act');
+		// 生成sitemap不限制URL模式，其他的需要检查
+		if (!GEN_READY && act !== 'sitemap') {
+			layer.msg('当前不是「生成静态模式」，请先到 SEO → URL配置 切换', {icon: 2});
+			return;
+		}
+		if (act === 'nav' || act === 'doc') {
+			openNav(act);                    // 栏目页 / 文档页：要先选栏目
+		} else if (act === 'home') {
+			doStart({ type: 'home' });       // 首页没有选项，直接开跑
+		} else if (act === 'all') {
+			openAll();
+		} else if (act === 'tags') {
+			doStart({ type: 'tags' });
+		} else if (act === 'sitemap') {
+			openSitemap();
+		}
+	});
+
+	// ================= 各按钮的选项弹窗 =================
+
+	// 今天，格式：年-月-日
+	function genToday(){
+		var d = new Date();
+		var m = ('0' + (d.getMonth() + 1)).slice(-2);
+		var day = ('0' + d.getDate()).slice(-2);
+		return d.getFullYear() + '-' + m + '-' + day;
+	}
+
+	// 一键生成：全站、今天、一周内或自定义日期
+	function openAll(){
+		var html = '<div class="layui-form" lay-filter="genOpt" style="margin: 30px;">'
+			+ optItem('生成范围',
+				'<input type="radio" name="scope" value="all" title="全站" checked lay-filter="genScope">'
+				+ '<input type="radio" name="scope" value="today" title="今天" lay-filter="genScope">'
+				+ '<input type="radio" name="scope" value="week" title="一周内" lay-filter="genScope">'
+				+ '<input type="radio" name="scope" value="date" title="自定义日期" lay-filter="genScope">')
+			+ '<div id="genDateRange" style="display:none"><div id="gen">'
+			+ optItem('发布时间',
+				'<input type="text" id="genStart" class="layui-input" style="width:180px;display:inline-block;vertical-align:middle;" placeholder="开始日期" readonly>'
+				+ '<span style="padding:0 6px;">~</span>'
+				+ '<input type="text" id="genEnd" class="layui-input" style="width:180px;display:inline-block;vertical-align:middle;" placeholder="截止日期" readonly>')
+			+ '</div></div>'
+			+ '<p class="notic" style="color:#999;margin-left:110px;">全站会生成首页、全部栏目页、文档页和 tag 页；今天或一周内按文档发布时间筛选，更新首页、相关栏目页、命中文档页及关联 tag 页（一周内含今天和之前 6 天）。</p>'
+			+ '</div>';
+
+		openOpt('一键生成', html,
+			function($box){
+				var today = genToday();
+				//默认填当天
+				$box.find('#genStart').val(today);
+				$box.find('#genEnd').val(today);
+
+				//只挂一个「范围」选择器让它同时管这两个输入框。
+				//（原来还给两个输入框各挂了一个 datetime，三个选择器抢同一对输入框会互相打架）
+				//type:'date' = 只选到「日」（年-月-日）；具体按 0 点 / 23:59:59 算交给后端
+				laydate.render({
+					elem: '#gen',
+					type: 'date',
+					range: ['#genStart', '#genEnd'],
+					rangeLinked: true // 开启日期范围选择时的区间联动标注模式 ---  2.8+ 新增
+				});
+			},
+			function($box){
+				doStart({
+					type:  'all',
+					scope: $box.find('input[name=scope]:checked').val() || 'all',
+					start: $box.find('#genStart').val() || '',
+					end:   $box.find('#genEnd').val() || ''
+				});
+			});
+	}
+
+	// 生成栏目页 / 文档页：栏目多选
+	function openNav(kind){
+		var title = kind === 'nav' ? '生成栏目页' : '生成文档页';
+		var html  = '<div class="layui-form" lay-filter="genOpt" style="margin: 30px;padding-right: 100px">'
+			+ optItem('选择栏目', buildMultiSelect())
+			+ '<p class="notic" style="color:#999;margin-left:110px;">不选择栏目时生成全部栏目；勾选栏目后，只生成所选栏目及其子栏目。</p>'
+			+ '</div>';
+
+		openOpt(title, html,
+			// 弹窗一出来就把多选绑好，不然下拉展不开
+			function($box, index){
+				bindMultiSelect($box, index);
+			},
+			function($box){
+				var ids = getMultiSelectValues($box);
+				doStart({ type: kind, nav_ids: ids });
+			});
+	}
+
+	// 生成 Sitemap：选项与 Sitemap 配置页保持一致。
+	function openSitemap(){
+		// 默认勾选哪几种，跟「SEO → Sitemap」里设置的「地图类型」一致
+		var mapList = [
+			{ value: 'xml',  title: 'xml地图'  },
+			{ value: 'txt',  title: 'txt地图'  },
+			{ value: 'html', title: 'html地图' },
+			{ value: 'llms', title: 'llms.txt（AI地图）' }
+		];
+		var boxes = '';
+		for (var i = 0; i < mapList.length; i++) {
+			boxes += '<input type="checkbox" name="sitemap[]" value="' + mapList[i].value + '" title="' + mapList[i].title
+				+ '" lay-skin="primary"' + (GEN_SITEMAP_TYPES.indexOf(mapList[i].value) >= 0 ? ' checked' : '') + '>';
+		}
+
+		var html = '<div class="layui-form" lay-filter="genOpt" style="margin: 30px;">'
+			+ optItem('地图类型', boxes)
+			+ '<p class="notic" style="color:#999;margin-left:110px;">生成到 public/：sitemap.xml / sitemap.txt / sitemap.html / llms.txt</p>'
+			+ '</div>';
+
+		openOpt('生成Sitemap', html, null, function($box){
+			var types = [];
+			$box.find('input[name="sitemap[]"]:checked').each(function(){ types.push(this.value); });
+			if (!types.length) {
+				layer.msg('请至少选择一种地图类型', { icon: 2 });
+				return false;
+			}
+			doStart({ type: 'sitemap', sitemap: types });
+		});
+	}
+
+	// 统一的「选项弹窗」
+	//   onReady(layero, index)  弹窗建好后调（渲染日期控件、绑多选等）
+	//   onStart(layero)         点「开始生成」时调；返回 false 表示校验没过，不关弹窗
+	function openOpt(title, html, onReady, onStart){
+		layer.open({
+			type: 1,
+			title: title,
+			area: ['640px', 'auto'],
+			shadeClose: true,
+			content: '<div class="gen-opt">' + html + '</div>',
+			btn: ['开始生成', '取消'],
+			btnAlign: 'c',                     // 底部按钮水平居中
+			offset: '50px',
+			success: function(layero, index){
+				form.render(null, 'genOpt');
+				if (typeof onReady === 'function') { onReady(layero, index); }
+			},
+			yes: function(index, layero){
+				if (typeof onStart === 'function' && onStart(layero) === false) { return; }
+				layer.close(index);
+			}
+		});
+	}
+
+	// 表单行小工具
+	function optItem(label, body){
+		return '<div class="layui-form-item">'
+			+ '<label class="layui-form-label">' + label + '</label>'
+			+ '<div class="layui-input-block">' + body + '</div>'
+			+ '</div>';
+	}
+
+	// ================= 栏目多选下拉（用 layui 的 checkbox 拼） =================
+	function buildMultiSelect(){
+		if (!GEN_NAVS.length) {
+			return '<div class="miu-ms"><div class="miu-ms-box"><span class="miu-ms-txt">没有可用栏目</span></div></div>';
+		}
+
+		var list = '';
+		for (var i = 0; i < GEN_NAVS.length; i++) {
+			list += '<input type="checkbox" value="' + GEN_NAVS[i].id + '" title="'
+				+ GEN_NAVS[i].title.replace(/"/g, '&quot;') + '" lay-skin="primary" lay-filter="msItem">';
+		}
+
+		return '<div class="miu-ms">'
+			+ '<div class="miu-ms-box"><span class="miu-ms-txt">请选择栏目（留空生成全部栏目）</span><i class="layui-icon layui-icon-down"></i></div>'
+			+ '<div class="miu-ms-panel">'
+			+ '<div class="miu-ms-bar"><a href="javascript:;" class="ms-all">全选</a><a href="javascript:;" class="ms-none">清空</a></div>'
+			+ '<div class="miu-ms-list">' + list + '</div>'
+			+ '</div></div>';
+	}
+
+	// 下拉展开 / 收起后，让弹窗按内容重新自适应高度（最高 600px）
+	//
+	// 下拉面板是 position:absolute，不占内容高度，弹窗自己算高度时看不到它，
+	// 所以展开后要手动量一下内容自然高度，再用 layer.style() 把弹窗撑高。
+	// layer.style() 内部会同时改弹窗根节点和 .layui-layer-content 的高度，不用自己算。
+	//
+	// 量的两个讲究：
+	//   1) 先把内容区临时设成 height:auto 再量 scrollHeight —— 直接量当前 scrollHeight 不行，
+	//      内容区被撑高后 scrollHeight 至少等于它的高度，收起时缩不回去；
+	//   2) 不用 getBoundingClientRect —— 弹窗入场动画带 transform 缩放，
+	//      动画没走完时 rect 是缩放后的值，量出来会偏小。
+	function fitOptLayer(index){
+		if (index === undefined || index === null) { return; }
+
+		var $layero = $('#layui-layer' + index);
+		if (!$layero.length) { return; }
+
+		var $content = $layero.children('.layui-layer-content');
+		var titleH   = $layero.find('.layui-layer-title').outerHeight() || 0;
+		var btnH     = $layero.find('.layui-layer-btn').outerHeight() || 0;
+
+		var oldH = $content[0].style.height;
+		$content.css('height', 'auto');
+		var contentH = $content[0].scrollHeight;
+		$content[0].style.height = oldH;
+
+		var h = Math.ceil(contentH + titleH + btnH + 8);
+		if (h > 600) { h = 600; }                  // 最高 600px
+
+		layer.style(index, { height: h });
+	}
+
+	function bindMultiSelect($box, index){
+		var $ms = $box.find('.miu-ms');
+
+		// 把弹窗 index 记在面板上：点空白收起时也要用它（那个事件在弹窗外面）
+		$ms.find('.miu-ms-panel').data('layerIndex', index);
+
+		// 展开 / 收起：展开后要把弹窗撑高，收起后缩回去
+		$ms.find('.miu-ms-box').on('click', function(e){
+			e.stopPropagation();
+			$ms.find('.miu-ms-panel').toggle();
+			fitOptLayer(index);
+		});
+		// 点面板里别关掉
+		$ms.find('.miu-ms-panel').on('click', function(e){ e.stopPropagation(); });
+
+		$ms.find('.ms-all').on('click', function(){
+			$ms.find('input[type=checkbox]').prop('checked', true);
+			form.render('checkbox');
+			refreshMsText($ms);
+		});
+		$ms.find('.ms-none').on('click', function(){
+			$ms.find('input[type=checkbox]').prop('checked', false);
+			form.render('checkbox');
+			refreshMsText($ms);
+		});
+	}
+
+	function refreshMsText($ms){
+		var names = [];
+		$ms.find('input[type=checkbox]:checked').each(function(){
+			names.push($(this).attr('title'));
+		});
+		var $box = $ms.find('.miu-ms-box');
+		if (names.length) {
+			$box.addClass('has-val');
+			$ms.find('.miu-ms-txt').text('已选 ' + names.length + ' 个：' + names.join('、'));
+		} else {
+			$box.removeClass('has-val');
+			$ms.find('.miu-ms-txt').text('请选择栏目（留空生成全部栏目）');
+		}
+	}
+
+	function getMultiSelectValues($box){
+		var ids = [];
+		$box.find('.miu-ms input[type=checkbox]:checked').each(function(){ ids.push(this.value); });
+		return ids;
+	}
+
+	// ================= 生成流程 =================
+	function doStart(opt){
+		var load = layer.load(2);
+		$.post(GEN_URL.start, opt, function(res){
+			layer.close(load);
+			if (res.code != 0) { layer.msg(res.msg, { icon: 2 }); return; }
+			if (res.total <= 0) { layer.msg('没有需要生成的页面', { icon: 0 }); return; }
+			showProgress(res.token, res.total);
+		}, 'json').fail(function(){
+			layer.close(load);
+			layer.msg('请求失败，请确认网站可以正常访问', { icon: 2 });
+		});
+	}
+
+	function showProgress(token, total){
+		var done = 0, errors = [];
+
+		layer.open({
+			type: 1,
+			title: '正在生成静态页面',
+			area: ['580px', 'auto'],
+			closeBtn: 0,
+			btnAlign: 'c',                     // 底部按钮水平居中
+			shadeClose: false,
+			content: '<div class="gen-box">'
+				+ '<p class="gen-total">共 <b>' + total + '</b> 个页面需要生成</p>'
+				+ '<div class="layui-progress layui-progress-big" lay-filter="genBar" lay-showpercent="true">'
+				+ '<div class="layui-progress-bar layui-bg-green" lay-percent="0%"></div></div>'
+				+ '<p class="gen-cur">正在准备…</p>'
+				+ '</div>',
+			success: function(layero, index){
+				element.render('progress');
+				next(index);
+			}
+		});
+
+		function next(index){
+			$.post(GEN_URL.step, { token: token, offset: done }, function(res){
+				if (res.code != 0) {
+					layer.close(index);
+					layer.msg(res.msg, { icon: 2 });
+					return;
+				}
+
+				done = res.generated;
+				if (res.errors && res.errors.length) { errors = errors.concat(res.errors); }
+
+				var pct = total > 0 ? Math.floor(done / total * 100) : 100;
+				element.progress('genBar', pct + '%');
+				$('.gen-cur').text(res.current ? ('正在生成：' + res.current) : '');
+
+				if (res.done) {
+					layer.close(index);
+					finish(total, errors);
+				} else {
+					next(index);
+				}
+			}, 'json').fail(function(){
+				layer.close(index);
+				layer.msg('生成中断了，请重新点击生成按钮（已生成的文件会保留）', { icon: 2 });
+			});
+		}
+	}
+
+	// 生成结束的提示
+	function finish(total, errors){
+		if (errors && errors.length) {
+			var li = '';
+			for (var i = 0; i < errors.length; i++) {
+				li += '<li>' + errors[i] + '</li>';
+			}
+			layer.open({
+				type: 1,
+				title: '生成完成（有 ' + errors.length + ' 个失败）',
+				area: ['620px', '420px'],
+				btnAlign: 'c',                 // 底部按钮水平居中
+				shadeClose: true,
+				content: '<ul class="gen-err">' + li + '</ul>'
+			});
+			return;
+		}
+
+		layer.open({
+			type: 1,
+			title: false,
+			area: '420px',
+			closeBtn: 0,
+			btnAlign: 'c',                     // 底部按钮水平居中
+			shadeClose: true,
+			content: '<div class="gen-done">'
+				+ '<i class="layui-icon layui-icon-ok-circle"></i>'
+				+ '<p>全部生成完成</p>'
+				+ '<p class="sub">共生成 ' + total + ' 个页面</p>'
+				+ '</div>'
+		});
+	}
+
+	// 点空白处收起多选面板（收起后弹窗也跟着缩回去）
+	$(document).on('click', function(){
+		$('.miu-ms-panel:visible').each(function(){
+			var index = $(this).hide().data('layerIndex');
+			fitOptLayer(index);
+		});
+	});
+});
+</script>
+{/block}
+<!-- /脚本 -->

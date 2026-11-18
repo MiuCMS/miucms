@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="{$doc.seo_description|default=''}" />
+    <meta name="keywords" content="{$doc.seo_keywords|default=''}" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="{miu:global name='site_name'/}" />
+    <meta property="og:title" content="{$page_title}" />
+    <meta property="og:description" content="{$doc.seo_description|default=''}" />
+    <title>{$page_title}</title>
+    {include file="head" /}
+</head>
+<body data-page="specialDetail">
+{include file="header"/}
+<main id="main">
+    <section class="page-intro page-intro--article page-intro--special">
+        <div class="container">
+            <div class="breadcrumbs">
+                {miu:positionraw name='vo'}
+                {if condition="$vo.url"}<a href="{$vo.url}">{$vo.name}</a><span>/</span>{else/}{$vo.name}{/if}
+                {/miu:positionraw}
+            </div>
+            <h1>{$doc.title}</h1>
+            <p class="intro-copy">{$doc.title_ext_1|default=''}</p>
+        </div>
+    </section>
+    <article class="container detail-layout special-detail-layout">
+        <div class="detail-main">
+            {notempty name="doc.litpic"}<div class="detail-cover"><img src="{$doc.litpic}" alt="{$doc.title}" loading="lazy" /></div>{/notempty}
+            <div class="article-meta"><time>{$doc.date}</time><span>{$doc.nav_name}</span>{miu:tag}<a class="tag" href="{$vo.url}">#{$vo.title}</a>{/miu:tag}</div>
+            <div class="rich-copy">
+                {$doc.content|raw}
+                {include file="detail_collect" /}
+                <div class="article-tags">{miu:tag}<a class="tag" href="{$vo.url}">#{$vo.title}</a>{/miu:tag}</div>
+            </div>
+
+            <!-- 专题节点保持原始 JSON；链接只由后端已公开的文档记录生成。 -->
+            {php}$specialNodes = json_decode((string) ($doc['special_nodes'] ?? ''), true); $specialNodes = is_array($specialNodes) ? $specialNodes : [];{/php}
+            {volist name="specialNodes" id="vo"}
+            {if condition="is_array($vo)"}
+            {php}$nodeDocs = is_array($vo['docs'] ?? null) ? $vo['docs'] : [];{/php}
+            <section class="special-collection section-pad">
+                <div class="section-heading"><h2>{$vo.name|default=''}</h2></div>
+                <div class="editorial-grid">
+                    {foreach $nodeDocs as $nodeItem}
+                    {php}
+                    $nodeId = is_array($nodeItem) ? (int) ($nodeItem['id'] ?? 0) : 0;
+                    $linkedDoc = $nodeId > 0 ? miu_cached_document($nodeId) : [];
+                    $linkedNav = $linkedDoc ? nav_by_id((int) ($linkedDoc['nav_id'] ?? 0)) : [];
+                    $canShow = $linkedDoc && $linkedNav && (int) ($linkedDoc['is_del'] ?? 0) === 0 && (int) ($linkedDoc['status'] ?? 0) === 1 && (int) ($linkedDoc['arcrank'] ?? 0) === 0 && (int) ($linkedDoc['restric_type'] ?? 0) === 0;
+                    if ($canShow) { $linkedDoc = miu_doc_row($linkedDoc, $linkedNav); }
+                    {/php}
+                    {if condition="$canShow"}
+                    <article class="editorial-card">
+                        <a class="card-media" href="{$linkedDoc.url}"><img class="card-image" src="{$linkedDoc.litpic|default='/skin/default/images/none.png'}" alt="{$linkedDoc.title}" loading="lazy" /></a>
+                        <div class="card-meta"><span>{$linkedDoc.nav_name}</span><time>{$linkedDoc.date}</time></div>
+                        <h3><a href="{$linkedDoc.url}">{$linkedDoc.title}</a></h3>
+                        <p>{$linkedDoc.seo_description|default=''}</p>
+                        <div class="card-foot"><a class="text-link" href="{$linkedDoc.url}">{miu:lang key='common.view_story' /} <span aria-hidden="true">↗</span></a></div>
+                    </article>
+                    {/if}
+                    {/foreach}
+                </div>
+            </section>
+            {/if}
+            {/volist}
+
+            <nav class="news-pagination">
+                {miu:prenext type='pre'}<a class="news-page-link" href="{$vo.link}"><span>{miu:lang key='common.previous' /}</span><b>{if condition="$vo.title"}{$vo.title}{else/}{miu:lang key='common.none' /}{/if}</b></a>{/miu:prenext}
+                {miu:nav id='vo' navid='$doc.top_navid'}<a class="news-back-link" href="{$vo.url}">{miu:lang key='common.back_prefix' /}{$vo.title}</a>{/miu:nav}
+                {miu:prenext type='next'}<a class="news-page-link is-next" href="{$vo.link}"><span>{miu:lang key='common.next' /}</span><b>{if condition="$vo.title"}{$vo.title}{else/}{miu:lang key='common.none' /}{/if}</b></a>{/miu:prenext}
+            </nav>
+        </div>
+        <aside class="detail-aside news-detail-aside">
+            <section class="news-aside-section"><h3>{miu:lang key='common.recommended' /}</h3><ul>
+                {miu:list id='vo' navid='$doc.top_navid' limit='5' flag='r'}<li><a class="news-aside-link" href="{$vo.url}"><span title="{$vo.title}">{$vo.title}</span><i aria-hidden="true">↗</i></a></li>{/miu:list}
+            </ul></section>
+            <section class="news-aside-section news-hot"><h3>{miu:lang key='common.popular' /}</h3><ul>
+                {miu:list id='vo' navid='$doc.top_navid' limit='5' order='click' sort='desc'}<li><a class="news-aside-link" href="{$vo.url}"><span title="{$vo.title}">{$vo.title}</span><i aria-hidden="true">↗</i></a></li>{/miu:list}
+            </ul></section>
+        </aside>
+    </article>
+</main>
+{include file="footer" /}
+</body>
+</html>

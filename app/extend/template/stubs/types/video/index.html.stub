@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body class="theme-video">
+{include file="header" /}
+<main id="main">
+    <section class="video-masthead"><div class="container"><p class="video-kicker">{miu:lang key='videoIndex' /}</p><h1>{miu:global name='site_title' /}</h1><p>{miu:global name='site_desc' /}</p><a class="video-browse-link" href="{:miu_search_url()}">{miu:lang key='search' /} <span aria-hidden="true">↗</span></a></div></section>
+    <section class="container video-shelf"><div class="video-shelf-heading"><h2>{miu:lang key='latest' /}</h2><span>{miu:lang key='videoIntro' /}</span></div>
+        <div class="video-chapters">{miu:list id='vo' limit='6'}<article class="video-chapter"><a class="video-chapter-poster" href="{$vo.url}">{notempty name="vo.litpic"}<img src="{$vo.litpic}" alt="{$vo.title}" loading="lazy">{else/}<span>{miu:lang key='noImage' /}</span>{/notempty}<i aria-hidden="true">▶</i></a><div><span>{$vo.nav_name}</span><h3><a href="{$vo.url}">{$vo.title}</a></h3><p>{$vo.title_ext_1|default=''}</p></div></article>{/miu:list}</div>
+    </section>
+</main>
+{include file="footer" /}
+</body>
+</html>

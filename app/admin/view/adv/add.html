@@ -1,0 +1,406 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<style>
+	body{background: #fff;}
+	.layui-card{padding-bottom: 50px;}
+	.layui-form-item{margin-bottom: 20px;}
+	/* 广告类型三块内容：只显示当前选中的那块 */
+	.adv-type-block{display:none;}
+	/* 轮播图片：一行最多 3 个，超出的换行（同一行的元素靠 flex 拉伸对齐高度） */
+	#advImages{display:flex;flex-wrap:wrap;gap:12px;align-items:stretch;}
+	.adv-img-box{flex:0 0 calc((100% - 24px) / 3);max-width:calc((100% - 24px) / 3);
+		display:flex;flex-direction:column;padding:10px;box-sizing:border-box;
+		border:1px solid #e6e6e6;border-radius:4px;background:#fafafa;}
+	.adv-img-thumb{width:100%;height:130px;border:1px solid #e6e6e6;border-radius:4px;
+		overflow:hidden;background:#fff;cursor:zoom-in;}
+	.adv-img-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+	.adv-img-fields{margin-top:8px;}
+	.adv-img-fields .layui-input{margin-bottom:8px;}
+	.layui-form-checkbox[lay-skin="primary"]{top:0;}
+	/* 图片扩展内容：支持 HTML 代码，高度固定 50px */
+	.adv-img-desc{height:50px;min-height:50px;margin-bottom:8px;padding:6px 8px;
+		font-size:13px;line-height:1.5;resize:vertical;}
+	/* 「新窗口打开」和「删除」同一行：删除靠右 */
+	.adv-img-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+	/* 新窗口打开：交给 layui 的 form.render('checkbox') 渲染。
+	   flex 居中，并把 layui 的「.layui-form-item .layui-form-checkbox[lay-skin=primary]」
+	   那个 margin-top:10px 顶掉（所以要写够三层选择器才压得住），
+	   否则复选框会被往下推，跟右边的「删除」差出十几个像素 */
+	.adv-img-target{display:flex;align-items:center;margin-bottom:0;}
+	.adv-img-row .adv-img-target .layui-form-checkbox[lay-skin=primary]{margin:0;}
+	.adv-del{font-size:13px;color:#ff5722;cursor:pointer;white-space:nowrap;}
+	/* 拖拽手柄：只有按住这里才能拖动整个 adv-img-box */
+	.adv-img-ops{display:flex;align-items:center;justify-content:center;gap:4px;
+		margin-bottom:4px;padding-bottom:4px;border-bottom:1px dashed #e6e6e6;
+		font-size:13px;color:#999;cursor:move;user-select:none;-webkit-user-select:none;}
+	.adv-img-ops:hover{color:#1e9fff;}
+	.adv-img-ops .layui-icon-screen-full{transform: rotate(45deg);}
+	.adv-img-box.adv-img-dragging{opacity:.5;}
+	.adv-img-box.adv-img-drag-over{border:1px dashed #1e9fff;box-shadow:0 0 4px rgba(30,159,255,.4);}
+	/* 「选择图片」：和 adv-img-box 等宽；同一行时靠 flex 拉伸等高，单独占一行时由 JS 同步高度 */
+	.adv-img-add{flex:0 0 calc((100% - 24px) / 3);max-width:calc((100% - 24px) / 3);min-height:200px;
+		display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+		border:1px dashed #d9d9d9;border-radius:4px;background:#fff;color:#999;font-size:13px;
+		cursor:pointer;box-sizing:border-box;}
+	.adv-img-add:hover{border-color:#1e9fff;color:#1e9fff;}
+	.adv-img-add-icon{font-size:34px;line-height:1;}
+</style>
+<div class="layui-card">
+	<form class="layui-form conf-layout p-page" lay-filter="webform">
+	<h3 class="pb-3">广告</h3>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">标题<font>*</font></label>
+		<div class="layui-input-block">
+			<input type="text" name="title" lay-verify="required" lay-reqText="请输入标题" placeholder="请输入标题" autocomplete="off" class="layui-input" value="{$adv.title|default=''}">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">标识<font>*</font></label>
+		<div class="layui-input-block">
+			<input type="text" name="mark" lay-verify="required" lay-reqText="请输入标识" placeholder="模板里靠它调广告，如 INDEX_SLIDE" autocomplete="off" class="layui-input" value="{$adv.mark|default=''}">
+			<div class="layui-word-aux">只能字母、数字、下划线、短横线</div>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">广告类型<font>*</font></label>
+		<div class="layui-input-block">
+			<input type="radio" name="type" value="1" title="轮播图片" lay-filter="advType" {eq name="adv_type" value="1"}checked{/eq}>
+			<input type="radio" name="type" value="2" title="多媒体" lay-filter="advType" {eq name="adv_type" value="2"}checked{/eq}>
+			<input type="radio" name="type" value="3" title="HTML代码" lay-filter="advType" {eq name="adv_type" value="3"}checked{/eq}>
+		</div>
+	</div>
+
+	<!-- 轮播图片 -->
+	<div class="layui-form-item adv-type-block" data-type="1">
+		<label class="layui-form-label">轮播图</label>
+		<div class="layui-input-block">
+			<div id="advImages">
+				<div class="adv-img-add" id="advAddImage">
+					<span class="adv-img-add-icon">+</span>
+					<span>选择图片</span>
+				</div>
+			</div>
+			<div class="layui-word-aux layui-padding-1">点「选择图片」打开文件管理器，可一次选多张；按住图片下方的「按住拖动排序」可以调换顺序，顺序就是轮播顺序</div>
+		</div>
+	</div>
+
+	<!-- 多媒体 -->
+	<div class="layui-form-item adv-type-block" data-type="2">
+		<label class="layui-form-label">媒体地址</label>
+		<div class="layui-input-block">
+			<div class="layui-input-inline" style="width:420px;">
+				<input type="text" name="media_url" id="media_url" placeholder="媒体地址（视频/音频）" autocomplete="off" class="layui-input" value="{$adv_media_url|default=''}">
+			</div>
+			<button type="button" class="layui-btn layui-btn-primary" id="advPickMedia">选择文件</button>
+			<div class="layui-word-aux">前台调用 <code>{literal}{$vo.media_url}{/literal}</code> </div>
+		</div>
+	</div>
+
+	<!-- HTML代码 -->
+	<div class="layui-form-item adv-type-block" data-type="3">
+		<label class="layui-form-label">广告内容</label>
+		<div class="layui-input-block">
+			<textarea name="html_content" placeholder="直接粘贴 HTML 代码" class="layui-textarea" style="height:200px;">{$adv_html|default=''}</textarea>
+			<div class="layui-word-aux">前台调用 <code>{literal}{$vo.html|raw}{/literal}</code> </div>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">状态<font>*</font></label>
+		<div class="layui-input-block">
+			{if condition="$id eq 0"}
+			<input type="radio" name="status" value="1" title="正常" checked>
+			<input type="radio" name="status" value="-1" title="禁用">
+			{else/}
+			<input type="radio" name="status" value="1" title="正常" {eq name="$adv.status" value="1"}checked{/eq}>
+			<input type="radio" name="status" value="-1" title="禁用" {eq name="$adv.status" value="-1"}checked{/eq}>
+			{/if}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">备注信息</label>
+		<div class="layui-input-block">
+			<textarea name="desc" placeholder="请输入备注" class="layui-textarea">{$adv.desc|default=''}</textarea>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<div class="layui-input-block">
+			<input type="hidden" name="id" value="{$id}" />
+			<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+			<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+		</div>
+	</div>
+	</form>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	//现有轮播图片（编辑时回显用）
+	var ADV_IMAGES = {$adv_images_json|raw};
+</script>
+<script>
+	layui.use(['tool'], function () {
+		var form = layui.form, tool = layui.tool, layer = layui.miulayer, $ = layui.jquery;
+		var esc = layui.util.escape;
+
+		/* ============ 广告类型切换 ============ */
+		function showType(type) {
+			$('.adv-type-block').hide();
+			$('.adv-type-block[data-type="' + type + '"]').show();
+			syncAddHeight(); //刚显示出来才能量到真实高度
+		}
+		form.on('radio(advType)', function (data) {
+			showType(data.value);
+		});
+		showType($('input[name="type"]:checked').val() || 1);
+
+		/* ============ 轮播图片 ============ */
+		//一行图片的 HTML（新增和回显都用它，只有这一处）
+		function imgRowHtml(img) {
+			img = img || {};
+			var src    = img.img_src || '';
+			var title  = img.img_title || '';
+			var desc   = img.img_desc || '';
+			var url    = img.img_url || '';
+			var target = String(img.img_target || '0') === '1';
+			var i18n   = img.i18n || {};
+			return '<div class="adv-img-box">'
+					+ '<div class="adv-img-ops" draggable="true" title="按住拖动排序">'
+					+   '<i class="layui-icon layui-icon-screen-full"></i>按住拖动排序'
+					+ '</div>'
+					+ '<div class="adv-img-thumb"><img src="' + esc(src) + '" alt=""></div>'
+					+ '<div class="adv-img-fields">'
+					+   '<input type="hidden" name="img_src[]" value="' + esc(src) + '">'
+					+   '<input type="hidden" name="img_i18n[]" value="' + esc(JSON.stringify(i18n)) + '">'
+					+   '<input type="text" name="img_title[]" placeholder="图片标题" autocomplete="off" class="layui-input" value="' + esc(title) + '">'
+					+   '<textarea name="img_desc[]" placeholder="扩展内容（支持 HTML 代码）" class="layui-textarea adv-img-desc">' + esc(desc) + '</textarea>'
+					+   '<input type="text" name="img_url[]" placeholder="点击跳转链接" autocomplete="off" class="layui-input" value="' + esc(url) + '">'
+					+   '<div class="adv-img-row">'
+					+     '<div class="adv-img-target"><input type="checkbox" lay-skin="primary" lay-filter="advTarget" title="新窗口打开"' + (target ? ' checked' : '') + '>'
+					+       '<input type="hidden" name="img_target[]" value="' + (target ? '1' : '0') + '"></div>'
+					+     '<div><a href="javascript:;" class="adv-del">删除</a></div>'
+					+   '</div>'
+					+ '</div>'
+					+ '</div>';
+		}
+
+		//让「选择图片」格子和图片格子一样高：图片格子高度由内容决定，
+		//同一行时 flex 会自己拉伸对齐，单独占一行时只能靠这里同步
+		function syncAddHeight() {
+			var h = 0;
+			$('#advImages').find('.adv-img-box').each(function () {
+				h = Math.max(h, $(this).outerHeight());
+			});
+			$('#advImages').find('.adv-img-add').css('min-height', h > 0 ? h : 200);
+		}
+
+		//新行插到「选择图片」格子前面，保证它一直在最后
+		function appendRows(html) {
+			$('#advImages').find('.adv-img-add').before(html);
+			form.render('checkbox'); //动态加的行也要走 layui 渲染，复选框才好看
+			syncAddHeight();
+		}
+
+		function addImages(files) {
+			var html = '';
+			files.forEach(function (file) {
+				if (file.type === 'image' || !file.type) {
+					html += imgRowHtml({img_src: file.src});
+				}
+			});
+			appendRows(html);
+		}
+
+		//供文件管理器 iframe 双击调用（target=multi-img-advImages）：
+		//文件管理器按「multi-img-字段名」找到 addImageRow_字段名 这个函数来插入
+		window.addImageRow_advImages = function (src) {
+			addImages([{src: src, type: 'image'}]);
+		};
+		if (typeof window._insertMultiImages === 'undefined') {
+			window._insertMultiImages = function (fieldName, images) {
+				var addFn = window['addImageRow_' + fieldName];
+				if (typeof addFn !== 'function') return;
+				images.forEach(function (file) { addFn(file.src, file.name || ''); });
+			};
+		}
+
+		//回显已有图片
+		if (ADV_IMAGES && ADV_IMAGES.length) {
+			var rows = '';
+			ADV_IMAGES.forEach(function (img) { rows += imgRowHtml(img); });
+			appendRows(rows);
+		}
+		syncAddHeight();
+
+		//打开文件管理器多选图片
+		$('#advAddImage').on('click', function () {
+			var miuUrl = (typeof __MIU !== 'undefined' && __MIU.filesIndex) ? __MIU.filesIndex : "{:url('admin/files/index')}";
+			layer.open({
+				type: 2,
+				title: '图片管理器',
+				area: ['80%', '90%'],
+				content: miuUrl + '?target=multi-img-advImages&filter=image',
+				maxmin: true,
+				shadeClose: true,
+				btn: ['确定', '取消'],
+				btnAlign: 'c',
+				success: function (layero, index) {
+					var iframeWin = window[layero.find('iframe')[0]['name']];
+					if (iframeWin) iframeWin.THUMB_LAYER_INDEX = index;
+				},
+				yes: function (index, layero) {
+					var iframeWin = window[layero.find('iframe')[0]['name']];
+					var files = iframeWin.getMultiThumbSrc ? iframeWin.getMultiThumbSrc() : [];
+					if (!files.length) {
+						layer.msg('请至少选择一张图片');
+						return false;
+					}
+					addImages(files);
+					layer.close(index);
+				}
+			});
+		});
+
+		//删除（事件委托，动态加的行也能用）
+		$('#advImages').on('click', '.adv-del', function () {
+			$(this).closest('.adv-img-box').remove();
+			syncAddHeight();
+		});
+
+		/* ============ 拖动排序 ============
+		   只有按住 adv-img-ops 这根手柄才能拖（输入框、缩略图都不受影响），
+		   拖动的是它所在的整个 adv-img-box。顺序就是 DOM 顺序，提交时数组自然跟着变。 */
+		var dragSrc = null;
+		var $advWrap = $('#advImages');
+		$advWrap.on('dragstart', '.adv-img-ops', function (e) {
+			dragSrc = $(this).closest('.adv-img-box')[0];
+			if (!dragSrc) return;
+			$(dragSrc).addClass('adv-img-dragging');
+			var dt = e.originalEvent && e.originalEvent.dataTransfer;
+			if (!dt) return;
+			dt.effectAllowed = 'move';
+			try { dt.setData('text/plain', ''); } catch (err) {}
+			//拖影用整个盒子，而不是那根细细的手柄
+			try { dt.setDragImage(dragSrc, 20, 20); } catch (err) {}
+		});
+		$advWrap.on('dragenter', '.adv-img-box', function (e) {
+			if (dragSrc && this !== dragSrc) {
+				$(this).addClass('adv-img-drag-over');
+			}
+		});
+		$advWrap.on('dragleave', '.adv-img-box', function (e) {
+			var to = e.relatedTarget || e.toElement;
+			if (!to || !$(this).has(to).length) {
+				$(this).removeClass('adv-img-drag-over');
+			}
+		});
+		//dragover 必须 preventDefault，否则不会触发 drop
+		$advWrap.on('dragover', function (e) {
+			if (dragSrc) {
+				e.preventDefault();
+				if (e.originalEvent && e.originalEvent.dataTransfer) {
+					e.originalEvent.dataTransfer.dropEffect = 'move';
+				}
+			}
+		});
+		//落在某张图上：插到它前面
+		$advWrap.on('drop', '.adv-img-box', function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			if (dragSrc && this !== dragSrc) {
+				$(this).before(dragSrc);
+			}
+		});
+		//落在空白处或「选择图片」上：挪到最后
+		$advWrap.on('drop', function (e) {
+			e.preventDefault();
+			if (dragSrc && !$(e.target).closest('.adv-img-box').length) {
+				$advWrap.find('.adv-img-add').before(dragSrc);
+			}
+		});
+		$advWrap.on('dragend', function () {
+			$advWrap.find('.adv-img-dragging').removeClass('adv-img-dragging');
+			$advWrap.find('.adv-img-drag-over').removeClass('adv-img-drag-over');
+			dragSrc = null;
+		});
+
+		//新窗口打开：勾选后同步到隐藏域（复选框本身不带 name，提交靠隐藏域）
+		form.on('checkbox(advTarget)', function (obj) {
+			$(obj.elem).siblings('input[name="img_target[]"]').val(obj.elem.checked ? '1' : '0');
+		});
+		//点缩略图看大图：把当前所有图片都带上，左右可以切换
+		$('#advImages').on('click', '.adv-img-thumb img', function () {
+			var self = $(this).closest('.adv-img-box')[0];
+			var imgs = [];
+			var idx  = 0;
+			$('#advImages').find('.adv-img-box').each(function () {
+				var src = $(this).find('.adv-img-thumb img').attr('src');
+				if (!src) {
+					return; //没图的格子跳过，否则下标会跟 imgs 错位
+				}
+				if (this === self) {
+					idx = imgs.length; //先记下标再 push，这样 start 正好指向点的那张
+				}
+				imgs.push({src: src});
+			});
+			if (imgs.length) {
+				layer.photos({photos: {data: imgs, start: idx}, anim: 5});
+			}
+		});
+
+		/* ============ 多媒体：从文件管理器选一个文件 ============ */
+		$('#advPickMedia').on('click', function () {
+			var miuUrl = (typeof __MIU !== 'undefined' && __MIU.filesIndex) ? __MIU.filesIndex : "{:url('admin/files/index')}";
+			layer.open({
+				type: 2,
+				title: '文件管理器',
+				area: ['80%', '90%'],
+				content: miuUrl + '?target=media_url&filter=video',
+				maxmin: true,
+				shadeClose: true,
+				btn: ['确定', '取消'],
+				btnAlign: 'c',
+				success: function (layero, index) {
+					var iframeWin = window[layero.find('iframe')[0]['name']];
+					if (iframeWin) iframeWin.THUMB_LAYER_INDEX = index;
+				},
+				yes: function (index, layero) {
+					var iframeWin = window[layero.find('iframe')[0]['name']];
+					var value = iframeWin.getThumbSrc ? iframeWin.getThumbSrc() : '';
+					if (!value) {
+						layer.msg('只能选择一个文件');
+						return false;
+					}
+					$('#media_url').val(value);
+					layer.close(index);
+				}
+			});
+		});
+
+		/* ============ 提交 ============ */
+
+		form.on('submit(webform)', function (data) {
+			var loadIndex = layer.msg('正在提交...', { icon: 16, shade: 0.01,time:0 });
+			var callback = function (e) {
+				layer.close(loadIndex);
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.sideClose(1000);
+				}
+			}
+			tool.post("{:url('admin/adv/add')}", data.field, callback);
+			return false;
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

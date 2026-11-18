@@ -1,0 +1,105 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-3">
+	<form class="layui-form miucms-form-bar border-t border-x">
+		<div class="layui-input-inline" style="width:300px;">
+			<input type="text" name="keywords" placeholder="分组名称" class="layui-input" />
+		</div>
+		<div class="layui-input-inline" style="width:150px">
+			<button class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="table-search"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+			<button type="reset" class="layui-btn layui-btn-reset" lay-filter="table-reset">清空</button>
+		</div>
+	</form>
+	<table class="layui-hide" id="group" lay-filter="group"></table>
+</div>
+
+<script type="text/html" id="toolbarDemo">
+	<div class="layui-btn-container">
+	<button class="layui-btn layui-btn-sm layui-btn-color layui-btn-radius" lay-event="add">+ 添加分组</button>
+  </div>
+</script>
+<script type="text/html" id="barDemo">
+<div class="layui-btn-group">
+	<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">编辑</a>
+	<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['tool','tablePlus'],function(){
+		var table = layui.tablePlus, tool = layui.tool;
+		layui.pageTable = table.render({
+			elem: '#group',
+			title: '标签分组列表',
+			toolbar: '#toolbarDemo',
+			defaultToolbar:[],
+			url: "{:url('admin/keywords/group')}",
+			page: true, //开启分页
+			limit: 20,
+			cols: [
+				[{
+					field: 'id',
+					width: 80,
+					title: 'ID编号',
+					align: 'center'
+				}, {
+					field: 'title',
+					title: '分组名称'
+				}, {
+					field: 'keywords_count',
+					width: 100,
+					title: '标签数',
+					align: 'center'
+				}, {
+					field: 'sort',
+					width: 80,
+					title: '排序',
+					align: 'center'
+				}, {
+					width: 150,
+					title: '操作',
+					align: 'center',
+					toolbar: '#barDemo'
+				}]
+			]
+		});
+
+		//表头工具栏事件
+		table.on('toolbar(group)', function(obj){
+			if (obj.event === 'add') {
+				tool.side("{:url('admin/keywords/group_add')}", '80%');
+				return;
+			}
+		});
+		//监听行工具事件
+		table.on('tool(group)', function (obj) {
+			var data = obj.data;
+			if (obj.event === 'edit') {
+				tool.side("{:url('admin/keywords/group_add')}?id=" + data.id, '80%');
+				return;
+			}
+			if (obj.event === 'del') {
+				layer.confirm('确定要删除该分组吗?', {
+					icon: 3,
+					title: '提示'
+				}, function (index) {
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							obj.del();
+						}
+					}
+					tool.delete("{:url('admin/keywords/group_delete')}", { id: data.id }, callback);
+					layer.close(index);
+				});
+			}
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

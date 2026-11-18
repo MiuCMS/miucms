@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body>
+{include file="header" /}
+<main id="main">
+    <section class="page-intro"><div class="container">{miu:position /}<h1>{$nav.title}</h1><p>{$nav.seo_description|default=''}</p></div></section>
+    <section class="section container">
+        <nav class="category-links">{miu:nav id='vo' pid='$nav.top_navid'}<a href="{$vo.url}" class="{$vo.currentstyle}">{$vo.title}</a>{/miu:nav}</nav>
+        <!-- 栏目主列表不填 navid，跟随当前栏目并包含所有子孙栏目；这里使用 pagesize 分页。 -->
+        <div class="document-grid">{miu:list id='vo' pagesize='12' emptykey='empty'}{include file="card" /}{/miu:list}</div>
+        {miu:pagelist theme='light' /}
+    </section>
+</main>
+{include file="footer" /}
+</body>
+</html>

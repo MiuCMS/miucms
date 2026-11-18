@@ -1,0 +1,304 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-3">
+	<form class="layui-form miucms-form-bar border-t border-x">
+		<div class="layui-input-inline" style="width:300px;">
+			<input type="text" name="keywords" placeholder="关键字名称" class="layui-input" />
+		</div>
+		<div class="layui-input-inline" style="width:160px;">
+			<select name="group_id">
+				<option value="">全部分组</option>
+				<option value="0">未分组</option>
+				{volist name="groups" id="g"}
+				<option value="{$g.id}">{$g.title}</option>
+				{/volist}
+			</select>
+		</div>
+		<div class="layui-input-inline" style="width:150px">
+			<button class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="table-search"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+			<button type="reset" class="layui-btn layui-btn-reset" lay-filter="table-reset">清空</button>
+		</div>
+	</form>
+	<table class="layui-hide" id="keywords" lay-filter="keywords"></table>
+</div>
+
+<script>
+	//分组下拉数据（「批量移动」弹层里用）
+	window.KEYWORD_GROUPS = {:json_encode($groups)};
+</script>
+
+<script type="text/html" id="status">
+	<i class="layui-icon {{#  if(d.status == 1){ }}layui-icon-ok{{#  } else { }}layui-icon-close{{#  } }}"></i>
+</script>
+<script type="text/html" id="toolbarDemo">
+	<div class="layui-btn-container">
+	<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-color layui-btn-radius" lay-event="add">+ 添加关键字</button>
+	<button class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue layui-btn-color layui-btn-radius" lay-event="move">批量移动</button>
+	<button class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue layui-btn-color layui-btn-radius" lay-event="batchDel">批量删除</button>
+	{volist name="listToolbarActions" id="action"}
+	<button type="button" class="layui-btn {$action.class|default='layui-btn-primary'} layui-btn-sm layui-btn-color layui-btn-radius" data-admin-list-action="{$action.event}" data-list-type="{$listToolbarType}">{if condition="$action.icon neq ''"}<i class="layui-icon {$action.icon}" style="margin-right:4px;"></i>{/if}{$action.title}</button>
+	{/volist}
+	<button class="layui-btn layui-btn-sm layui-btn-primary table-btn-pull-right layui-btn-color layui-btn-radius" lay-event="types">+ 分组管理</button>
+  </div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['tool','tablePlus','dropdown'],function(){
+		var table = layui.tablePlus,tool = layui.tool, form = layui.form, dropdown = layui.dropdown;
+
+		//分组下拉的数据（「分组」列的下拉、批量移动弹层共用）：0 = 未分组
+		var GROUP_OPTIONS = [{title: '未分组', value: 0}];
+		(window.KEYWORD_GROUPS || []).forEach(function (g) {
+			GROUP_OPTIONS.push({title: g.title, value: g.id});
+		});
+		layui.pageTable = table.render({
+			elem: '#keywords',
+			title: '关键字列表',
+			toolbar: '#toolbarDemo',
+			defaultToolbar:true,
+			url: "{:url('admin/keywords/index')}",
+			page: true, //开启分页				
+			limit: 20,
+			cols: [
+				[{
+					type: 'checkbox',
+					fixed: 'left',
+					align: 'center'
+				}, {
+					field: 'id',
+					width: 80,
+					title: 'ID编号',
+					align: 'center'
+				}, {
+					field: 'sort',
+					width: 80,
+					title: '排序',
+					align: 'center',
+					edit: 'text',
+					sort: true
+				}, {
+					field: 'title',
+					title: '关键字名称'
+				}, {
+					field: 'doc_count',
+					width: 100,
+					title: '文档数',
+					align: 'center'
+				}, {
+					field: 'group_title',
+					width: 150,
+					title: '分组',
+					align: 'center',
+					//点这格的按钮弹下拉，直接改这一行的分组（和文档列表「审核」列一个做法）
+					//按钮用 btn-xs：表格默认行高 38px（内容区才 26px），btn-sm 是 30px 会被裁掉
+					templet: function (d) {
+						return '<button class="layui-btn layui-btn-primary layui-btn-xs dropdown-group" style="padding:0 8px;">'
+							+ '<span' + (d.group_title ? '' : ' style="color:#ccc;"') + '>'
+							+ (d.group_title ? layui.util.escape(d.group_title) : '未分组') + '</span>'
+							+ '<i class="layui-icon layui-icon-down layui-font-12" style="margin-left:2px;"></i></button>';
+					}
+				}, {
+					field: 'status',
+					width: 80,
+					title: '状态',
+					align: 'center',
+					sort:true,
+					//照文档列表「头条」那种做法：格子里的复选框直接改状态（1正常 / 0禁用）
+					templet: function (d) {
+						return '<input type="checkbox" name="status" value="' + d.id + '" lay-filter="fieldEdit"' + (Number(d.status) === 1 ? ' checked' : '') + '>';
+					}
+				}, {
+					width: {$keywordsActionWidth},
+					title: '操作',
+					align: 'center',
+					ignoreExport:true,
+					templet: function (d) {
+						//lay-unrow：点这两个按钮时不要连带触发行单击选中
+						var html = '<div class="layui-btn-group"><button class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit" lay-unrow>编辑</button><button class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del" lay-unrow>删除</button>';
+						{volist name="tagListActions" id="action"}
+						html += '<button class="layui-btn {$action.class} layui-btn-xs" lay-event="{$action.event}" lay-unrow>{$action.title}</button>';
+						{/volist}
+							html += '</div>';
+						return html;
+					}
+				}]
+			],
+			done: function () {
+				//「分组」列：点单元格弹下拉，选完直接改这一行的分组
+				dropdown.render({
+					elem: '.dropdown-group',
+					data: GROUP_OPTIONS,
+					click: function (obj) {
+						var dataIndex = $(this.elem).closest('tr[data-index]').data('index');
+						var row = layui.table.getData('keywords')[dataIndex];
+						if (!row) {
+							return;
+						}
+						//先把格子上的字换掉；万一后端拦下来，下面的 reloadData 会把真实值拉回来
+						this.elem.find('span').html(layui.util.escape(obj.title)).css('color', obj.value > 0 ? '' : '#ccc');
+						tool.post("{:url('admin/keywords/edit_field')}", { field: 'group_id', value: obj.value, id: row.id }, function (e) {
+							layer.msg(e.msg, {icon: e.code == 0 ? 1 : 2});
+							layui.pageTable.reloadData();
+						});
+					}
+				});
+			}
+		});
+
+		//监听搜索提交
+		form.on('submit(webform)', function (data) {
+			layui.pageTable.reload({
+				where: data.field,
+				page: {curr: 1}
+			});
+			return false;
+		});
+
+		//「清空」按钮：原生 reset 改不了 layui 渲染出来的下拉，这里补一次渲染，
+		//不然分组下拉还显示着上次选的分组，列表却已经重置了
+		$('body').on('click', '[lay-filter="table-reset"]', function () {
+			setTimeout(function () { form.render('select'); }, 20);
+		});
+
+		//行单击：选中 / 取消选中这一行（配合复选框列，方便批量操作）
+		table.on('row(keywords)', function (obj) {
+			obj.setRowChecked({type: 'checkbox'});
+		});
+
+		//表头工具栏事件
+		table.on('toolbar(keywords)', function(obj){
+			if (obj.event === 'add') {
+				tool.side("{:url('admin/keywords/add')}", '80%');
+				return;
+			}
+			//分组管理：弹一个分组列表出来，里面能增删改分组
+			if (obj.event === 'types') {
+				tool.side("{:url('admin/keywords/group')}", '80%');
+				return;
+			}
+			//批量移动：选一个分组，把勾选的标签都挪过去
+			if (obj.event === 'move') {
+				var rows = table.checkStatus('keywords').data;
+				if (rows.length === 0) {
+					return layer.msg('请先选择要移动的标签');
+				}
+				var body = '<div style="color:#666;margin-bottom:10px;">把选中的 ' + rows.length + ' 个标签移动到：</div>'
+					+ '<select id="moveGroupId" class="layui-input">';
+				GROUP_OPTIONS.forEach(function (o) {
+					body += '<option value="' + o.value + '">' + layui.util.escape(o.title) + '</option>';
+				});
+				body += '</select>';
+
+				layer.open({
+					type: 1,
+					title: '批量移动',
+					//高度自适应：内容撑高弹窗，超过 maxHeight 由 layer 截断、内容那层出滚动条
+					area: ['420px', 'auto'],
+					maxHeight: Math.min(520, Math.round($(window).height() * 0.8)),
+					shadeClose: true,
+					btn: ['确定', '取消'],
+					btnAlign: 'c',
+					//这里**不能**套 .layui-form：layui 的 `.layui-form select{display:none}`，
+					//要 form.render('select') 才显示 —— 弹层创建那一刻下拉是隐藏的，高度就被算短了。
+					//用原生下拉：浏览器自己画，也不会被 .layui-layer-content 的 overflow 截断
+					content: '<div style="padding:20px 24px;max-height:420px;overflow-y:auto;box-sizing:border-box;">' + body + '</div>',
+					yes: function (index) {
+						var ids = rows.map(function (r) { return r.id; }).join(',');
+						tool.post("{:url('admin/keywords/move')}", { ids: ids, group_id: $('#moveGroupId').val() }, function (e) {
+							layer.msg(e.msg, {icon: e.code == 0 ? 1 : 2});
+							if (e.code == 0) {
+								layer.close(index);
+								layui.pageTable.reloadData();
+							}
+						});
+					}
+				});
+				return;
+			}
+			//批量删除：标签下面还有文章的话，后端会拦下来并说明是哪几个标签
+			if (obj.event === 'batchDel') {
+				var rows = table.checkStatus('keywords').data;
+				if (rows.length === 0) {
+					return layer.msg('请先选择要删除的标签');
+				}
+				layer.confirm('确定删除所选的 ' + rows.length + ' 个标签吗?', {
+					icon: 3,
+					title: '提示'
+				}, function (index) {
+					var ids = rows.map(function (r) { return r.id; }).join(',');
+					tool.delete("{:url('admin/keywords/delete')}", { ids: ids }, function (e) {
+						layer.msg(e.msg, {icon: e.code == 0 ? 1 : 2});
+						if (e.code == 0) {
+							layui.pageTable.reloadData();
+						}
+					});
+					layer.close(index);
+				});
+				return;
+			}
+		});
+		//监听行工具事件
+		table.on('tool(keywords)', function (obj) {
+			var data = obj.data;
+			if (obj.event === 'edit') {
+				tool.side("{:url('admin/keywords/add')}?id="+obj.data.id, '80%');
+				return;
+			}
+			if (obj.event === 'del') {
+				layer.confirm('确定要删除吗?', {
+					icon: 3,
+					title: '提示'
+				}, function (index) {
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							obj.del();
+						}
+					}
+					tool.delete("{:url('admin/keywords/delete')}", { id: data.id }, callback);
+					layer.close(index);
+				});
+			}
+		});
+
+		//单元格编辑（「排序」这种点一下直接输的）
+		table.on('edit(keywords)', function (obj) {
+			if (String(obj.value).replace(/\s/g, '') === '') {
+				layer.tips('值不能为空', this, {tips: 1});
+				return obj.reedit(); // 重新编辑
+			}
+			tool.post("{:url('admin/keywords/edit_field')}", { field: obj.field, value: obj.value, id: obj.data.id }, function (e) {
+				layer.msg(e.msg, {icon: e.code == 0 ? 1 : 2});
+			});
+		});
+
+		//「状态」列的复选框
+		form.on('checkbox(fieldEdit)', function (obj) {
+			tool.post("{:url('admin/keywords/edit_field')}", {
+				field: this.name,
+				value: obj.elem.checked ? 1 : 0,
+				id: this.value
+			}, function (e) {
+				layer.msg(e.msg, {icon: e.code == 0 ? 1 : 2});
+				if (e.code != 0) {
+					layui.pageTable.reloadData(); // 没改成，把状态还原
+				}
+			});
+		});
+
+		//表头点击排序（「排序」「状态」列）：把字段和方向带给后端，排序后回到第1页
+		table.on('sort(keywords)', function (obj) {
+			layui.pageTable.reload({
+				where: {field: obj.field, order: obj.type},
+				page: {curr: 1}
+			});
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

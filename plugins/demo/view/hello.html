@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{$config.site_name|default='演示插件前台页面'}</title>
+	<style>
+		* { box-sizing: border-box; }
+		body { margin: 0; padding: 32px 16px; background: #f5f7fb; color: #243044; font-family: -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif; line-height: 1.8; }
+		.demo-page { max-width: 900px; margin: 0 auto; }
+		.demo-card { margin-bottom: 16px; padding: 24px; background: #fff; border: 1px solid #e8edf5; border-radius: 12px; box-shadow: 0 5px 20px rgba(31, 54, 88, .04); }
+		h1 { margin: 0 0 8px; font-size: 26px; }
+		h2 { margin: 0 0 12px; font-size: 18px; }
+		.demo-muted { color: #778399; font-size: 13px; }
+		.demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+		.demo-item { padding: 12px; background: #f7f9fc; border-radius: 8px; overflow-wrap: anywhere; }
+		code { padding: 2px 5px; background: #eef2f8; border-radius: 4px; overflow-wrap: anywhere; }
+		.demo-footer-note { padding-top: 12px; border-top: 1px solid #edf0f5; }
+		@media (max-width: 600px) { body { padding: 16px 10px; } .demo-card { padding: 18px; } h1 { font-size: 22px; } }
+	</style>
+</head>
+<body>
+<main class="demo-page">
+	<section class="demo-card">
+		<div class="demo-muted">Miucms 插件开发示例 · 前台路由 / 控制器 / 模板 / 配置 / 标签</div>
+		<h1>{$config.site_name|default='我的演示站点'}</h1>
+		<p>{$config.welcome_msg|default='欢迎访问插件前台演示页。'}</p>
+		<div class="demo-grid">
+			<div class="demo-item"><strong>URL 参数</strong><br><code>name</code> = {$name|default='（未传）'}</div>
+			<div class="demo-item"><strong>欢迎语风格</strong><br>{$greetingStyle|default='友好亲切'}</div>
+			<div class="demo-item"><strong>自定义配置</strong><br>{$config.example_text|default='这是一个插件配置示例'}</div>
+		</div>
+	</section>
+
+	<section class="demo-card">
+		<h2>模板标签示例</h2>
+		<p>下面的文字由插件标签 <code>{demo:hello name='访客' /}</code> 生成：</p>
+		<p><strong>{demo:hello name='访客' /}</strong></p>
+		<p class="demo-muted">标签类：<code>plugins/demo/taglib/Demo.php</code>。安装并启用插件后，插件标签库会自动加载。</p>
+	</section>
+
+	<section class="demo-card">
+		<h2>从页面反查代码</h2>
+		<ul>
+			<li>路由定义：<code>plugins/demo/route.php</code></li>
+			<li>前台控制器：<code>plugins/demo/controller/Index.php</code></li>
+			<li>当前模板：<code>plugins/demo/view/hello.html</code></li>
+			<li>配置定义：<code>plugins/demo/Plugin.php::getConfigFields()</code></li>
+			<li>页脚注入：<code>Plugin.php::templateParse()</code>，默认关闭。</li>
+			<li>文档记录：<code>Plugin.php::documentAdded()</code> 写入本插件的 <code>demo_record</code> 表。</li>
+		</ul>
+		<p class="demo-muted">插件配置中的 API Key 仅演示密码字段，本页面不会读取或显示它。</p>
+	</section>
+
+	<section class="demo-card demo-footer-note demo-muted">
+		本页面由演示插件提供。可在网址末尾添加 <code>?name=你的名字</code>，观察控制器接收参数后传给模板。
+	</section>
+</main>
+</body>
+</html>

@@ -1,0 +1,924 @@
+{if condition="isset($customfields) && count($customfields)>0"}
+{volist name="customfields" id="v"}
+
+{if condition="$v.type eq 'text'"}
+    <div class="layui-col-md12" style="height:0;padding: 0;"></div>
+    <div class="layui-col-md6">
+      <div class="layui-form-item">
+        <label class="layui-form-label">{$v.title}</label>
+        <div class="layui-input-block">
+          <div class="layui-input-group" style="width:300px">
+            <input type="text" name="{$v.name}" value="{$info[$v['name']]|default=''}" maxlength="{$v.maxlength|default=250}" lay-affix="clear" placeholder="" class="layui-input" >
+              <div class="layui-form-mid layui-text-em" style="display:inline-block;">&emsp;{$v.unit|default=''}</div>
+            {tips tips="$v.tips" /}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="layui-col-md12" style="height:0;padding: 0;"></div>
+{/if}
+
+{if condition="$v.type eq 'multitext'"}
+    <div class="layui-col-md12" style="height:0;padding: 0;"></div>
+    <div class="layui-col-md6">
+      <div class="layui-form-item">
+        <label class="layui-form-label">{$v.title}</label>
+        <div class="layui-input-block">
+          <div class="layui-input-group" style="width:100%">
+            <textarea type="text" name="{$v.name}" lay-affix="clear" maxlength="{$v.maxlength|default=250}" style="resize:none;" class="layui-input layui-textarea" >{$info[$v['name']]|default=''}</textarea>
+            {tips tips="$v.tips" /}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="layui-col-md12" style="height:0;padding: 0;"></div>
+{/if}
+
+{if condition="$v.type eq 'htmltext'"}
+    <div class="layui-col-md12" style="height:0;padding: 0;"></div>
+    <div class="layui-col-md12">
+        <label class="layui-form-label">{$v.title} </label>
+        <span style="color:red">
+            {tips tips="$v.tips" /}
+        </span>
+    </div>
+    <div class="layui-col-md12" style="height:0;padding: 0;"></div>
+    <div class="layui-col-md12">
+        <div class="layui-form-item" style="margin:0 100px;">
+            <div id="editor-container_{$v.name}" style="height:500px;"></div>
+            <textarea id="content_{$v.name}" name="{$v.name}" style="display:none;">{$info[$v['name']]|default=''}</textarea>
+        </div>
+    </div>
+    <div class="layui-col-md12" style="height:0;padding: 0;"></div>
+        <script>
+        (function(){
+            var fieldName = '{$v.name}';
+            var fieldValueId = 'content_' + fieldName;
+            window.__MIU_CUSTOM_FIELD_EDITORS = window.__MIU_CUSTOM_FIELD_EDITORS || {};
+            if (typeof window.syncCustomFieldEditors !== 'function') {
+                window.syncCustomFieldEditors = function(dataField){
+                    Object.keys(window.__MIU_CUSTOM_FIELD_EDITORS).forEach(function(name){
+                        var item = window.__MIU_CUSTOM_FIELD_EDITORS[name];
+                        if (!item || !item.editor) return;
+                        if (item.type === 'tinymce') {
+                            dataField[name] = item.editor.getContent();
+                        }
+                    });
+                };
+            }
+
+            layui.use(['tinymce'], function(){
+                layui.tinymce.render({
+                    selector: '#editor-container_' + fieldName,
+                    height: 500,
+                    toolbar: 'code undo redo | forecolor backcolor bold italic underline strikethrough removeformat | alignleft aligncenter alignright alignjustify outdent indent | bullist numlist table blockquote myimage myvideo codesample | formatselect fontselect fontsizeselect',
+                    setup: function(inst){
+                        inst.ui.registry.addButton('myimage', {icon: 'image', tooltip: '插入图片', onAction: function(){ openFileManagerForTinymce(inst, 'image'); }});
+                        inst.ui.registry.addButton('myvideo', {icon: 'embed', tooltip: '插入视频', onAction: function(){ openFileManagerForTinymce(inst, 'video'); }});
+                    },
+                    init_instance_callback: function(inst){
+                        window.__MIU_CUSTOM_FIELD_EDITORS[fieldName] = {type: 'tinymce', editor: inst};
+                        var val = document.getElementById(fieldValueId).value || '';
+                        if(val) inst.setContent(val);
+                    }
+                });
+            });
+        })();
+    </script>
+{/if}
+
+{if condition="$v.type eq 'radio'"}
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<div class="layui-col-md6">
+    <div class="layui-form-item">
+        <label class="layui-form-label">{$v.title}</label>
+        <div class="layui-input-block">
+            <div class="layui-input-group" style="width:100%">
+                {foreach :get_channel_field_column_array($v['id']) as $key=>$val}
+                <input type="radio" name="{$v.name}" value="{$val}" title="{$val}" {if condition="isset($info) && $info[$v['name']] eq $val "}checked{/if} {if condition="!isset($info) && $key eq 0 "}checked{/if} >
+                {/foreach}
+                {tips tips="$v.tips" /}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+{/if}
+
+{if condition="$v.type eq 'checkbox'"}
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<div class="layui-col-md6">
+    <div class="layui-form-item">
+        <label class="layui-form-label">{$v.title}</label>
+        <div class="layui-input-block">
+            <div class="layui-input-group" style="width:100%">
+                {if condition="isset($info)"}
+                {php}$doc_array=[];$doc_array=explode('|',$info[$v['name']]);{/php}
+                {foreach :get_channel_field_column_array($v['id']) as $val}
+                <input type="checkbox" name="{$v.name}[]" title="{$val}" value="{$val}" {if condition="in_array($val,$doc_array)"}checked{/if}>
+                {/foreach}
+                {else/}
+                {foreach :get_channel_field_column_array($v['id']) as $val}
+                <input type="checkbox" name="{$v.name}[]" title="{$val}" value="{$val}">
+                {/foreach}
+                {/if}
+                {tips tips="$v.tips" /}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+{/if}
+
+{if condition="$v.type eq 'select'"}
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<div class="layui-col-md6">
+    <div class="layui-form-item">
+        <label class="layui-form-label">{$v.title}</label>
+        <div class="layui-input-block">
+            <div class="layui-input-group" style="width:300px">
+                <select name="{$v.name}">
+                    <option value="">请选择{$v.title}</option>
+                    {foreach :get_channel_field_column_array($v['id']) as $val}
+                    <option value="{$val}" {if condition="isset($info) && $info[$v['name']] eq $val "}selected{/if}>{$val}</option>
+                    {/foreach}
+                </select>
+                {tips tips="$v.tips" /}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+{/if}
+
+{if condition="$v.type eq 'switch'"}
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<div class="layui-col-md6">
+    <div class="layui-form-item">
+        <label class="layui-form-label">{$v.title}</label>
+        <div class="layui-input-block">
+            <div class="layui-input-group" style="width:100%">
+                <input type="hidden" name="{$v.name}" value="0">
+                <input type="checkbox" name="{$v.name}" lay-skin="switch" value="1" lay-filter="switchTest" title="开|关" {if condition="isset($info) && $info[$v['name']] eq 1 "}checked{/if}>
+                {tips tips="$v.tips" /}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+{/if}
+
+{if condition="$v.type eq 'datetime'"}
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<div class="layui-col-md6">
+    <div class="layui-form-item">
+        <label class="layui-form-label">{$v.title}</label>
+        <div class="layui-input-block">
+            <div class="layui-input-group" style="width:300px">
+                <input type="text" class="layui-input layui-input-inline" name="{$v.name}" id="custom_{$v.name}" value="{$info[$v['name']]|default=''}" placeholder="yyyy-MM-dd HH:mm:ss">
+                {tips tips="$v.tips" /}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<script>
+    layui.use(['laydate'], function(){
+        layui.laydate.render({
+            elem: '#custom_{$v.name}',
+            type: 'date',
+            fullPanel: true
+        });
+    });
+</script>
+{/if}
+
+{if condition="$v.type eq 'img'"}
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<div class="layui-col-md6">
+    <div class="layui-form-item">
+        <label class="layui-form-label">{$v.title}</label>
+        <div class="layui-input-block">
+            <div class="layui-inline marginr-0">
+                <span style="display:inline-flex;align-items:center;">
+                    <i class="layui-icon layui-icon-picture" style="margin-right:5px;cursor:pointer;" id="{$v.name}-preview-icon"></i>
+                    <input type="text" id="input_{$v.name}" name="{$v.name}" value="{$info[$v['name']]|default=''}" autocomplete="off" lay-affix="clear" class="layui-input" style="width:370px;" placeholder="点击上传或输入图片地址">
+                </span>
+            </div>
+            <div class="layui-inline">
+                <button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue uploadBtn" data-bind="input_{$v.name}" filter="image">选择上传</button>
+            </div>
+            {tips tips="$v.tips" /}
+        </div>
+    </div>
+</div>
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<script>
+    initThumbPreview("input_{$v.name}","{$v.name}-preview-icon");
+</script>
+{/if}
+
+{if condition="$v.type eq 'imgs'"}
+<style>
+.multi-img-box-{$v.name} { flex: 0 0 auto; width: 108px; position: relative; border: 1px solid #e6e6e6; border-radius: 2px; overflow: hidden; cursor: move; }
+.multi-img-box-{$v.name}:hover { cursor: move; }
+.multi-img-box-{$v.name} .img-wrap { width: 108px; height: 108px; position: relative; overflow: hidden; }
+.multi-img-box-{$v.name} .img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s ease;transform: scale(1);}
+.multi-img-box-{$v.name} .img-wrap img:hover { transform: scale(1.1); }
+.multi-img-box-{$v.name} .img-name-input { width: 100%; height: 28px; line-height: 28px; border: none; border-top: 1px solid #e6e6e6; padding: 0 6px; font-size: 12px; color: #333; background: #fafafa; box-sizing: border-box; outline: none; }
+.multi-img-box-{$v.name} .img-name-input:focus { background: #fff; }
+.multi-img-del-{$v.name} { position: absolute; top: 0; right: 0; width: 20px; height: 20px; line-height: 20px; text-align: center; background: rgba(0,0,0,0.5); color: #fff; cursor: pointer; font-size: 14px; border-radius: 0 0 0 2px; z-index: 2; }
+.multi-img-add-{$v.name} { width: 108px; height: 108px; border: 1px dashed #d9d9d9; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 2px; flex-shrink: 0; }
+.multi-img-add-{$v.name}:hover { border-color: #1e9fff; }
+/* 拖动中的图片：半透明 + 红色虚线框。框住的就是它当前的位置
+   （dragover 时它已经实时挪到落点，其他图片被挤开）。
+   只改边框样式不改宽度，所以框的宽高跟图片框完全一致，也不会让图片抖动 */
+.multi-img-box-{$v.name}.multi-img-dragging-{$v.name} { opacity: 0.5; border: 1px dashed #f56c6c; box-shadow: 0 0 4px rgba(245,108,108,.4); }
+</style>
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<div class="layui-col-md12">
+    <div class="layui-form-item">
+        <label class="layui-form-label">{$v.title}</label>
+        <div class="layui-input-block">
+            <div class="layui-input-group" style="width:100%">
+                <div class="multi-img-wrap-{$v.name}" id="multi-img-wrap-{$v.name}" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;">
+                    {notempty name="$info[$v['name']]"}
+                        {php}
+                        $imgArr = [];
+                        $rawVal = $info[$v['name']];
+                        $decoded = json_decode($rawVal, true);
+                        if(is_array($decoded)){
+                            $imgArr = $decoded;
+                        } else {
+                            $imgArr = array_map(function($url){ return ['src' => $url, 'name' => '']; }, array_filter(explode('|', $rawVal)));
+                        }
+                        {/php}
+                        {volist name="imgArr" id="imgItem"}
+                        {notempty name="$imgItem.src"}
+                        <div class="multi-img-box-{$v.name}" data-src="{$imgItem.src}" data-name="{$imgItem.name}" draggable="true">
+                            <div class="img-wrap">
+                                <img src="{$imgItem.src}" alt="" onclick="previewMultiImage_{$v.name}(this)">
+                                <i class="layui-icon layui-icon-close multi-img-del-{$v.name}" onclick="removeMultiImage_{$v.name}(this)"></i>
+                            </div>
+                            <input type="text" class="img-name-input" value="{$imgItem.name}" placeholder="图片名称" oninput="updateMultiImageValue_{$v.name}()">
+                        </div>
+                        {/notempty}
+                        {/volist}
+                    {/notempty}
+                    <div class="multi-img-add-{$v.name}" onclick="openMultiImageManager_{$v.name}()">
+                        <i class="layui-icon layui-icon-addition" style="font-size:24px;color:#999;"></i>
+                    </div>
+                </div>
+                <input type="hidden" name="{$v.name}" id="input_{$v.name}" value="{$info[$v['name']]|default=''}">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<script>
+    (function(){
+        var input = document.getElementById('input_{$v.name}');
+        if(input && input.value.trim() === '[]'){
+            input.value = '';
+        }
+    })();
+
+    function addImageRow_{$v.name}(src, name){
+        name = name || '';
+        var $wrap = $('#multi-img-wrap-{$v.name}');
+        var $box = $('<div class="multi-img-box-{$v.name}" data-src="'+ src +'" data-name="'+ name +'" draggable="true">'+
+            '<div class="img-wrap">'+
+                '<img src="'+ src +'" alt="" onclick="previewMultiImage_{$v.name}(this)">'+
+                '<i class="layui-icon layui-icon-close multi-img-del-{$v.name}" onclick="removeMultiImage_{$v.name}(this)"></i>'+
+            '</div>'+
+            '<input type="text" class="img-name-input" value="'+ name +'" placeholder="图片名称" oninput="updateMultiImageValue_{$v.name}()">'+
+        '</div>');
+        $wrap.find('.multi-img-add-{$v.name}').before($box);
+    }
+
+    function openMultiImageManager_{$v.name}(){
+        var miuUrl = (typeof __MIU !== 'undefined' && __MIU.filesIndex) ? __MIU.filesIndex : "{:url('admin/files/index')}";
+        layer.open({
+            type: 2,
+            title: '图片管理器',
+            area: ['70%', '80%'],
+            content: miuUrl + '?target=multi-img-{$v.name}&filter=image',
+            maxmin: true,
+            shadeClose: true,
+            btn: ['确定', '取消'],
+            btnAlign: 'c',
+            success: function(layero, index){
+                var iframeWin = window[layero.find('iframe')[0]['name']];
+                if(iframeWin) iframeWin.THUMB_LAYER_INDEX = index;
+            },
+            yes: function(index, layero){
+                var iframeWin = window[layero.find('iframe')[0]['name']];
+                var files = iframeWin.getMultiThumbSrc ? iframeWin.getMultiThumbSrc() : [];
+                if(!files.length){
+                    layer.msg('请至少选择一张图片');
+                    return false;
+                }
+                files.forEach(function(file){
+                    if(file.type === 'image' || !file.type){
+                        addImageRow_{$v.name}(file.src, file.name || '');
+                    }
+                });
+                updateMultiImageValue_{$v.name}();
+                layer.close(index);
+            }
+        });
+    }
+    function removeMultiImage_{$v.name}(el){
+        $(el).closest('.multi-img-box-{$v.name}').remove();
+        updateMultiImageValue_{$v.name}();
+    }
+    function updateMultiImageValue_{$v.name}(){
+        var arr = [];
+        $('#multi-img-wrap-{$v.name}').find('.multi-img-box-{$v.name}').each(function(){
+            var $t = $(this);
+            arr.push({'src': $t.data('src'), 'name': $t.find('.img-name-input').val()});
+        });
+        $('#input_{$v.name}').val(arr.length ? JSON.stringify(arr) : '');
+    }
+    function previewMultiImage_{$v.name}(el){
+        var imgs = [];
+        var idx = 0;
+        $('#multi-img-wrap-{$v.name}').find('.multi-img-box-{$v.name}').each(function(i){
+            imgs.push({src: $(this).find('img').attr('src')});
+            if(this === $(el).closest('.multi-img-box-{$v.name}')[0]){
+                idx = i;
+            }
+        });
+        layer.photos({
+            photos: {
+                data: imgs,
+                start: idx
+            },
+            anim: 5
+        });
+    }
+
+    // 拖拽排序
+    (function(){
+        var $wrap = $('#multi-img-wrap-{$v.name}');
+        var dragSrc = null;
+
+        // 把浏览器自带的拖影藏掉：图片已经在实时跟手了，拖影是重复的。
+        // 用 1×1 的透明 canvas 当拖影，不用图片是为了省掉「等图片加载完」这一步
+        var blankDragImg = document.createElement('canvas');
+        blankDragImg.width = blankDragImg.height = 1;
+
+        $wrap.on('dragstart', '.multi-img-box-{$v.name}', function(e){
+            if($(e.target).closest('.multi-img-del-{$v.name}, .img-name-input').length){
+                e.preventDefault();
+                return;
+            }
+            dragSrc = this;
+            $(this).addClass('multi-img-dragging-{$v.name}');
+            e.originalEvent.dataTransfer.effectAllowed = 'move';
+            try{
+                e.originalEvent.dataTransfer.setData('text/plain', '');
+                e.originalEvent.dataTransfer.setDragImage(blankDragImg, 0, 0);
+            }catch(err){}
+        });
+        // 经过某张图：把被拖图片实时挪到落点，其他图片自然被挤开
+        $wrap.on('dragover', '.multi-img-box-{$v.name}', function(e){
+            if(!dragSrc || this === dragSrc) return;
+            e.preventDefault();
+            e.originalEvent.dataTransfer.dropEffect = 'move';
+            // 鼠标在目标图片的左半边 → 插到它前面；右半边 → 插到它后面
+            var rect = this.getBoundingClientRect();
+            if((e.originalEvent.clientX - rect.left) > rect.width / 2){
+                $(this).after(dragSrc);
+            } else {
+                $(this).before(dragSrc);
+            }
+        });
+        $wrap.on('dragover', function(e){
+            if(dragSrc){
+                e.preventDefault();
+                e.originalEvent.dataTransfer.dropEffect = 'move';
+            }
+        });
+        // 被拖图片在 dragover 时就已经挪到位了，这里只收尾
+        $wrap.on('drop', function(e){
+            e.preventDefault();
+            if(dragSrc){
+                updateMultiImageValue_{$v.name}();
+            }
+        });
+        $wrap.on('dragend', function(){
+            $wrap.find('.multi-img-dragging-{$v.name}').removeClass('multi-img-dragging-{$v.name}');
+            dragSrc = null;
+            updateMultiImageValue_{$v.name}();
+        });
+    })();
+
+    // 供文件管理器 iframe 双击调用（全局唯一）
+    if(typeof window._insertMultiImages === 'undefined'){
+        window._insertMultiImages = function(fieldName, images){
+            var addFn = window['addImageRow_' + fieldName];
+            if(typeof addFn !== 'function') return;
+            images.forEach(function(file){
+                addFn(file.src, file.name || '');
+            });
+            var update = window['updateMultiImageValue_' + fieldName];
+            if(typeof update === 'function') update();
+        };
+    }
+</script>
+{/if}
+
+{if condition="$v.type eq 'decimal'"}
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<div class="layui-col-md6">
+    <div class="layui-form-item">
+        <label class="layui-form-label">{$v.title}</label>
+        <div class="layui-input-block">
+            <div class="layui-input-group" style="width:300px">
+                <input type="number" class="layui-input layui-input-inline" name="{$v.name}" id="" value="{$info[$v['name']]|default='0.00'}" placeholder="￥">
+                <div class="layui-form-mid layui-text-em" style="display:inline-block;">&emsp;{$v.unit|default=''}</div>
+                {tips tips="$v.tips" /}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+{/if}
+
+{if condition="$v.type eq 'float'"}
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<div class="layui-col-md6">
+    <div class="layui-form-item">
+        <label class="layui-form-label">{$v.title}</label>
+        <div class="layui-input-block">
+            <div class="layui-input-group" style="width:300px">
+                <input type="number" class="layui-input layui-input-inline" name="{$v.name}" id="" value="{$info[$v['name']]|default='0.00'}" placeholder="">
+                <div class="layui-form-mid layui-text-em" style="display:inline-block;">&emsp;{$v.unit|default=''}</div>
+                {tips tips="$v.tips" /}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+{/if}
+
+{if condition="$v.type eq 'int'"}
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<div class="layui-col-md6">
+    <div class="layui-form-item">
+        <label class="layui-form-label">{$v.title}</label>
+        <div class="layui-input-block">
+            <div class="layui-input-group" style="width:300px">
+                <input type="number" class="layui-input layui-input-inline" name="{$v.name}" id="" value="{$info[$v['name']]|default=''}" onkeyup="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="请输入整数">
+                <div class="layui-form-mid layui-text-em" style="display:inline-block;">&emsp;{$v.unit|default=''}</div>
+                {tips tips="$v.tips" /}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+{/if}
+
+{if condition="$v.type eq 'file'"}
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<div class="layui-col-md6">
+    <div class="layui-form-item">
+        <label class="layui-form-label">{$v.title}</label>
+        <div class="layui-input-block">
+            <div class="layui-inline marginr-0">
+                <span style="display:inline-flex;align-items:center;">
+                    <input type="text" id="input_{$v.name}" name="{$v.name}" value="{$info[$v['name']]|default=''}" autocomplete="off" lay-affix="clear" class="layui-input" style="width:370px;" placeholder="点击上传或输入附件地址">
+                </span>
+            </div>
+            <div class="layui-inline">
+                <button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue uploadBtn" data-bind="input_{$v.name}" data-filter="all">选择上传</button>
+            </div>
+            {tips tips="$v.tips" /}
+        </div>
+    </div>
+</div>
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+{/if}
+
+
+{if condition="$v.type eq 'media'"}
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<div class="layui-col-md6">
+    <div class="layui-form-item">
+        <label class="layui-form-label">{$v.title}</label>
+        <div class="layui-input-block">
+            <div class="layui-inline marginr-0">
+                <span style="display:inline-flex;align-items:center;">
+                    <input type="text" id="input_{$v.name}" name="{$v.name}" value="{$info[$v['name']]|default=''}" autocomplete="off" lay-affix="clear" class="layui-input" style="width:370px;" placeholder="点击上传或输入附件地址">
+                </span>
+            </div>
+            <div class="layui-inline">
+                <button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue uploadBtn" data-bind="input_{$v.name}" data-filter="video">选择上传</button>
+            </div>
+            {tips tips="$v.tips" /}
+        </div>
+    </div>
+</div>
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+{/if}
+
+
+{if condition="$v.type eq 'download'"}
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<div class="layui-col-md10">
+    <div class="layui-form-item">
+        <label class="layui-form-label">{$v.title}</label>
+        <div class="layui-input-block">
+            <div class="layui-inline">
+                <button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue" onclick="openDownloadFileManager_{$v.name}()">+ 选择文件</button>
+                <button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue" onclick="addDownloadUrl_{$v.name}()">+ 远程链接</button>
+            </div>
+            {tips tips="$v.tips" /}
+        </div>
+        <div class="layui-input-block">
+            <style>
+                .download-table-{$v.name} th, .download-table-{$v.name} td { padding: 5px 8px; vertical-align: middle; }
+                .download-table-{$v.name} .layui-input-sm { height: 28px; line-height: 28px; padding: 0 8px; }
+                .dl-btn-dropdown li { padding: 6px 15px; cursor: pointer; font-size: 13px; white-space: nowrap; }
+                .dl-btn-dropdown li:hover { background: #f0f0f0; }
+            </style>
+            <table class="layui-table download-table-{$v.name}" lay-size="sm" lay-skin="line">
+                <thead>
+                    <tr>
+                        <th style="min-width:200px">下载链接</th>
+                        <th style="min-width:60px">提取码</th>
+                        <th style="min-width:100px">下载按钮名称</th>
+                        <th style="width:80px">大小</th>
+                        <th style="width:60px">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="download-tbody-{$v.name}"></tbody>
+            </table>
+            <input type="hidden" name="{$v.name}" id="download-input-{$v.name}" value="{$info[$v['name']]|default=''}">
+        </div>
+    </div>
+</div>
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<script>
+(function(){
+    var F = '{$v.name}';
+    var $tbody = $('#download-tbody-' + F);
+    var $input = $('#download-input-' + F);
+    var opts = ['立即下载','本地下载','远程下载','百度网盘','迅雷网盘','夸克网盘','腾讯网盘'];
+    var optsHtml = opts.map(function(o){ return '<li data-val="'+ o +'">'+ o +'</li>'; }).join('');
+
+    function esc(s){ return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
+
+    // 收集当前所有行写入隐藏 input
+    function save(){
+        var arr = [];
+        $tbody.children('tr').each(function(){
+            var t = $(this);
+            arr.push({'url': t.find('.dl-url').val(), 'code': t.find('.dl-code').val(), 'btn_name': t.find('.dl-btn').val(), 'size': t.find('.dl-size').val()});
+        });
+        $input.val(JSON.stringify(arr));
+    }
+
+    // 添加一行并绑定行内事件（挂到 window 供 iframe 双击复用）
+    window['addDownloadRow_' + F] = function(item){
+        item = item || {};
+        var $r = $('<tr>' +
+            '<td><input type="text" class="layui-input layui-input-sm dl-url" value="'+ esc(item.url || item.path || '') +'" placeholder="下载链接"></td>' +
+            '<td><input type="text" class="layui-input layui-input-sm dl-code" value="'+ esc(item.code || '') +'" placeholder="网盘链接提取码"></td>' +
+            '<td style="position:relative;">' +
+                '<input type="text" class="layui-input layui-input-sm dl-btn" value="'+ esc(item.btn_name || '') +'" placeholder="下载按钮名称">' +
+                '<ul class="dl-btn-dropdown dl-dropdown-'+ F +'" style="display:none;position:absolute;top:100%;left:0;z-index:9999;min-width:140px;background:#fff;border:1px solid #e2e2e2;box-shadow:0 2px 4px rgba(0,0,0,.12);list-style:none;padding:5px 0;margin:0;">'+ optsHtml +'</ul>' +
+            '</td>' +
+            '<td><input type="text" class="layui-input layui-input-sm dl-size" value="'+ esc(item.size || '') +'" placeholder="大小"></td>' +
+            '<td><button type="button" class="layui-btn layui-btn-xs layui-btn-danger dl-del">移除</button></td>' +
+        '</tr>').appendTo($tbody);
+
+        // 输入联动
+        $r.find('input').on('input', save);
+
+        // 下载按钮名称下拉
+        var $btn = $r.find('input.dl-btn');
+        var $dd = $r.find('.dl-btn-dropdown');
+        $btn.on('click', function(e){
+            e.stopPropagation();
+            $('.dl-dropdown-'+ F).not($dd).hide();
+            $dd.toggle();
+        });
+        $dd.on('click', 'li', function(e){
+            e.stopPropagation();
+            $btn.val($(this).data('val'));
+            $dd.hide();
+            save();
+        });
+
+        // 移除
+        $r.find('.dl-del').on('click', function(){ $r.remove(); save(); });
+
+        save();
+    };
+
+    // 打开文件管理器（支持多选）
+    window['openDownloadFileManager_' + F] = function(){
+        var miuUrl = (typeof __MIU !== 'undefined' && __MIU.filesIndex) ? __MIU.filesIndex : "{:url('admin/files/index')}";
+        layer.open({
+            type: 2,
+            title: '文件管理器',
+            area: ['80%', '85%'],
+            content: miuUrl + '?target=download-'+ F +'&filter=all&multi=1',
+            maxmin: true,
+            shadeClose: true,
+            btn: ['确定', '取消'],
+            btnAlign: 'c',
+            success: function(layero, index){
+                var w = layero.find('iframe')[0];
+                if(w) w.contentWindow.DOWNLOAD_LAYER_INDEX = index;
+            },
+            yes: function(index, layero){
+                var w = layero.find('iframe')[0].contentWindow;
+                var files = w.getMultiSelectedFiles ? w.getMultiSelectedFiles() : [];
+                if(!files.length){ layer.msg('请至少选择一个文件'); return false; }
+                files.forEach(function(f){
+                    window['addDownloadRow_' + F]({'url': f.src || f.url || f.path || '', 'size': f.size || '', 'btn_name': '本地下载'});
+                });
+                layer.close(index);
+            }
+        });
+    };
+
+    // 添加远程链接
+    window['addDownloadUrl_' + F] = function(){
+        layer.prompt({
+            formType: 2,
+            value: '',
+            title: '输入远程下载链接（每行一个）',
+            area: ['500px', '200px']
+        }, function(value, index){
+            var count = 0;
+            value.split('\n').forEach(function(u){
+                u = u.trim();
+                if(u && /^(https?:\/\/)/i.test(u)){
+                    window['addDownloadRow_' + F]({'url': u, 'btn_name': '远程下载'});
+                    count++;
+                }
+            });
+            if(count === 0 && value.trim()){
+                layer.msg('未检测到有效网址，请确保链接以 http:// 或 https:// 开头');
+            }
+            layer.close(index);
+        });
+    };
+
+    // 点击空白处关闭下拉
+    $(document).on('click', function(){ $('.dl-dropdown-'+ F).hide(); });
+
+    // 页面加载恢复数据（兼容旧格式）
+    (function(){
+        var val = $input.val();
+        if(!val) return;
+        try {
+            var list = JSON.parse(val);
+            if(Array.isArray(list)){ list.forEach(function(it){ window['addDownloadRow_' + F](it); }); }
+        } catch(e){
+            val.split('|').forEach(function(u){ if(u.trim()) window['addDownloadRow_' + F]({'url': u.trim(), 'name': ''}); });
+        }
+    })();
+})();
+
+// 供文件管理器 iframe 双击调用（全局唯一）
+if(typeof window._insertDownloadFiles === 'undefined'){
+    window._insertDownloadFiles = function(fieldName, files){
+        var add = window['addDownloadRow_' + fieldName];
+        if(typeof add !== 'function') return;
+        files.forEach(function(f){
+            add({'name': f.name || '', 'url': f.src || f.url || f.path || '', 'size': f.size || '', 'btn_name': f.btn_name || ''});
+        });
+    };
+}
+</script>
+{/if}
+
+
+{if condition="$v.type eq 'video'"}
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<style>
+.video-play-group { margin-bottom: 12px; padding: 14px; border: 1px solid #e6e6e6; background: #fff; }
+.video-play-group-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.video-play-group-name { max-width: 300px; }
+.video-play-group-urls { min-height: 120px; resize: vertical; }
+@media (max-width: 767px) { .video-play-group-head { flex-wrap: wrap; } }
+</style>
+<div class="layui-col-md12">
+    <div class="layui-form-item">
+        <label class="layui-form-label">{$v.title}</label>
+        <div class="layui-input-block">
+            <select id="video-player-options-{$v.name}" class="layui-hide" data-default="{$playerDefault}" lay-ignore>
+                <option value="">选择播放器</option>
+                {foreach name="playerOptions" id="playerOption" key="playerKey"}
+                <option value="{$playerKey}">{$playerOption.name}</option>
+                {/foreach}
+            </select>
+            <div id="video-groups-{$v.name}"></div>
+            <button type="button" id="video-group-add-{$v.name}" class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue">+ 新增播放组</button>
+            <div class="layui-form-mid layui-word-aux">每行填写一集，格式：集数$播放地址</div>
+            {tips tips="$v.tips" /}
+            <input type="hidden" id="video-input-{$v.name}" name="{$v.name}" value="{$info[$v['name']]|default=''}">
+        </div>
+    </div>
+</div>
+<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+<script>
+(function(){
+    var $wrap = $('#video-groups-{$v.name}');
+    var $input = $('#video-input-{$v.name}');
+    var $addButton = $('#video-group-add-{$v.name}');
+    var $playerOptions = $('#video-player-options-{$v.name}');
+    var playerFilter = 'video-player-{$v.name}';
+    var defaultPlayer = $playerOptions.attr('data-default') || 'html5';
+    var hasStoredValue = $input.val().trim() !== '';
+    var nextGroupId = 1;
+    if(!$wrap.length || !$input.length || !$addButton.length) return;
+
+    function videoUiText(text){
+        return window.MiuAdminI18n ? window.MiuAdminI18n.translate(text) : text;
+    }
+
+    function defaultGroupName(groupId){
+        var chineseNumbers = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十'];
+        return '线路' + (chineseNumbers[groupId] || groupId);
+    }
+
+    function save(){
+        var groups = [];
+        $wrap.find('.video-play-group').each(function(){
+            var $group = $(this);
+            var name = $group.find('.video-play-group-name').val().trim();
+            var urls = $group.find('.video-play-group-urls').val();
+            if(name || urls.trim()) groups.push({name: name, player: $group.find('.video-play-group-player').val() || defaultPlayer, urls: urls});
+        });
+        $input.val(groups.length ? JSON.stringify(groups) : '');
+    }
+
+    function updateRemoveButtons(){
+        var canRemove = $wrap.children('.video-play-group').length > 1;
+        $wrap.find('.video-play-group-delete').each(function(){
+            $(this).prop('disabled', !canRemove).toggleClass('layui-btn-disabled', !canRemove);
+        });
+    }
+
+    function addGroup(item){
+        item = item || {};
+        var groupId = nextGroupId++;
+        var $group = $('<div class="video-play-group"></div>');
+        var $head = $('<div class="video-play-group-head"></div>');
+        var $player = $('<select class="layui-input video-play-group-player" style="width:160px"></select>')
+            .attr('lay-filter', playerFilter)
+            .append($playerOptions.find('option').clone());
+        $player.find('option').each(function(){ $(this).text(videoUiText($(this).text())); });
+        $player.val(typeof item.player === 'string' && item.player ? item.player : defaultPlayer);
+        if(!$player.val()) $player.val(defaultPlayer);
+        var groupName = typeof item.name === 'string' && item.name ? item.name : defaultGroupName(groupId);
+        if(/^线路\d+$/.test(groupName)) groupName = defaultGroupName(parseInt(groupName.replace('线路', ''), 10));
+        if(/^播放组\d+$/.test(groupName)) groupName = defaultGroupName(parseInt(groupName.replace('播放组', ''), 10));
+        var $name = $('<input type="text" class="layui-input video-play-group-name">')
+            .attr('placeholder', videoUiText('播放组名称，例如：默认线路')).val(groupName);
+        var $remove = $('<button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-red video-play-group-delete"></button>').text(videoUiText('删除播放组'));
+        var $upload = $('<button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue video-play-group-upload"></button>').text(videoUiText('上传'));
+        var $format = $('<button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue video-play-group-format"></button>').text(videoUiText('校验格式'));
+        var $urls = $('<textarea class="layui-textarea video-play-group-urls" rows="5"></textarea>')
+            .attr({id: 'video-group-urls-{$v.name}-' + groupId, placeholder: videoUiText('每行填写一集，格式：集数$播放地址')})
+            .val(typeof item.urls === 'string' ? item.urls : '');
+
+        $head.append($player, $name, $remove, $upload, $format);
+        $group.append($head, $urls);
+        $wrap.append($group);
+        layui.use(['form'], function(){
+            layui.form.render('select');
+        });
+        updateRemoveButtons();
+    }
+
+    function openVideoFileManager(group){
+        var textarea = $(group).find('.video-play-group-urls').get(0);
+        if(!textarea) return;
+        var miuUrl = (typeof __MIU !== 'undefined' && __MIU.filesIndex) ? __MIU.filesIndex : "{:url('admin/files/index')}";
+        layer.open({
+            type: 2,
+            title: '选择视频',
+            area: ['80%', '85%'],
+            content: miuUrl + '?target=video-group-' + encodeURIComponent(textarea.id) + '&filter=video&multi=1',
+            maxmin: true,
+            shadeClose: true,
+            btn: ['添加到播放组', '取消'],
+            btnAlign: 'c',
+            success: function(layero, index){
+                var iframe = layero.find('iframe')[0];
+                if(iframe) iframe.contentWindow.THUMB_LAYER_INDEX = index;
+            },
+            yes: function(index, layero){
+                var iframe = layero.find('iframe')[0];
+                var files = iframe && iframe.contentWindow.getMultiSelectedFiles ? iframe.contentWindow.getMultiSelectedFiles() : [];
+                if(!files.length){ layer.msg('请至少选择一个视频文件'); return false; }
+                var added = window._insertVideoGroupFiles ? window._insertVideoGroupFiles(textarea.id, files) : 0;
+                if(!added){ layer.msg('没有可添加的视频文件'); return false; }
+                layer.close(index);
+            }
+        });
+    }
+
+    function formatGroup(group){
+        var $textarea = $(group).find('.video-play-group-urls');
+        var rows = $textarea.val().split(/\r\n|\n|\r/);
+        var formatted = [];
+        $.each(rows, function(_, row){
+            row = row.trim();
+            if(!row) return;
+            var splitAt = row.indexOf('$');
+            var url = (splitAt >= 0 ? row.slice(splitAt + 1) : row).trim();
+            if(url) formatted.push('第' + (formatted.length + 1) + '集$' + url);
+        });
+        if(!formatted.length){
+            layer.msg('请先填写视频播放地址');
+            return;
+        }
+        $textarea.val(formatted.join('\n'));
+        save();
+        layer.msg('格式校验完成，共' + formatted.length + '集');
+    }
+
+    $wrap.on('input change', '.video-play-group-name, .video-play-group-urls, .video-play-group-player', save);
+    layui.use(['form'], function(){
+        layui.form.on('select(' + playerFilter + ')', save);
+    });
+    $wrap.on('click', '.video-play-group-delete, .video-play-group-upload, .video-play-group-format', function(){
+        var $button = $(this);
+        var $group = $button.closest('.video-play-group');
+        if($button.hasClass('video-play-group-delete')){
+            if($wrap.children('.video-play-group').length <= 1) return;
+            $group.remove();
+            updateRemoveButtons();
+            save();
+        } else if($button.hasClass('video-play-group-upload')) {
+            openVideoFileManager($group);
+        } else if($button.hasClass('video-play-group-format')) {
+            formatGroup($group);
+        }
+    });
+    $addButton.on('click', function(){
+        addGroup();
+        save();
+    });
+
+    if(hasStoredValue){
+        try {
+            var savedGroups = JSON.parse($input.val());
+            if($.isArray(savedGroups)){
+                $.each(savedGroups, function(index, item){
+                    if(typeof item === 'string') item = {name: defaultGroupName(index + 1), urls: item};
+                    if(!item || typeof item !== 'object') return;
+                    addGroup({
+                        name: typeof item.name === 'string' ? item.name : '',
+                        player: typeof item.player === 'string' ? item.player : defaultPlayer,
+                        urls: typeof item.urls === 'string' ? item.urls : ''
+                    });
+                });
+            } else {
+                addGroup({name: defaultGroupName(1), urls: $input.val()});
+            }
+        } catch(error) {
+            addGroup({name: defaultGroupName(1), urls: $input.val()});
+        }
+    }
+    if(!$wrap.children('.video-play-group').length) addGroup();
+    if(hasStoredValue) save();
+})();
+
+if(typeof window._insertVideoGroupFiles === 'undefined'){
+    window._insertVideoGroupFiles = function(textareaId, files){
+        var $textarea = $('.video-play-group-urls').filter(function(){ return this.id === textareaId; }).first();
+        if(!$textarea.length) return 0;
+        var videoExts = ['mp4','avi','mov','wmv','flv','mkv','webm'];
+        var rows = $.grep($.map($textarea.val().split(/\r\n|\n|\r/), function(row){ return row.trim(); }), function(row){ return row !== ''; });
+        var added = 0;
+        $.each(files, function(_, file){
+            var ext = String(file.ext || '').toLowerCase();
+            var url = String(file.src || file.url || file.path || '').trim();
+            if(!url || $.inArray(ext, videoExts) === -1) return;
+            rows.push((rows.length + 1) + '$' + url);
+            added++;
+        });
+        if(added){
+            $textarea.val(rows.join('\n')).trigger('input');
+        }
+        return added;
+    };
+}
+</script>
+{/if}
+
+
+
+{/volist}
+
+{/if}
+

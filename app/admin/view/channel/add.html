@@ -1,0 +1,68 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<form class="layui-form p-page">
+<!--	<h3 class="pb-3">新建/编辑模型</h3>-->
+	<fieldset class="layui-elem-field">
+		<legend>新建/编辑模型</legend>
+		<div class="layui-field-box">
+			<div class="layui-form-item">
+				<label class="layui-form-label">模型名称<font>*</font></label>
+				<div class="layui-input-block">
+					<input type="text" name="title" lay-verify="required" lay-reqText="请输入模型名称" placeholder="请输入模型名称" class="layui-input" value="{$channel.title|default=''}" {if condition="isset($channel) && $channel.is_system eq 1"}disabled{/if}>
+				</div>
+				<div class="layui-form-mid layui-text-em"></div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">模型标识<font>*</font></label>
+				<div class="layui-input-block">
+					<input type="hidden" name="old_table" value="{$channel.nid|default=''}" >
+					<input type="text" name="nid" lay-verify="nid" maxlength="16" placeholder="请输入模型标识" lay-reqText="请输入模型标识" class="layui-input" value="{$channel.nid|default=''}" {if condition="(isset($channel) && $channel.is_system eq 1)"}disabled{/if}>
+				</div>
+				<div class="layui-form-mid layui-text-em">模型标识必须是字母或数字，字母开头，且长度为3到16位<br/>
+					列表模板是：lists_模型标识.html<br/>
+					详情模板是：view_模型标识.html<br/></div>
+			</div>
+
+		</div>
+	</fieldset>
+
+	<div class="py-3">
+		<input type="hidden" name="id" value="{$id}" />
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">确认提交</button>
+<!--		<button type="reset" class="layui-btn layui-btn-primary">重置</button>-->
+	</div>
+</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['tool'],function(){
+		var form = layui.form,tool=layui.tool;
+		form.verify({
+			nid:function(value, elem) {
+				if (!/^[a-z][a-z0-9]{2,15}$/.test(value)) {
+					return '模型标识必须是字母或数字，以字母开头，且长度为3到16位';
+				}
+			},
+		});
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			let callback = function (e) {
+				parent.layui.layer.msg(e.msg);
+				if (e.code == 0) {
+					parent.layui.trees.reloadData()
+					setTimeout(function () {
+						parent.layui.layer.closeAll();
+					}, 1000);
+				}
+			}
+			tool.post("{:url('admin/channel/add')}", data.field, callback);
+			return false;
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

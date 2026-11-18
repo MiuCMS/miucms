@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="{$nav.seo_description}"/>
+    <meta name="keywords" content="{$nav.seo_keywords}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="{miu:global name='site_name'/}" />
+    <meta property="og:title" content="{$page_title}" />
+    <meta property="og:description" content="{$nav.seo_description}"/>
+    <title>{$page_title}</title>
+    {include file="head" /}
+</head>
+<body data-page="newsDetail">
+{include file="header"/}
+<main id="main">
+    <section class="case-story-head page-intro--cases">
+        <div class="container">
+            <div class="breadcrumbs">
+                {miu:positionraw name='vo'}
+                {if condition="$vo.url"}<a href="{$vo.url}">{$vo.name}</a><span>/</span>{else/}{$vo.name}{/if}
+                {/miu:positionraw}
+            </div>
+            <div class="case-story-title">
+
+                <h1>{$doc.title}</h1>
+                <p class="case-deck">{$doc.title_ext_1}</p>
+                <div class="case-meta">
+                    <span>{$doc.author}</span><time datetime="2026-08-26">{miu:lang key='common.updated_prefix' /}{$doc.date}</time><span>{$doc.nav_name}</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    <article class="case-article" style="margin-top: 10px;">
+        <div class="container">
+            <section class="case-gallery" data-case-gallery>
+                <div class="case-gallery-stage">
+                    {volist name='doc.imgs' id='img'}
+                    {eq name='key' value='0'}
+                    <img data-case-main src="{$img.src}" alt="{$img.name}" fetchpriority="high" />
+                    <button class="case-gallery-arrow is-prev" type="button" data-case-arrow="prev">←</button>
+                    <button class="case-gallery-arrow is-next" type="button" data-case-arrow="next">→</button>
+                    <span class="case-gallery-count" aria-live="polite"><b data-case-count>1</b> / {:count($doc.imgs)}</span>
+                    {/eq}
+                    {/volist}
+                    <div class="case-gallery-foot">
+                        <div class="case-thumbs">
+                            {volist name='doc.imgs' id='img'}
+                            <button class="case-thumb {eq name='key' value='0'}active{/eq}" type="button" data-case-thumb="0" data-src="{$img.src}" data-alt="{$img.name}" aria-pressed="true">
+                                <img class="" src="{$img.src}" alt="{$img.name}" loading="lazy" />
+                            </button>
+                            {/volist}
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="case-story-layout">
+                <div class="case-story-copy">
+                    {$doc.content|raw}
+                    {include file="detail_collect" /}
+                    <div class="case-tags">
+                        <span>{miu:lang key='common.related_tags' /}</span>
+                        {miu:tag}
+                        <a class="tag" target="_blank" href="{$vo.url}">#{$vo.title}</a>
+                        {/miu:tag}
+                    </div>
+                    <nav class="news-pagination">
+                        {miu:prenext type='pre'}
+                        <a class="news-page-link" href="{$vo.link}">
+                            <span>{miu:lang key='common.previous' /}</span>
+                            <b>{if condition="$vo.title"}{$vo.title}{else/}{miu:lang key='common.none' /}{/if}</b>
+                        </a>
+                        {/miu:prenext}
+                        {miu:nav id='vo' navid='$doc.top_navid'}
+                        <a class="news-back-link" href="{$vo.url}">{miu:lang key='common.back_prefix' /}{$vo.title}</a>
+                        {/miu:nav}
+                        {miu:prenext type='next'}
+                        <a class="news-page-link is-next" href="{$vo.link}"><span>{miu:lang key='common.next' /}</span>
+                            <b>{if condition="$vo.title"}{$vo.title}{else/}{miu:lang key='common.none' /}{/if}</b>
+                        </a>
+                        {/miu:prenext}
+                    </nav>
+                </div>
+                <aside class="detail-aside news-detail-aside">
+                    <section class="news-aside-section">
+                        <h3>{miu:lang key='common.recommended' /}</h3>
+                        <ul>
+                            {miu:list name='vo' navid='$doc.top_navid' limit='5' flag='r'}
+                            <li>
+                                <a class="news-aside-link" href="{$vo.url}">
+                                    <span title="{$vo.title}">{$vo.title}</span><i aria-hidden="true">↗</i>
+                                </a>
+                            </li>
+                            {/miu:list}
+                        </ul>
+                    </section>
+                    <div class="news-hot">
+                        <section class="news-aside-section">
+                            <h3>{miu:lang key='common.popular' /}</h3>
+                            <ul>
+                                {miu:list name='vo' navid='$doc.top_navid' limit='5' order='click' sort='desc'}
+                                <li>
+                                    <a class="news-aside-link" href="{$vo.url}">
+                                        <span title="{$vo.title}">{$vo.title}</span><i aria-hidden="true">↗</i>
+                                    </a>
+                                </li>
+                                {/miu:list}
+                            </ul>
+                        </section>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </article>
+</main>
+{include file="footer" /}
+</body>
+</html>

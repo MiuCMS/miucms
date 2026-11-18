@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="renderer" content="webkit">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<title>演示插件配置</title>
+	<link rel="stylesheet" href="{__ADMIN__}/css/miu.css">
+	<script src="{__ADMIN__}/layui/layui.js"></script>
+	<style>
+		html, body { height: auto; background: #fff; }
+		.demo-config-help { line-height: 1.8; }
+		.demo-config-help p { margin: 5px 0; }
+		.demo-sensitive-tip { color: #666; font-size: 12px; line-height: 1.7; margin-top: 6px; }
+	</style>
+</head>
+<body>
+<div class="p-3">
+	<div class="layui-card">
+		<div class="layui-card-header">插件配置演示表单</div>
+		<div class="layui-card-body">
+			<blockquote class="layui-elem-quote demo-config-help">
+				<p>这是插件自己编写的配置页，文件位于 <code>plugins/demo/admin/view/config.html</code>，由 <code>admin/controller/Index.php</code> 的 <code>config()</code> 方法渲染。</p>
+				<p>保存时提交到系统的 <code>admin/plugin/save_config</code>。系统只接受 <code>Plugin.php</code> 的 <code>getConfigFields()</code> 中声明的字段；本表单把所有可编辑字段一起提交，避免遗漏其他配置。</p>
+				<p>插件列表的“配置”按钮仍打开系统自动生成的通用配置表单。两种页面可以共存：通用表单适合快速配置，自定义表单适合插件专属布局和交互。</p>
+			</blockquote>
+
+			<form class="layui-form" lay-filter="demoConfigForm">
+				<input type="hidden" name="name" value="demo">
+				<div class="layui-row layui-col-space16">
+					<div class="layui-col-md6">
+						<div class="layui-form-item">
+							<label class="layui-form-label">演示站点名称</label>
+							<div class="layui-input-block">
+								<input type="text" name="site_name" value="{$config.site_name|default='我的演示站点'}" placeholder="例如：米柚演示站" class="layui-input">
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md6">
+						<div class="layui-form-item">
+							<label class="layui-form-label">欢迎语风格</label>
+							<div class="layui-input-block">
+								<select name="greeting_style">
+									<option value="friendly" {if condition="$greetingStyle == 'friendly'"}selected{/if}>友好亲切</option>
+									<option value="brief" {if condition="$greetingStyle == 'brief'"}selected{/if}>简洁直接</option>
+									<option value="professional" {if condition="$greetingStyle == 'professional'"}selected{/if}>专业正式</option>
+								</select>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12">
+						<div class="layui-form-item">
+							<label class="layui-form-label">前台欢迎语</label>
+							<div class="layui-input-block">
+								<textarea name="welcome_msg" placeholder="填写前台演示页显示的文字" class="layui-textarea" style="min-height:80px;">{$config.welcome_msg|default='欢迎访问插件前台演示页。'}</textarea>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md6">
+						<div class="layui-form-item">
+							<label class="layui-form-label">启用页脚注入</label>
+							<div class="layui-input-block">
+								<input type="checkbox" name="enable_footer" value="1" lay-skin="switch" lay-text="开|关" lay-filter="demoEnableFooter" {if !empty($config.enable_footer)}checked{/if}>
+								<div class="layui-form-mid layui-word-aux">演示 template_parse 钩子修改最终 HTML。</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md6">
+						<div class="layui-form-item">
+							<label class="layui-form-label">搜索词清理</label>
+							<div class="layui-input-block">
+								<input type="checkbox" name="enable_search_trim" value="1" lay-skin="switch" lay-text="开|关" {if !empty($config.enable_search_trim)}checked{/if}>
+								<div class="layui-form-mid layui-word-aux">演示 hooks.php 的 search_before 映射。</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md6 demo-footer-options">
+						<div class="layui-form-item">
+							<label class="layui-form-label">页脚文字</label>
+							<div class="layui-input-block">
+								<input type="text" name="footer_text" value="{$config.footer_text|default='本页由演示插件提供'}" placeholder="输入要插入前台页面的文字" class="layui-input">
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md6 demo-footer-options">
+						<div class="layui-form-item">
+							<label class="layui-form-label">页脚对齐</label>
+							<div class="layui-input-block">
+								<input type="radio" name="footer_align" value="left" title="左对齐" {if condition="$footerAlign == 'left'"}checked{/if}>
+								<input type="radio" name="footer_align" value="center" title="居中" {if condition="$footerAlign == 'center'"}checked{/if}>
+								<input type="radio" name="footer_align" value="right" title="右对齐" {if condition="$footerAlign == 'right'"}checked{/if}>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md6">
+						<div class="layui-form-item">
+							<label class="layui-form-label">首页记录数量</label>
+							<div class="layui-input-block">
+								<input type="number" name="record_limit" min="1" max="100" value="{$config.record_limit|default=10}" class="layui-input">
+								<div class="layui-form-mid layui-word-aux">范围为 1 到 100，控制器会再次校验。</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md6">
+						<div class="layui-form-item">
+							<label class="layui-form-label">自定义示例字段</label>
+							<div class="layui-input-block">
+								<input type="text" name="example_text" value="{$config.example_text|default='这是一个插件配置示例'}" placeholder="输入示例文字" class="layui-input">
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12">
+						<div class="layui-form-item">
+							<label class="layui-form-label">示例 API Key</label>
+							<div class="layui-input-block">
+								<input type="password" name="demo_api_key" value="" autocomplete="new-password" placeholder="{if !empty($config.demo_api_key)}已配置；留空表示不修改{else /}仅用于演示，可留空{/if}" class="layui-input">
+								<div class="demo-sensitive-tip">该字段不会回显已保存内容。留空会保留旧值，填写新值才会替换；本演示插件不会使用此 Key。真实插件也不要在页面、接口响应或日志中输出密钥。</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="layui-form-item" style="margin-top:12px;">
+					<div class="layui-input-block">
+						<button type="button" class="layui-btn" lay-submit lay-filter="saveDemoConfig">
+							<i class="layui-icon layui-icon-ok"></i> 保存配置
+						</button>
+						<span class="layui-font-gray" style="margin-left:8px;">站点名称预览：<b id="demoConfigPreview">{$config.site_name|default='我的演示站点'}</b></span>
+					</div>
+				</div>
+			</form>
+
+			<div class="layui-bg-gray" style="padding:12px;margin-top:12px;line-height:1.8;">
+				<strong>代码中读取配置</strong><br>
+				钩子或插件类中：<code>$this-&gt;getConfig('site_name', '默认值')</code><br>
+				后台控制器中：<code>PluginManager::instance()-&gt;getPluginConfig('demo')</code><br>
+				修改配置字段时，请同步维护 <code>Plugin.php::getConfigFields()</code> 和此自定义表单。
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+layui.use(['form', 'layer'], function () {
+	var form = layui.form;
+	var layer = layui.layer;
+	var $ = layui.$;
+	var saving = false;
+
+	function updateFooterFields(enabled) {
+		$('.demo-footer-options').toggle(!!enabled);
+	}
+
+	form.on('switch(demoEnableFooter)', function (data) {
+		updateFooterFields(data.elem.checked);
+	});
+
+	form.on('submit(saveDemoConfig)', function (data) {
+		if (saving) return false;
+		saving = true;
+		$.post("{:url('admin/plugin/save_config')}", data.field, function (res) {
+			layer.msg(res.msg, { icon: res.code === 0 ? 1 : 2 });
+			if (res.code === 0) {
+				$('#demoConfigPreview').text(data.field.site_name || '我的演示站点');
+			}
+		}).fail(function () {
+			layer.msg('保存请求失败，请检查网络后重试', { icon: 2 });
+		}).always(function () {
+			saving = false;
+		});
+		return false;
+	});
+
+	form.render();
+	updateFooterFields($('input[name="enable_footer"]').prop('checked'));
+});
+</script>
+</body>
+</html>

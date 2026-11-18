@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body>
+{include file="header" /}
+<main id="main" class="section container reading-layout">{miu:position /}<header class="document-heading"><h1>{$nav.title}</h1></header><div class="document-body">{$nav.content|default=''|raw}</div>
+    <!-- 表单字段及各种类型的输入控件示例由 form_fields 片段生成。 -->
+    {miu:clue id='vo'}
+    <form class="message-form" method="post" action="{$vo.action}" onsubmit="return miuClueSubmit(this)">
+        <h2>{$vo.form_name}</h2><p>{$vo.intro}</p>
+        {include file="form_fields" /}
+        {$vo.hidden|raw}<button class="button" type="submit">{miu:lang key='submit' /}</button>
+    </form>
+    {$vo.script|raw}
+    {/miu:clue}
+</main>
+{include file="footer" /}
+</body>
+</html>

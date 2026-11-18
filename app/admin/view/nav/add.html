@@ -1,0 +1,389 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+
+<div class="layui-layer-title" style="font-size: 16px;">新增栏目</div>
+<style>
+	/* 栏目标题后面的【扩展标题】开关：点一下显示/隐藏下面两个扩展标题输入框 */
+	.nav-ext-toggle{flex:0 0 auto;align-self:center;padding:0 8px;color:#1e9fff;font-size:13px;white-space:nowrap;cursor:pointer;}
+</style>
+
+<form class="layui-form p-page">
+	<div class="layui-tabs layui-tab-brief layui-container">
+		<ul class="layui-tabs-header">
+			<li class="layui-this">常规选项</li>
+			<li>高级选项</li>
+			{notempty name="i18nRows"}
+			<li>多语言</li>
+			{/notempty}
+		</ul>
+		<div class="layui-tabs-body">
+			<div class="layui-tabs-item layui-show">
+				<div class="layui-row layui-col-space16">
+					<div class="layui-col-md4">
+						<div class="layui-form-item">
+							<label class="layui-form-label">父级栏目<font>*</font></label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+										<select name="pid" lay-verify="required" lay-reqText="请选择父级栏目">
+											<option value="0">作为顶级栏目</option>
+											{volist name="navs" id="v"}
+											<option value="{$v.id}" data-id="{$v.id}" {if condition="$id eq $v.id"}selected{/if}>{$v.title}</option>
+											{/volist}
+										</select>
+										{tips tips="" /}
+									</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+					<div class="layui-col-md4">
+						<div class="layui-form-item">
+							<label class="layui-form-label">栏目标题<font>*</font></label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="title" lay-affix="clear" lay-verify="required" placeholder="请输入栏目标题" class="layui-input" value="{$nav.title|default=''}">
+									<a href="javascript:;" class="nav-ext-toggle">【扩展标题】</a>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+					<div class="layui-col-md4 nav-ext-box" style="display:none;">
+						<div class="layui-form-item">
+							<label class="layui-form-label">扩展标题1</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="title_ext_1" lay-affix="clear" placeholder="" class="layui-input" value="{$nav.title_ext_1|default=''}">
+									{tips tips="备用扩展标题，字段名 title_ext_1" /}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+					<div class="layui-col-md4 nav-ext-box" style="display:none;">
+						<div class="layui-form-item">
+							<label class="layui-form-label">扩展标题2</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="title_ext_2" lay-affix="clear" placeholder="" class="layui-input" value="{$nav.title_ext_2|default=''}">
+									{tips tips="备用扩展标题，字段名 title_ext_2" /}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+					<div class="layui-col-md4 nav-ext-box" style="display:none;">
+						<div class="layui-form-item">
+							<label class="layui-form-label">扩展标题3</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="title_ext_3" lay-affix="clear" placeholder="" class="layui-input" value="{$nav.title_ext_3|default=''}">
+									{tips tips="备用扩展标题，字段名 title_ext_3" /}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+					<div class="layui-col-md4">
+						<div class="layui-form-item">
+							<label class="layui-form-label">栏目别名</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="title_en" lay-affix="clear" lay-verify="title_en" placeholder="必须是拼音或数字，以字母开头。留空则系统根据栏目标题拼音生成" class="layui-input" value="{$nav.title_en|default=''}">
+									{tips tips="不可与其他栏目的别名重复" /}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+					<div class="layui-col-md6">
+						<div class="layui-form-item">
+							<label class="layui-form-label">栏目图片</label>
+							<div class="layui-input-block">
+								<div class="layui-inline marginr-0">
+								<span style="display:inline-flex;align-items:center;">
+									<i class="layui-icon layui-icon-picture" style="margin-right:5px;cursor:pointer;" id="litpic-preview-icon"></i>
+									<input type="text" id="litpic" name="litpic" lay-affix="clear" autocomplete="off" class="layui-input" style="width:370px;" placeholder="点击上传或输入图片地址">
+								</span>
+								</div>
+								<div class="layui-inline">
+									<button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue uploadBtn" data-bind="litpic">选择上传</button>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+					<div class="layui-col-md4">
+						<div class="layui-form-item">
+							<label class="layui-form-label">内容模型<font>*</font></label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<select name="channel_id" id="channel_id" lay-filter="channel_id" lay-verify="required" lay-reqText="请选择模型">
+										{volist name="channel" id="v"}
+										<option value="{$v.id}" data-nid="{$v.nid}" {if condition="$v.id eq $channel_id"}selected{/if}>{$v.title|default=''} - {$v.nid|default=''}</option>
+										{/volist}
+									</select>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+					<div class="layui-col-md3">
+						<div class="layui-form-item">
+							<label class="layui-form-label">排序</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="number" name="sort" lay-affix="clear" class="layui-input" value="{$nav.sort|default='0'}">
+									{tips tips="只能填写数字，越小越靠前" /}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+					<div class="layui-col-md3">
+						<div class="layui-form-item">
+							<label class="layui-form-label">新窗口打开</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="radio" name="target" value="0" title="否" checked>
+									<input type="radio" name="target" value="1" title="是">
+									{tips tips="选择“是”，前端模板a标签中将添加target='_blank'" /}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+					<div class="layui-col-md3">
+						<div class="layui-form-item">
+							<label class="layui-form-label">隐藏栏目</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="radio" name="is_show" value="0" title="否" checked>
+									<input type="radio" name="is_show" value="1" title="是">
+									{tips tips="选择“是”，前台导航栏将不显示该栏目" /}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="layui-tabs-item">
+				<div class="layui-row layui-col-space16">
+					<div class="layui-col-md3">
+						<div class="layui-form-item layui-form-2">
+							<label class="layui-form-label">是否外部链接</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="radio" name="is_url" lay-filter="is_url" value="0" title="否" checked>
+									<input type="radio" name="is_url" lay-filter="is_url" value="1" title="是">
+									{tips tips="是否外部连接，如选择“是”，请填写下方外部链接" /}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+					<div class="layui-col-md4" id="url" style="display:none;">
+						<div class="layui-form-item">
+							<label class="layui-form-label">外链地址</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="url" lay-affix="clear" placeholder="https://" class="layui-input" value="">
+									{tips tips="完整外部链接地址" /}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+					<div class="layui-col-md4" id="temp-list-box">
+						<div class="layui-form-item">
+							<label class="layui-form-label">栏目模板</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<select name="temp_list">
+										<option value="">默认</option>
+									</select>
+									{tips tips="只列出当前模板目录里符合命名规则的模板文件。<br>不选就自动用 list_[模型nid].html" /}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+					<div class="layui-col-md4" id="temp-view-box">
+						<div class="layui-form-item">
+							<label class="layui-form-label">内容模板</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<select name="temp_view">
+										<option value="">默认</option>
+									</select>
+									{tips tips="只列出当前模板目录里符合命名规则的模板文件。<br>不选就自动用 view_[模型nid].html<br>单页模型没有内容模板" /}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+					<div class="layui-col-md6">
+						<div class="layui-form-item">
+							<label class="layui-form-label">SEO标题</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="seo_title" lay-affix="clear" placeholder="" class="layui-input" value="">
+									{tips tips="显示在前台栏目页的浏览器标题" /}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+					<div class="layui-col-md6">
+						<div class="layui-form-item">
+							<label class="layui-form-label">SEO关键字</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="seo_keywords" lay-affix="clear" placeholder="" class="layui-input" value="">
+									{tips tips="多个关键词请用英文逗号（,）隔开，建议不超过5个关键词" /}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+					<div class="layui-col-md6">
+						<div class="layui-form-item">
+							<label class="layui-form-label">SEO描述</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<textarea type="text" name="seo_description" lay-affix="clear" maxlength="200" style="resize:none;" class="layui-input layui-textarea" ></textarea>
+									{tips tips="一般不超过200个字符，不填写时系统自动提取正文的前200个字符" /}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+
+				</div>
+			</div>
+			{notempty name="i18nRows"}
+			<div class="layui-tabs-item">
+			{include file="common/i18n_fields" /}
+			</div>
+			{/notempty}
+		</div>
+		<div class="py-3">
+			<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+			<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+		</div>
+	</div>
+</form>
+
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	window.__MIU_URLS = {
+		filesIndex: "{:url('admin/files/index')}",
+		savePreset: "{:url('admin/api/save_preset')}"
+	};
+
+	// 各模型可用的栏目模板 / 内容模板：[模型nid => {list: [...], view: [...]}]
+	var TPL_OPTIONS = {:json_encode($tpl_options)};
+
+	layui.use(['tool'],function(){
+		var form = layui.form, tool = layui.tool;
+		form.verify({
+			title_en:function(value, elem) {
+				if(value.length>0){
+					if (!/^[a-z][a-z0-9]{0,64}$/.test(value)) {
+						return '必须是拼音或数字，以字母开头';
+					}
+				}
+			},
+		})
+
+		// 当前选中的内容模型的 nid
+		function currentNid(){
+			return $('#channel_id').find('option:selected').attr('data-nid') || '';
+		}
+
+		// 按模型刷新「栏目模板」「内容模板」下拉
+		function fillTplSelect(){
+			var nid = currentNid();
+			var opts = TPL_OPTIONS[nid] || { list: [], view: [] };
+
+			var $list = $('select[name="temp_list"]');
+			var listVal = $list.val() || '';
+			$list.empty().append('<option value="">默认（list_' + nid + '.html）</option>');
+			$.each(opts.list, function(i, name){
+				$list.append('<option value="' + name + '">' + name + '.html</option>');
+			});
+			if(listVal){ $list.val(listVal); }
+
+			var $view = $('select[name="temp_view"]');
+			var viewVal = $view.val() || '';
+			$view.empty();
+			if(nid === 'single' || nid === 'clue'){
+				// 单页模型只有栏目模板，没有内容模板
+				$('#temp-view-box').hide();
+				$view.append('<option value=""></option>');
+			}else{
+				$('#temp-view-box').show();
+				$view.append('<option value="">默认（view_' + nid + '.html）</option>');
+				$.each(opts.view, function(i, name){
+					$view.append('<option value="' + name + '">' + name + '.html</option>');
+				});
+				if(viewVal){ $view.val(viewVal); }
+			}
+
+			form.render('select');
+		}
+
+		// radio 事件
+		form.on('radio(is_url)', function(data){
+			var elem = data.elem; // 获得 radio 原始 DOM 对象
+			var value = elem.value; // 获得 radio 值
+			if(value==1){
+				$('#url').show();
+				layer.tips('您开启了外链，请填写外链地址',$('[name="url"]'), {tips: [1, '#16b777']});
+			}else{
+				$('#url').hide();
+			}
+
+		});
+		// 换内容模型 → 换模板下拉选项
+		form.on('select(channel_id)', fillTplSelect);
+		fillTplSelect();
+
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			var loadIndex = layer.msg('正在提交...', { icon: 16, shade: 0.01,time:0 });
+			let callback = function (e) {
+				layer.close(loadIndex);
+				if (e.code == 0) {
+					parent.layui.layer.closeAll();
+					parent.layui.trees.reloadData()
+					parent.layer.msg(e.msg, {icon: 1});
+				}else{
+					layer.msg(e.msg, {icon: 2});
+				}
+			}
+			tool.post("{:url('admin/nav/add')}", data.field, callback);
+			return false;
+		});
+		// 图片上传
+		$('.uploadBtn').on('click', function(){
+			openFileManager($(this).attr('data-bind'));
+			return false;
+		});
+		//【扩展标题】：点一下显示/隐藏下面两个扩展标题输入框
+		$('.nav-ext-toggle').on('click', function(){
+			$('.nav-ext-box').toggle();
+		});
+		// 缩略图预览
+		initThumbPreview();
+	})
+</script>
+{/block}
+<!-- /脚本 -->

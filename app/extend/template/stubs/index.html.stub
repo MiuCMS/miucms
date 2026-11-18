@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body>
+{include file="header" /}
+<main id="main">
+    <section class="home-intro"><div class="container"><h1>{miu:global name='site_title' /}</h1><p>{miu:global name='site_desc' /}</p></div></section>
+    <section class="section container"><div class="section-heading"><h2>{miu:lang key='latest' /}</h2><a href="{:miu_search_url()}">{miu:lang key='search' /} →</a></div>
+        <!-- 首页没有分页上下文，用 limit 取固定条数；需要指定栏目时再添加 navid。 -->
+        <div class="document-grid">{miu:list id='vo' limit='6' emptykey='empty'}{include file="card" /}{/miu:list}</div>
+    </section>
+</main>
+{include file="footer" /}
+</body>
+</html>

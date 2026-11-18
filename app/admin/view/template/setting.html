@@ -1,0 +1,257 @@
+{extend name="common/base"/}
+
+{block name="style"}
+<style>
+	/* ===== 顶部概览统计 ===== */
+	.tpl-stat{display:flex;align-items:center;gap:14px;height:100%;padding:16px 18px;border:1px solid #f0f0f0;border-radius:6px;background:#fff;}
+	.tpl-stat .stat-icon{width:46px;height:46px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:24px;color:#fff;}
+	.tpl-stat .stat-value{font-size:22px;font-weight:700;line-height:1.2;overflow-wrap:anywhere;}
+	.tpl-stat .stat-label{margin-top:2px;font-size:13px;color:#999;}
+
+	/* ===== 顶部提示条 ===== */
+	.gen-tip{background:#fff8e6;border:1px solid #ffe1a8;color:#8a6d3b;border-radius:4px;padding:12px 14px;line-height:1.9;margin-bottom:14px;}
+	.gen-tip .layui-icon{margin-right:6px;color:#ffb800;}
+	.gen-tip b{color:#d2691e;}
+
+	/* ===== 模板列表面板 ===== */
+	.tpl-panel{border:1px solid #f0f0f0;border-radius:6px;}
+	/* miu.css 全局把 .layui-card-header 里的 layui-icon 绝对定位到卡片头右侧，会打乱头部按钮内的图标，这里恢复文档流 */
+	.tpl-panel>.layui-card-header .layui-icon{position:static;right:auto;top:auto;margin-top:0;line-height:inherit;}
+	.tpl-panel>.layui-card-header{display:flex;align-items:center;justify-content:space-between;gap:12px;height:auto;line-height:1.6;padding:12px 18px;font-size:15px;font-weight:600;}
+	.tpl-panel>.layui-card-header .tpl-panel-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+	.tpl-panel>.layui-card-header .tpl-panel-title .layui-icon{color:#1e9fff;font-size:16px;}
+	.tpl-panel>.layui-card-header .layui-word-aux{font-weight:400;}
+	.tpl-panel>.layui-card-body{padding:14px;}
+	.tpl-meta dd{overflow-wrap:anywhere;}
+
+	/* ===== 模板卡片：栅格列改 flex，保证同行卡片等高 ===== */
+	.tpl-grid{display:flex;flex-wrap:wrap;}
+	.tpl-grid>*{display:flex;flex:0 0 auto;}
+	.tpl-card{position:relative;display:flex;flex-direction:column;width:100%;border:1px solid #eef0f3;border-radius:10px;background:#fff;overflow:hidden;transition:transform .2s,box-shadow .2s,border-color .2s;}
+	.tpl-card:hover{transform:translateY(-3px);border-color:#c9e2ff;box-shadow:0 10px 24px rgba(29,41,57,.10);}
+	.tpl-card.is-current{border-color:#1e9fff;box-shadow:0 0 0 2px rgba(30,159,255,.14);}
+	.tpl-card.is-error{border-color:#ffe1a8;background:#fffdf9;}
+
+	/* 封面条：纯色渐变 + 半透明装饰圆，状态只用配色区分 */
+	.tpl-cover{position:relative;display:flex;align-items:center;gap:10px;height:60px;padding:0 14px;overflow:hidden;color:#fff;background:linear-gradient(135deg,#5aa9ff,#1e6fff);}
+	.tpl-cover:before,.tpl-cover:after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.14);}
+	.tpl-cover:before{right:-18px;top:-24px;width:84px;height:84px;}
+	.tpl-cover:after{right:34px;bottom:-32px;width:56px;height:56px;background:rgba(255,255,255,.09);}
+	.tpl-card.is-current .tpl-cover{background:linear-gradient(135deg,#00b4ff,#009688);}
+	.tpl-card.is-error .tpl-cover{background:linear-gradient(135deg,#ffc75f,#ff8b00);}
+	.tpl-cover .layui-icon{position:relative;flex:none;font-size:22px;}
+	.tpl-cover-code{position:relative;flex:1;min-width:0;text-align:right;font-family:Menlo,Consolas,monospace;font-size:14px;letter-spacing:.04em;color:rgba(255,255,255,.92);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+	.tpl-cover-ribbon{position:absolute;left:0;top:0;padding:4px 12px 5px;border-bottom-right-radius:8px;background:rgba(0,0,0,.16);line-height:1.5;}
+
+	/* 卡片正文 */
+	.tpl-body{flex:1;padding:12px 14px 4px;}
+	.tpl-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;}
+	.tpl-title{margin:0;font-size:16px;font-weight:900;line-height:1.45;overflow-wrap:anywhere;}
+	.tpl-badge{flex:none;display:inline-flex;align-items:center;padding:6px 15px;border-radius:10px;font-size:14px;font-weight:600;line-height:1.7;white-space:nowrap;}
+	.tpl-badge--current{background:rgba(30,159,255,.12);color:#1e9fff;}
+	.tpl-badge--ready{background:rgba(22,183,119,.12);color:#16b777;}
+	.tpl-badge--error{background:rgba(255,87,34,.12);color:#ff5722;}
+	.tpl-desc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:6px 0 0;min-height:38px;font-size:12px;color:#7a828e;line-height:1.7;}
+	/* 模板信息按每行两项排列，标签和值仍保持左右对齐。 */
+	.tpl-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:12px;row-gap:7px;margin:10px 0 0;padding:10px 0 0;border-top:1px dashed #eef0f3;}
+	.tpl-meta>div{display:flex;align-items:baseline;gap:8px;min-width:0;margin:0;}
+	.tpl-meta dt{flex:none;font-size:13px;color:#a0a6b0;letter-spacing:.02em;}
+	.tpl-meta dd{flex:1;min-width:0;margin:0;text-align:left;font-size:14px;color:#4b5563;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+	.tpl-meta dd a{color:#1e9fff;}
+	.tpl-error{display:flex;gap:6px;margin:10px 0 0;padding:7px 9px;border-radius:6px;background:#fff3eb;color:#ff5722;font-size:12px;line-height:1.6;overflow-wrap:anywhere;}
+
+	/* 卡片底部操作 */
+	.tpl-ft{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;border-top:1px solid #f3f5f8;background:#fbfcfd;}
+	.tpl-ft .tpl-state{color:#9aa1ac;}
+	.tpl-ft .layui-btn{height:36px;line-height:36px;padding:0 18px;font-size:14px;}
+
+	/* ===== 空状态 ===== */
+	.tpl-empty{padding:48px 20px;text-align:center;color:#bbb;}
+	.tpl-empty .layui-icon{display:block;margin-bottom:10px;font-size:44px;color:#d9d9d9;}
+	.tpl-empty p{font-size:13px;}
+
+	@media screen and (max-width:768px){
+		.tpl-stat{padding:12px;gap:10px;}
+		.tpl-stat .stat-icon{width:38px;height:38px;font-size:20px;}
+	}
+</style>
+{/block}
+
+{block name="body"}
+<div class="p-3">
+	<!-- 概览统计 -->
+	<div class="layui-row layui-col-space15" style="margin-bottom:14px;">
+		<div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
+			<div class="tpl-stat">
+				<div class="stat-icon" style="background:#1e9fff;"><i class="layui-icon layui-icon-template"></i></div>
+				<div>
+					<div class="stat-value">{$stats.total}</div>
+					<div class="stat-label">模板总数</div>
+				</div>
+			</div>
+		</div>
+		<div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
+			<div class="tpl-stat">
+				<div class="stat-icon" style="background:#16b777;"><i class="layui-icon layui-icon-ok-circle"></i></div>
+				<div>
+					<div class="stat-value">{$stats.available}</div>
+					<div class="stat-label">可启用</div>
+				</div>
+			</div>
+		</div>
+		<div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
+			<div class="tpl-stat">
+				<div class="stat-icon" style="background:#ff5722;"><i class="layui-icon layui-icon-about"></i></div>
+				<div>
+					<div class="stat-value">{$stats.error}</div>
+					<div class="stat-label">不可用</div>
+				</div>
+			</div>
+		</div>
+		<div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
+			<div class="tpl-stat">
+				<div class="stat-icon" style="background:#7860c0;"><i class="layui-icon layui-icon-engine"></i></div>
+				<div>
+					<div class="stat-value">{$cmsVersion}</div>
+					<div class="stat-label">当前 CMS 版本</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="gen-tip">
+		<i class="layui-icon layui-icon-tips"></i>
+		模板目录：<b>templates/</b>，当前启用：<b>{$current}</b>。启用时会自动发布模板静态资源到 <b>/skin/&lt;模板名&gt;/</b>，切换后请刷新前台页面。
+	</div>
+
+	<!-- 模板列表 -->
+	<div class="layui-card tpl-panel">
+		<div class="layui-card-header">
+			<div class="tpl-panel-title">
+				<i class="layui-icon layui-icon-app"></i>模板列表
+				<span class="layui-word-aux">点击「启用」切换前台模板</span>
+			</div>
+			<button type="button" class="layui-btn layui-btn-sm layui-btn-color layui-btn-radius js-create-template" lay-event="dev"><i class="layui-icon layui-icon-console mr-1"></i>创建模板</button>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-row layui-col-space15 tpl-grid">
+				{volist name="templates" id="tpl"}
+				<div class="layui-col-xs6 layui-col-sm4 layui-col-md3">
+					<div class="tpl-card {if $tpl.name == $current}is-current{elseif $tpl.error != ''}is-error{/if}">
+						<div class="tpl-cover">
+							{if $tpl.name == $current}
+							{elseif $tpl.error != '' /}
+							<i class="layui-icon layui-icon-about"></i>
+							{else /}
+							<i class="layui-icon layui-icon-template"></i>
+							{/if}
+							<span class="tpl-cover-code">{$tpl.name}</span>
+							{if $tpl.name == $current}<span class="tpl-cover-ribbon">使用中</span>{/if}
+						</div>
+
+						<div class="tpl-body">
+							<div class="tpl-title-row">
+								<h3 class="tpl-title">{if $tpl.typeTitle != ''}<span style="font-weight:100">[{$tpl.typeTitle}]</span> {/if}{$tpl.title}</h3>
+								{if $tpl.name == $current}
+								<span class="tpl-badge tpl-badge--current">当前启用</span>
+								{elseif $tpl.error != '' /}
+								<span class="tpl-badge tpl-badge--error">不可用</span>
+								{/if}
+							</div>
+
+							<p class="tpl-desc">{$tpl.description|default='暂无模板说明'}</p>
+
+							<dl class="tpl-meta">
+								<div><dt>模板版本:</dt><dd>{$tpl.version|default='未提供'}</dd></div>
+								<div><dt>最低CMS版本:</dt><dd>{$tpl.minCmsVersion|default='不限'}</dd></div>
+								<div><dt>作者:</dt><dd>{$tpl.author|default='未提供'}</dd></div>
+								<div><dt>作者网址:</dt><dd>{notempty name="tpl.authorUrl"}<a href="{$tpl.authorUrl}" target="_blank" rel="noopener noreferrer">{$tpl.authorUrl}</a>{else/}未提供{/notempty}</dd></div>
+							</dl>
+
+							{if $tpl.error != ''}
+							<div class="tpl-error"><i class="layui-icon layui-icon-close-fill"></i><span>{$tpl.error}</span></div>
+							{/if}
+						</div>
+
+						<div class="tpl-ft">
+							{if $tpl.name == $current}
+							<span class="tpl-state">正在使用</span>
+							<button type="button" class="layui-btn layui-btn-disabled" disabled>已启用</button>
+							{elseif $tpl.error != '' /}
+							<span class="tpl-state">无法启用</span>
+							<button type="button" class="layui-btn layui-btn-disabled" disabled>启用</button>
+							{else /}
+							<span class="tpl-state">可切换到该模板</span>
+							<button type="button" class="layui-btn layui-btn-normal layui-btn-radius js-enable-template" data-name="{$tpl.name}" data-title="{$tpl.title}">启用</button>
+							{/if}
+						</div>
+					</div>
+				</div>
+				{/volist}
+			</div>
+
+			{empty name="templates"}
+			<div class="tpl-empty">
+				<i class="layui-icon layui-icon-survey"></i>
+				<p>templates 目录下暂无模板</p>
+			</div>
+			{/empty}
+		</div>
+	</div>
+</div>
+{/block}
+
+{block name="script"}
+<script>
+layui.use(['jquery', 'layer'], function () {
+    var $ = layui.jquery, layer = layui.layer, busy = false;
+    function escapeText(value) { return $('<div>').text(String(value || '')).html(); }
+
+    $('.js-refresh').on('click', function () { location.reload(); });
+
+    $('.js-create-template').on('click', function () {
+        var maxHeight = Math.max(260, $(window).height() - 32);
+        layer.open({
+            type: 2,
+            title: '创建模板',
+            content: MIU_ADMIN + '/template/setting?form=create',
+            area: [Math.min(760, $(window).width() - 24) + 'px', Math.min(720, maxHeight) + 'px'],
+            maxHeight: maxHeight,
+            success: function (layero, index) {
+                layero.find('iframe').on('load', function () {
+                    layer.iframeAuto(index);
+                    if (layero.height() > maxHeight) layer.style(index, {height: maxHeight + 'px'});
+                });
+            }
+        });
+    });
+
+    $('.js-enable-template').on('click', function () {
+        if (busy) return;
+        var $button = $(this);
+        layer.confirm('确定启用模板「' + escapeText($button.attr('data-title')) + '」吗？<br><span style="color:#999;">启用后会自动发布该模板的静态资源。</span>', {icon:3, title:'启用模板'}, function (index) {
+            if (busy) return;
+            layer.close(index);
+            busy = true;
+            $button.prop('disabled', true).addClass('layui-btn-disabled');
+            var loading = layer.msg('正在启用模板并同步静态资源…', {time:0, shade:0.08});
+            $.post(MIU_ADMIN + '/template/setting', {name:$button.attr('data-name')}).done(function (res) {
+                layer.close(loading);
+                if (res.code === 0) {
+                    layer.msg(res.msg, {icon:1});
+                    window.setTimeout(function () { location.reload(); }, 500);
+                } else {
+                    layer.alert(escapeText(res.msg || '启用失败').replace(/\n/g, '<br>'), {icon:2});
+                }
+            }).fail(function () {
+                layer.close(loading);
+                layer.alert('请求失败，请检查网络后重试', {icon:2});
+            }).always(function () {
+                busy = false;
+                $button.prop('disabled', false).removeClass('layui-btn-disabled');
+            });
+        });
+    });
+});
+</script>
+{/block}

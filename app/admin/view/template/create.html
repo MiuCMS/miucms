@@ -1,0 +1,66 @@
+{extend name="common/base"/}
+{block name="style"}
+<style>
+.scaffold-form{padding:22px 20px 12px;background:#fff}.scaffold-form .layui-form-label{width:105px}.scaffold-form .layui-input-block{margin-left:135px}.scaffold-note{padding:12px 16px;margin-bottom:20px;background:#f6f8fa;color:#667085;line-height:1.8;border-left:3px solid #1e9fff}.scaffold-form .layui-word-aux{margin-top:6px;font-size:12px}.scaffold-form textarea{min-height:70px}.scaffold-actions{padding-top:8px}@media(max-width:520px){.scaffold-form{padding:16px 12px}.scaffold-form .layui-form-label{float:none;text-align:left;padding-left:0;width:auto}.scaffold-form .layui-input-block{margin-left:0}}
+</style>
+{/block}
+{block name="body"}
+<form class="layui-form scaffold-form" lay-filter="templateScaffold" id="templateScaffold" data-occupied="{$occupiedNames}">
+    <div class="scaffold-note">仅生成对应类型的模板骨架与简单视觉样式，你可以在此基础上进行模板开发、修改等操作；<br/>生成的模板文件路径为/templates/&lt;模板标识&gt;/；<br/>模板包含各模型页面、搜索、标签页、三种语言包及模板标签的调用示例。</div>
+    <div class="layui-row layui-col-space16">
+        <div class="layui-col-md12"><div class="layui-form-item"><label class="layui-form-label">模板标识 *</label><div class="layui-input-block"><input type="text" name="name" class="layui-input" maxlength="32" lay-verify="required|templateName" placeholder="例如 mytheme" autocomplete="off"><div class="layui-word-aux">只允许字母、数字、下划线；禁止 default 和现有目录名，大小写视为相同。</div></div></div></div>
+        <div class="layui-col-md12"><div class="layui-form-item"><label class="layui-form-label">模板名称 *</label><div class="layui-input-block"><input type="text" name="title" class="layui-input" maxlength="80" lay-verify="required" placeholder="后台显示的模板名称" autocomplete="off"></div></div></div>
+        <div class="layui-col-md12"><div class="layui-form-item"><label class="layui-form-label">模板类型 *</label><div class="layui-input-block"><select name="type" lay-verify="required"><option value="corporate" selected>企业官网</option><option value="blog">博客站</option><option value="image">图片站</option><option value="video">视频站</option><option value="portal">资讯门户</option></select><div class="layui-word-aux"></div></div></div></div>
+        <div class="layui-col-md6"><div class="layui-form-item"><label class="layui-form-label">模板版本</label><div class="layui-input-block"><input type="text" name="version" class="layui-input" maxlength="64" value="1.0.0" lay-verify="templateVersion"></div></div></div>
+        <div class="layui-col-md6"><div class="layui-form-item"><label class="layui-form-label">最低 CMS 版本</label><div class="layui-input-block"><input type="text" name="minCmsVersion" class="layui-input" maxlength="64" value="{$cmsVersion}" lay-verify="templateVersion" placeholder="留空表示不限"></div></div></div>
+        <div class="layui-col-md12"><div class="layui-form-item"><label class="layui-form-label">作者</label><div class="layui-input-block"><input type="text" name="author" class="layui-input" maxlength="80" placeholder="作者名称（可选）" autocomplete="off"></div></div></div>
+        <div class="layui-col-md12"><div class="layui-form-item"><label class="layui-form-label">作者网址</label><div class="layui-input-block"><input type="text" name="authorUrl" class="layui-input" maxlength="2048" lay-verify="authorUrl" placeholder="https://example.com（可选）" autocomplete="off"></div></div></div>
+        <div class="layui-col-md12"><div class="layui-form-item"><label class="layui-form-label">模板简介</label><div class="layui-input-block"><textarea name="description" class="layui-textarea" maxlength="500" placeholder="模板用途与说明（可选）"></textarea></div></div></div>
+    </div>
+    <div class="layui-form-item scaffold-actions"><div class="layui-input-block"><button type="submit" class="layui-btn layui-btn-normal" lay-submit lay-filter="createTemplate">创建模板</button><button type="button" class="layui-btn layui-btn-primary" id="cancelCreateTemplate">取消</button></div></div>
+</form>
+{/block}
+{block name="script"}
+<script>
+layui.use(['jquery', 'form', 'layer'], function () {
+    var $ = layui.jquery, form = layui.form, layer = layui.layer, busy = false;
+    var occupied = JSON.parse($('#templateScaffold').attr('data-occupied') || '[]').map(function (name) { return name.toLowerCase(); });
+    function closeDialog() { parent.layer.close(parent.layer.getFrameIndex(window.name)); }
+    function escapeText(value) { return $('<div>').text(String(value || '')).html(); }
+    form.verify({
+        templateName: function (value) {
+            value = $.trim(value);
+            if (!/^[A-Za-z0-9_]{1,32}$/.test(value)) return '模板标识只能包含 1 至 32 位字母、数字和下划线';
+            if (value.toLowerCase() === 'default') return 'default 是系统保留的模板标识，请使用其他名称';
+            if (occupied.indexOf(value.toLowerCase()) !== -1) return '模板标识已被现有目录或文件使用，请更换名称';
+        },
+        templateVersion: function (value) { if (value && !/^\d+(?:\.\d+)*(?:[-+][0-9A-Za-z.-]+)?$/.test(value)) return '请填写有效的版本号，例如 1.0.0'; },
+        authorUrl: function (value) { if (value && !/^https?:\/\/[^\s]+$/i.test(value)) return '作者网址请填写有效的 HTTP 或 HTTPS 地址'; }
+    });
+    $('#cancelCreateTemplate').on('click', function () { if (!busy) closeDialog(); });
+    form.on('submit(createTemplate)', function (data) {
+        if (busy) return false;
+        busy = true;
+        var $button = $(data.elem).prop('disabled', true).addClass('layui-btn-disabled');
+        var loading = layer.msg('正在创建模板…', {time: 0, shade: 0.08});
+        data.field.operation = 'create';
+        $.post(MIU_ADMIN + '/template/setting', data.field).done(function (res) {
+            if (res.code !== 0) { layer.alert(escapeText(res.msg || '创建失败'), {icon: 2}); return; }
+            var $files = $('<div>').css({maxHeight: '260px', overflow: 'auto', marginTop: '12px'});
+            $.each(res.data || [], function (_, file) { $files.append($('<div>').text(file)); });
+            var $message = $('<div>').append($('<p>').text(res.msg)).append($files);
+            parent.layer.alert($message.html(), {icon: 1, title: '模板已创建'}, function (index) {
+                parent.layer.close(index);
+                closeDialog();
+                parent.location.reload();
+            });
+        }).fail(function () { layer.alert('请求失败，请检查网络后重试', {icon: 2}); }).always(function () {
+            layer.close(loading);
+            busy = false;
+            $button.prop('disabled', false).removeClass('layui-btn-disabled');
+        });
+        return false;
+    });
+});
+</script>
+{/block}

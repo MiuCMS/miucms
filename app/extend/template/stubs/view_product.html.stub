@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body>
+{include file="header" /}
+<main id="main" class="section container">
+    {miu:position /}
+    <section class="product-summary">
+        <div>{notempty name="doc.litpic"}<img class="product-cover" src="{$doc.litpic}" alt="{$doc.title}">{else/}<div class="image-placeholder">{miu:lang key='noImage' /}</div>{/notempty}</div>
+        <div><h1>{$doc.title}</h1><p>{$doc.title_ext_1|default=''}</p><p class="product-price">{miu:lang key='price' /}：{$doc.price|default=''}</p>{notempty name="doc.buy_url"}<a class="button" href="{$doc.buy_url}" target="_blank" rel="noopener noreferrer">{miu:lang key='buy' /}</a>{/notempty}</div>
+    </section>
+    {include file="gallery" /}
+    <article class="reading-layout">{include file="document_body" /}</article>
+    {include file="detail_end" /}
+</main>
+{include file="footer" /}
+</body>
+</html>

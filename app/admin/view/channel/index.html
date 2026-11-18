@@ -1,0 +1,113 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-3">
+	<table class="layui-hide" id="channel" lay-filter="channel"></table>
+</div>
+
+<script type="text/html" id="status">
+	{{# if(d.is_system == 1){ }}
+	<i class="layui-icon {{#  if(d.status == 1){ }}layui-icon-ok{{#  } else { }}layui-icon-close{{#  } }}"></i>
+	{{#  } else { }}
+		<input type="checkbox" name="status" value="{{= d.id }}" title="正常|禁用" lay-skin="switch" lay-filter="fieldEdit" {{= d.status == 1 ? "checked" : "" }}>
+	{{# } }}
+</script>
+<script type="text/html" id="is_system">
+	{{# if(d.is_system == 1){ }}
+	<span type="button" class="layui-btn layui-btn-xs layui-btn-primary layui-border-blue">系统模型</span>
+	{{#  } else { }}
+	<span type="button" class="layui-btn layui-btn-xs layui-btn-primary layui-border-green">自建模型</span>
+	{{# } }}
+</script>
+<script type="text/html" id="handle">
+	<span class="layui-btn-group">
+		{{# if(d.is_system == 0){ }}<button class="layui-btn layui-btn-xs" lay-event="edit">编辑</button>{{# } }}
+		<button class="layui-btn layui-btn-normal layui-btn-xs" lay-event="field">管理字段</button>
+		{{# if(d.is_system == 0){ }}<button class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</button>{{# } }}
+	</span>
+  </div>
+</script>
+<script type="text/html" id="toolbarDemo">
+	<div class="layui-btn-container">
+	<button class="layui-btn layui-btn-sm layui-btn-normal layui-btn-color layui-btn-radius" lay-event="add">+ 新建模型</button>
+  </div>
+</script>
+
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['tool'],function(){
+		var treeTable = layui.treeTable,tool = layui.tool, form = layui.form;
+		layui.trees = treeTable.render({
+			elem: '#channel',
+			title: '模型列表',
+			toolbar: '#toolbarDemo',
+			defaultToolbar:[],
+			url: "{:url('admin/channel/index')}", //数据接口
+			cols: [[
+				{field: 'id',width: 80,title: 'ID',align: 'center'},
+				{field: 'title', title: '模型名称',},
+				{field: 'nid', title: '模型标识'},
+				{field: 'is_system',width: 80,toolbar: '#is_system',title: '模型类型',align: 'center'},
+				{field: 'field_count',width: 80,title: '字段数量',align: 'center'},
+				{field: 'status', title: '状态', toolbar: '#status', align: 'center', width: 120},
+				{ title: '操作', align: 'left',toolbar: '#handle'}
+			]]
+		});
+
+		//表头工具栏事件
+		treeTable.on('toolbar(channel)', function (obj) {
+			if (obj.event === 'add') {
+				tool.side("{:url('admin/channel/add')}");
+				return;
+			}
+		});
+		//监听行工具事件
+		treeTable.on('tool(channel)', function (obj) {
+			var data = obj.data;
+			if (obj.event === 'edit') {
+				tool.side("{:url('admin/channel/add')}?id=" + obj.data.id);
+				return;
+			}
+			if (obj.event === 'field') {
+				tool.side("{:url('admin/channel/field')}?channel_id=" + obj.data.id);
+				return;
+			}
+			if (obj.event === 'del') {
+				layer.confirm('确定删除该模型吗？<br/><b style="color:red;">该操作会删除模型对应的表，不可恢复！<br/>谨慎操作！</b>', {
+					icon: 3,
+					title: '提示'
+				}, function (index) {
+					let callback = function (e) {
+						if (e.code == 0) {
+							layer.msg(e.msg, {icon: 1});
+						}else{
+							layer.msg(e.msg, {icon: 2});
+						}
+						setTimeout(function(){
+							layui.trees.reloadData();
+						},300)
+					}
+					tool.delete("{:url('admin/channel/delete')}", { id: data.id }, callback);
+					layer.close(index);
+				});
+			}
+		});
+		// 状态 - 开关操作
+		form.on('switch(fieldEdit)', function(obj){
+			console.log(this)
+			var id = this.value;
+			var name = this.name;
+			var value = obj.elem.checked==true?1:0;
+			// 编辑后续操作，如提交更新请求，以完成真实的数据更新
+			tool.post("{:url('admin//admin/channel/edit_field')}", { field: name,value:value,id:id }, function(data) {
+				layer.tips(data.msg,obj.othis);
+			});
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

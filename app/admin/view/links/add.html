@@ -1,0 +1,101 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<style>
+	body{background: #fff;}
+	.layui-card{padding-bottom: 50px;}
+	.layui-form-item{margin-bottom: 20px;}
+</style>
+<div class="layui-card">
+	<form class="layui-form conf-layout p-page" lay-filter="webform">
+	<h3 class="pb-3">友情链接</h3>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">网站名称<font>*</font></label>
+		<div class="layui-input-block">
+			<input type="text" name="name" lay-verify="required" placeholder="请输入网站名称" lay-reqText="请输入网站名称" autocomplete="off" class="layui-input" value="{$links.name|default=''}">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">网站Logo</label>
+		<div class="layui-input-block">
+			<div class="layui-inline marginr-0">
+				<span style="display:inline-flex;align-items:center;">
+					<i class="layui-icon layui-icon-picture" style="margin-right:5px;cursor:pointer;" id="logo-preview-icon"></i>
+					<input type="text" id="logo" name="logo" lay-affix="clear" autocomplete="off" class="layui-input" style="width:370px;" placeholder="点击上传或输入图片地址" value="{$links.logo|default=''}">
+				</span>
+			</div>
+			<div class="layui-inline">
+				<button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue uploadBtn" data-bind="logo">选择上传</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">网站链接<font>*</font></label>
+		<div class="layui-input-block">
+			<input type="text" name="src" lay-verify="required" placeholder="请输入网站链接" lay-reqText="请输入网站链接" autocomplete="off" class="layui-input" value="{$links.src|default=''}">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">新窗口打开</label>
+		<div class="layui-input-block">
+			{notempty name="$links.target" }
+			<input type="radio" name="target" value="1" title="是" {eq name="$links.target" value="1" }checked{/eq}>
+			<input type="radio" name="target" value="0" title="否" {eq name="$links.target" value="0" }checked{/eq}>
+			{else/}
+			<input type="radio" name="target" value="1" title="是" checked>
+			<input type="radio" name="target" value="0" title="否">
+			{/notempty}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">排序</label>
+		<div class="layui-input-block">
+			<input type="text" name="sort" placeholder="请输入排序，数字" autocomplete="off" class="layui-input" value="{$links.sort|default='0'}">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<div class="layui-input-block">
+			<input type="hidden" name="id" value="{$id}" />
+			<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+			<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+		</div>
+	</div>
+	</form>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['tool'],function(){
+		var form = layui.form,tool=layui.tool;
+		//图片：打开文件管理器选择
+		$('.uploadBtn').on('click', function(){
+			openFileManager($(this).attr('data-bind'));
+			return false;
+		});
+		//图片预览
+		initThumbPreview('logo', 'logo-preview-icon');
+
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			let callback = function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.sideClose(1000);
+				}
+			}
+			tool.post("{:url('admin/links/add')}", data.field, callback);
+			return false;
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

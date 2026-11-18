@@ -1,0 +1,136 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<form class="layui-form">
+<div class="layui-tabs layui-tab-brief layui-container">
+	<ul class="layui-tabs-header">
+		<li class="layui-this">基本设置</li>
+		<li>高级设置</li>
+	</ul>
+	<div class="layui-tabs-body">
+		<div class="layui-tabs-item layui-show">
+			<div class="layui-row layui-col-space16">
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">表单名称<font>*</font></label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								<input type="text" name="form_name" lay-verify="required" placeholder="例如：预约参观、联系我们" lay-reqText="请输入表单名称" autocomplete="off" class="layui-input" value="{$info.form_name|default=''}">
+								{tips tips="方便后台管理时识别，前台不显示" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">关联栏目</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								<select name="nav_id">
+									<option value="0" {eq name="nav_id_cur" value="0"}selected{/eq}>不关联</option>
+									{volist name="navs" id="n"}
+									<option value="{$n.id}" {eq name="nav_id_cur" value="$n.id"}selected{/eq}>{$n.title}</option>
+									{/volist}
+								</select>
+								{tips tips="绑定栏目后，前台该栏目下可直接调用此表单" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+				<div class="layui-col-md6">
+					<div class="layui-form-item">
+						<label class="layui-form-label">表单说明</label>
+						<div class="layui-input-block">
+							<textarea name="intro" placeholder="这个表单是干什么用的，方便自己以后认（前台不显示）" class="layui-textarea" style="height:80px;">{$info.intro|default=''}</textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="layui-tabs-item">
+			<div class="layui-row layui-col-space16">
+				<div class="layui-col-md3">
+					<div class="layui-form-item">
+						<label class="layui-form-label">状态</label>
+						<div class="layui-input-block">
+							{notempty name="$info"}
+							<input type="radio" name="status" value="1" title="开启" {eq name="$info.status" value="1" }checked{/eq}>
+							<input type="radio" name="status" value="0" title="关闭" {eq name="$info.status" value="0" }checked{/eq}>
+							{else/}
+							<input type="radio" name="status" value="1" title="开启" checked>
+							<input type="radio" name="status" value="0" title="关闭">
+							{/notempty}
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+				<div class="layui-col-md3">
+					<div class="layui-form-item">
+						<label class="layui-form-label">开启审核</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								{notempty name="$info"}
+								<input type="radio" name="open_examine" value="1" title="是" {eq name="$info.open_examine" value="1" }checked{/eq}>
+								<input type="radio" name="open_examine" value="0" title="否" {eq name="$info.open_examine" value="0" }checked{/eq}>
+								{else/}
+								<input type="radio" name="open_examine" value="1" title="是">
+								<input type="radio" name="open_examine" value="0" title="否" checked>
+								{/notempty}
+								{tips tips="开启后，留言需后台审核才显示" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+				<div class="layui-col-md3">
+					<div class="layui-form-item">
+						<label class="layui-form-label">开启回复</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								{notempty name="$info"}
+								<input type="radio" name="open_reply" value="1" title="是" {eq name="$info.open_reply" value="1" }checked{/eq}>
+								<input type="radio" name="open_reply" value="0" title="否" {eq name="$info.open_reply" value="0" }checked{/eq}>
+								{else/}
+								<input type="radio" name="open_reply" value="1" title="是">
+								<input type="radio" name="open_reply" value="0" title="否" checked>
+								{/notempty}
+								{tips tips="开启后，后台可以对留言进行回复" /}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="layui-form-item mt-3">
+	<div class="layui-input-block">
+		<input type="hidden" name="id" value="{$id}" />
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+	</div>
+</div>
+</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['tool','form'],function(){
+		var form = layui.form, tool = layui.tool;
+		form.on('submit(webform)', function (data) {
+			tool.post("{:url('admin/form/add')}", data.field, function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.sideClose(1000);
+				}
+			});
+			return false;
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

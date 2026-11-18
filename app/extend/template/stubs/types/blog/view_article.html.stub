@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body class="theme-blog">
+{include file="header" /}
+<main id="main" class="section container reading-layout blog-reading">
+    {miu:position /}
+    <article><header class="blog-article-heading"><p class="blog-kicker">{$doc.nav_name}</p><h1>{$doc.title}</h1><p>{$doc.title_ext_1|default=''}</p><div class="card-meta"><time>{$doc.date}</time><span>{$doc.author|default=''}</span></div></header>
+        {notempty name="doc.litpic"}<img class="document-cover" src="{$doc.litpic}" alt="{$doc.title}" loading="lazy">{/notempty}
+        {include file="document_body" /}
+    </article>
+    {include file="detail_end" /}
+</main>
+{include file="footer" /}
+</body>
+</html>

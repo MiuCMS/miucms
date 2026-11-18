@@ -1,0 +1,225 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-3">
+	<form class="layui-form miucms-form-bar border-t border-x">
+		<div class="layui-input-inline" style="width:300px;">
+			<input type="text" name="keywords" placeholder="表单名称" class="layui-input" />
+		</div>
+		<div class="layui-input-inline" style="width:150px">
+			<button class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="table-search"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+			<button type="reset" class="layui-btn layui-btn-reset" lay-filter="table-reset">清空</button>
+		</div>
+	</form>
+	<table class="layui-hide" id="form" lay-filter="form"></table>
+</div>
+
+<script type="text/html" id="toolbarDemo">
+	<div class="layui-btn-container">
+		<button class="layui-btn layui-btn-sm layui-btn-color layui-btn-radius" lay-event="add">+ 添加表单</button>
+	</div>
+</script>
+<script type="text/html" id="barDemo">
+<div class="layui-btn-group">
+	<a class="layui-btn layui-btn-xs layui-bg-cyan tab-a" data-title="留言管理" data-id="1038" data-href="{:url('admin/form/message')}?form_id={{=d.id}}" >留言</a>
+	<a class="layui-btn layui-bg-blue layui-btn-xs" lay-event="edit">编辑</a>
+	<a class="layui-btn layui-btn-xs" lay-event="field">字段管理</a>
+	<a class="layui-btn layui-btn-xs layui-bg-green" lay-event="demo">调用示例</a>
+	<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</div>
+</script>
+<script type="text/html" id="statusTpl">
+	{{# if(d.status == 1){ }}<span class="layui-badge layui-bg-green">开启</span>{{# } else { }}<span class="layui-badge layui-bg-gray">关闭</span>{{# } }}
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['tool','tablePlus'],function(){
+		var table = layui.tablePlus, tool = layui.tool, layer = layui.miulayer, $ = layui.jquery;
+		var FIELD_URL = "{:url('admin/form/field')}";
+
+		layui.pageTable = table.render({
+			elem: '#form',
+			title: '表单列表',
+			toolbar: '#toolbarDemo',
+			defaultToolbar: [],
+			url: "{:url('admin/form/index')}",
+			page: true,
+			limit: 20,
+			cols: [
+				[
+					{field: 'id', title: 'ID号', width: 70, align: 'center'},
+					{field: 'form_name', title: '表单名称', minWidth: 160},
+					{field: 'nav_name', title: '关联栏目', width: 130, templet: function (d) {
+						return d.nav_name ? layui.util.escape(d.nav_name) : '<span style="color:#ccc;">未关联</span>';
+					}},
+					{field: 'field_count', title: '字段数', width: 90, align: 'center'},
+					{field: 'message_count', title: '留言数', width: 90, align: 'center'},
+					{field: 'unread_count', title: '未读', width: 90, align: 'center', templet: function (d) {
+						return d.unread_count > 0 ? '<span class="layui-badge tab-a" data-id="1038" data-title="留言管理" data-href="{:url('admin/form/message')}?form_id=' + d.id + '" title="查看留言" style="cursor:pointer;">' + d.unread_count + '</span>' : '0';
+					}},
+					{field: 'status', title: '状态', width: 90, align: 'center', toolbar: '#statusTpl'},
+					{field: 'add_time', title: '创建时间', width: 165, templet: function (d) {
+						return formatTime(d.add_time);
+					}},
+					{field: 'right', title: '操作', toolbar: '#barDemo', width: 330, align: 'center'}
+				]
+			]
+		});
+
+		//表头工具栏
+		table.on('toolbar(form)', function (obj) {
+			if (obj.event === 'add') {
+				tool.side("{:url('admin/form/add')}", '80%');
+			}
+		});
+
+		//行操作
+		table.on('tool(form)', function (obj) {
+			var data = obj.data;
+			if (obj.event === 'edit') {
+				tool.side("{:url('admin/form/add')}?id=" + data.id, '80%');
+				return;
+			}
+			if (obj.event === 'field') {
+				tool.side("{:url('admin/form/field')}?form_id=" + data.id, '80%');
+				return;
+			}
+			if (obj.event === 'demo') {
+				showClueDemo(data);
+				return;
+			}
+			if (obj.event === 'del') {
+				layer.confirm('删除表单会把它下面的字段和已收到的留言一起删掉，确定吗？', {icon: 3, title: '提示'}, function (index) {
+					tool.delete("{:url('admin/form/delete')}", {id: data.id}, function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							obj.del();
+						}
+					});
+					layer.close(index);
+				});
+			}
+		});
+
+		//调用示例：把表单每个字段的变量名列出来，方便前台写模板
+		function showClueDemo(data) {
+			tool.get(FIELD_URL, {form_id: data.id, limit: 999}, function (res) {
+				if (res.code != 0) {
+					layer.msg(res.msg || '读取字段失败');
+					return;
+				}
+				layer.open({
+					type: 1,
+					title: '调用示例：' + (data.form_name || ''),
+					area: ['880px', 'auto'],
+					//高度自适应：内容撑高弹窗，超过 maxHeight 由 layer 截断并出滚动条
+					maxHeight: Math.min(720, Math.round($(window).height() * 0.85)),
+					shadeClose: true,
+					btn: ['关闭'],
+					btnAlign: 'c',
+					content: buildClueDemoHtml(data, res.data || []),
+					yes: function (i) { layer.close(i); }
+				});
+			});
+		}
+
+		//点一下表格里带 .miu-sel 的变量：选中它并复制到剪贴板
+		$(document).on('click', '.miu-sel', function () {
+			var text = $(this).text();
+
+			//1) 选中
+			try {
+				var range = document.createRange();
+				range.selectNodeContents(this);
+				var sel = window.getSelection();
+				sel.removeAllRanges();
+				sel.addRange(range);
+			} catch (e) {}
+
+			//2) 复制：优先用 clipboard API（需 https / localhost），不可用就退回 execCommand
+			var execCopy = function () {
+				try { return document.execCommand('copy'); } catch (e) { return false; }
+			};
+			var tip = function (ok) {
+				layer.msg(ok ? ('已复制') : '复制失败，请手动选中复制', {time: ok ? 1200 : 2000,offset:'t'});
+			};
+			if (navigator.clipboard && navigator.clipboard.writeText) {
+				navigator.clipboard.writeText(text).then(function () { tip(true); }, function () { tip(execCopy()); });
+			} else {
+				tip(execCopy());
+			}
+		});
+
+		{literal}
+		//拼「调用示例」弹层内容。这段用 literal 包住，模板引擎才不会把里面的 {$vo.xxx} 当变量解析
+		function buildClueDemoHtml(data, fields) {
+			var esc = layui.util.escape;
+			var formid = data.id;
+
+			//字段变量表
+			var rows = '';
+			layui.each(fields, function (i, f) {
+				var n = f.id;
+				rows += '<tr>'
+					+ '<td align="center">' + n + '</td>'
+					+ '<td>' + esc(f.attr_name || '') + '</td>'
+					+ '<td align="center">' + esc(f.type_name || '') + '</td>'
+					+ '<td><code class="miu-sel" title="点击复制">{$vo.attr_' + n + '}</code></td>'
+					+ '<td><code class="miu-sel" title="点击复制">{$vo.itemname_' + n + '}</code></td>'
+					+ '<td><code class="miu-sel" title="点击复制">{$vo.type_' + n + '}</code> / <code class="miu-sel" title="点击复制">{$vo.typename_' + n + '}</code></td>'
+					+ '<td align="center">' + (f.required == 1 ? '是' : '') + '</td>'
+					+ '</tr>';
+			});
+			if (!rows) {
+				rows = '<tr><td colspan="7" align="center" style="color:#999;padding:18px;">这个表单还没有字段，先去「字段管理」加字段</td></tr>';
+			}
+
+			//示例代码骨架（按字段类型生成对应的控件）
+			var code = "{miu:clue formid='" + formid + "'}\n"
+				+ '<form method="POST" action="{$vo.action}" onsubmit="return miuClueSubmit(this)" autocomplete="off">\n';
+			layui.each(fields, function (i, f) {
+				var n = f.id;
+				var nm = '{$vo.attr_' + n + '}';
+				var ph = '{$vo.itemname_' + n + '}';
+				var req = (f.required == 1) ? ' required' : '';
+				var t = parseInt(f.attr_input_type, 10);
+				if (t === 2) {
+					code += '    <textarea name="' + nm + '" placeholder="' + ph + '"' + req + '></textarea>\n';
+				} else if (t === 1 || t === 3 || t === 4) {
+					code += '    <select name="' + nm + '">\n';
+					code += '        <option value="">请选择</option>\n';
+					code += '        {volist name="vo.options_' + n + '" id="opt"}<option value="{$opt}">{$opt}</option>{/volist}\n';
+					code += '    </select>\n';
+				} else {
+					var itype = (t === 6 ? 'tel' : (t === 7 ? 'email' : (t === 10 ? 'date' : 'text')));
+					code += '    <input type="' + itype + '" name="' + nm + '" placeholder="' + ph + '"' + req + '>\n';
+				}
+			});
+			code += '    {$vo.hidden|raw}\n</form>\n{$vo.script|raw}\n{/miu:clue}';
+
+			return '<style>.miu-sel{cursor:pointer;}.miu-sel:hover{color:#1e9fff;}</style>'
+				+ '<div style="padding:16px 18px;max-height:560px;">'
+				+ '<div style="margin-bottom:10px;color:#666;">前台用 <code>{miu:clue formid=\'' + formid + '\'}</code> 包住表单，字段变量如下（<b>N 就是字段ID</b>，字段删了重建编号会变，改模板前先去「字段管理」核对）：</div>'
+				+ '<table class="layui-table" lay-size="sm" style="margin:0 0 14px;">'
+				+ '<colgroup><col width="70"><col><col width="90"><col width="150"><col width="165"><col width="215"><col width="80"></colgroup>'
+				+ '<thead><tr><th align="center">字段ID</th><th>字段名称</th><th align="center">类型</th><th>提交name</th><th>标题变量</th><th>类型变量</th><th align="center">是否必填</th></tr></thead>'
+				+ '<tbody>' + rows + '</tbody></table>'
+				+ '<div style="margin-bottom:6px;color:#666;">示例代码（点一下文本框会全选，Ctrl+C 复制）：</div>'
+				+ '<textarea readonly onclick="this.select()" spellcheck="false" style="width:100%;height:200px;font-family:Consolas,Monaco,monospace;font-size:12px;line-height:1.6;padding:10px;border:1px solid #e6e6e6;border-radius:4px;background:#fafafa;resize:vertical;box-sizing:border-box;">'
+				+ esc(code) + '</textarea>'
+				+ '<div style="margin-top:5px;color:#999;font-size:12px;line-height:1.9;">'
+				+ '<div>· 下拉框 / 单选框 / 多选框 才有可选项：<code>{$vo.options_N}</code>（N 换成该字段的 ID）是一个选项数组，用 <code>{volist name="vo.options_N" id="opt"}</code> 循环输出，循环体内的 <code>{$opt}</code> 就是每个选项的值（放进 <code>&lt;option value="{$opt}"&gt;</code>）。单行文本 / 多行文本 / 手机 / 邮箱 / 时间 没有可选项。</div>'
+				+ '<div style="margin-top:5px;">· <b>{$vo.hidden}</b> 和 <b>{$vo.script}</b> 必须带 <code>|raw</code>，否则会被模板引擎转义，隐藏域 / JS 会失效。</div>'
+				+ '<div style="margin-top:5px;">· 表单一共 ' + fields.length + ' 个字段。</div>'
+				+ '</div>'
+				+ '</div>';
+		}
+		{/literal}
+	})
+</script>
+{/block}
+<!-- /脚本 -->

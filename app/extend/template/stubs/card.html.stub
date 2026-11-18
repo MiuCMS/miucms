@@ -1,0 +1,5 @@
+<!-- 此片段位于列表循环内部，vo 为当前文档。 -->
+<article class="document-card">
+    <a class="card-cover" href="{$vo.url}">{notempty name="vo.litpic"}<img src="{$vo.litpic}" alt="{$vo.title}" loading="lazy">{else/}<span>{miu:lang key='noImage' /}</span>{/notempty}</a>
+    <div class="card-content"><div class="card-meta"><span>{$vo.nav_name}</span><time>{$vo.date}</time></div><h2><a href="{$vo.url}">{$vo.title}</a></h2><p>{$vo.seo_description|default=''}</p><a class="text-link" href="{$vo.url}">{miu:lang key='more' /} <span aria-hidden="true">→</span></a></div>
+</article>

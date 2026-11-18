@@ -1,0 +1,275 @@
+{extend name="common/base"/}
+{block name="style"}
+
+<style>
+    .dashboard-num table {width: 100%;}
+    .dashboard-num td {text-align: center; padding: 16px 0; width: 16.6%;border-left: 1px solid #f1f1f1; position: relative;}
+    .dashboard-num td:nth-child(1) { border-left: none}
+    .dashboard-num .num-title { padding-bottom: 10px; color: #999;}
+    .dashboard-num .blue {font-size: 18px; font-weight: 100;padding:6px 0;font-family: Georgia, "Times New Roman", serif;}
+    .dashboard-num .blue.tab-a {font-size: 22px; font-weight: 900;}
+	.quick-nav{display:flex;flex-wrap:wrap;gap:12px;}
+	.quick-nav-item{box-sizing:border-box;display:flex;flex:0 1 calc(16.6667% - 10px);min-width:96px;flex-direction:column;align-items:center;text-align:center;padding:0 8px 12px;cursor:pointer;}
+	.dashboard-num.quick .quick-nav-item .blue{display:flex;align-items:center;justify-content:center;min-height:58px;line-height:1;padding:8px 0 4px;}
+    .dashboard-num td .badge span { padding: 2px 4px; font-size: 12px; border-radius: 0 0 0 4px;}
+	.dashboard-num.quick .quick-nav-item:hover .num-title{color:#1A75FF;}
+	.dashboard-num.quick .blue .miuico {
+		font-size: 36px;line-height: 42px;opacity: .65;transition:filter .3s ease,opacity .3s ease,transform .3s ease;
+		-webkit-filter: drop-shadow(4px 4px 4px rgba(97, 97, 97, 0.4));
+		filter: drop-shadow(4px 4px 4px rgba(97, 97, 97, 0.4));
+		background:linear-gradient(85deg,#0062ff -3.15%,#cb50ff 98.89%);background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent
+	}
+	.dashboard-num.quick .quick-nav-item:hover .miuico{
+		opacity:1;background-image:linear-gradient(85deg,#0056e8 -3.15%,#b13ef0 98.89%);
+	}
+	.dashboard-num:not(.quick) .blue {
+		opacity:.95;transition:filter .3s ease,opacity .3s ease,transform .3s ease;
+		-webkit-filter:drop-shadow(4px 4px 4px rgba(97,97,97,.4));
+		filter:drop-shadow(4px 4px 4px rgba(97,97,97,.4));
+		background:linear-gradient(85deg,#0062ff -3.15%,#cb50ff 98.89%);background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent
+	}
+	.dashboard-num:not(.quick) td:hover .blue {
+		opacity:1;transform:scale(1.1);background-image:linear-gradient(85deg,#0056e8 -3.15%,#b13ef0 98.89%)
+	}
+    .dashboard-total td {border-top: 1px solid #f1f1f1}
+    .dashboard-logs .layui-timeline-item {padding-bottom: 1px;}
+    .info-td { width: 110px; text-align: right;background-color: #fafafa; color: #999; padding: 5px 3px;}
+	.layui-card-body .layui-timeline-title {padding-bottom: 0;font-size: 14px;}
+	.layui-card-body .layui-timeline-item {padding-bottom:0;}
+	.tab-a{cursor: pointer;}
+	.dashboard-access-chart {
+		min-height: 244px;
+		border-left: 1px solid rgba(128, 128, 128, .24);
+		border-bottom: 1px solid rgba(128, 128, 128, .24);
+		background: repeating-linear-gradient(to top, transparent 0 calc(20% - 1px), rgba(128, 128, 128, .12) calc(20% - 1px) 20%);
+	}
+	.dashboard-access-year {
+		min-height: 220px;
+		background: repeating-linear-gradient(to right, transparent 0 calc(100% / 12 - 1px), rgba(128, 128, 128, .12) calc(100% / 12 - 1px) calc(100% / 12)),
+			repeating-linear-gradient(to top, transparent 0 calc(100% / 7 - 1px), rgba(128, 128, 128, .12) calc(100% / 7 - 1px) calc(100% / 7));
+	}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-3">
+<div class="layui-row layui-col-space12">
+	<div class="layui-col-md8">
+		<div class="layui-row layui-col-space12">
+			<div class="layui-col-md12">
+				<div class="layui-card dashboard-num quick">
+					<div class="layui-card-title"><i class="layui-icon layui-icon-flag"></i> 快捷导航</div>
+					<div class="quick-nav">
+						<div class="quick-nav-item tab-a" data-title="网站配置" data-id="1015" data-href="{:url('admin/conf/index')}">
+							<div class="blue"><i class="layui-icon miu-quanju-f miuico"></i></div>
+							<div class="num-title">网站配置</div>
+						</div>
+						<div class="quick-nav-item tab-a" data-title="URL配置" data-id="1026" data-href="{:url('admin/seo/index')}">
+							<div class="blue"><i class="layui-icon miuai-seo miuico"></i></div>
+							<div class="num-title">SEO设置</div>
+						</div>
+						<div class="quick-nav-item tab-a" data-title="Sitemap" data-id="55" data-href="{:url('admin/seo/sitemap')}">
+							<div class="blue"><i class="layui-icon miu-ditu-f miuico"></i></div>
+							<div class="num-title">Sitemap</div>
+						</div>
+						<div class="quick-nav-item tab-a" data-title="栏目" data-id="49" data-href="{:url('admin/nav/index')}">
+							<div class="blue"><i class="layui-icon miu-guanggao-f miuico"></i></div>
+							<div class="num-title">栏目管理</div>
+						</div>
+						<div class="quick-nav-item tab-a" data-title="内容" data-id="1000" data-href="{:url('admin/document/index')}">
+							<div class="blue"><i class="layui-icon miu-neirong-f miuico"></i></div>
+							<div class="num-title">文档管理</div>
+						</div>
+						{$dashboardShortcuts|raw}
+						<div class="quick-nav-item tab-a" data-title="留言管理" data-id="1038" data-href="{:url('admin/form/message')}">
+							<div class="blue"><i class="layui-icon miu-liuyan-f miuico"></i></div>
+							<div class="num-title">留言管理</div>
+						</div>
+						<div class="quick-nav-item tab-a" data-title="模型管理" data-id="119" data-href="{:url('admin/channel/index')}">
+							<div class="blue"><i class="layui-icon miu-xitong-f miuico"></i></div>
+							<div class="num-title">模型管理</div>
+						</div>
+						<div class="quick-nav-item tab-a" data-title="页面生成" data-id="1031" data-href="{:url('admin/seo/createhtml')}">
+							<div class="blue"><i class="layui-icon miuai-shengchengyemian miuico"></i></div>
+							<div class="num-title">页面生成</div>
+						</div>
+						<div class="quick-nav-item tab-a" data-title="插件" data-id="1051" data-href="{:url('admin/plugin/index')}">
+							<div class="blue"><i class="layui-icon layui-icon-app miuico"></i></div>
+							<div class="num-title">插件</div>
+						</div>
+						<div class="quick-nav-item tab-a" data-title="文件管理器" data-id="42" data-href="{:url('admin/files/index')}">
+							<div class="blue"><i class="layui-icon miu-wenjianjia-f miuico"></i></div>
+							<div class="num-title">文件管理器</div>
+						</div>
+						<div class="quick-nav-item tab-a" data-title="模板管理" data-id="1097" data-href="{:url('admin/tplmanage/index')}">
+							<div class="blue"><i class="layui-icon layui-icon-template-1 miuico"></i></div>
+							<div class="num-title">模板管理</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-card dashboard-num">
+					<div class="layui-card-title"><i class="layui-icon layui-icon-chart-screen"></i> 数据统计</div>
+					<table>
+						<tr>
+						  <td>
+							  <div class="blue tab-a" data-title="管理员" data-id="25" data-href="{:url('admin/admin/index')}">{$adminCount}</div>
+							  <div class="num-title">系统用户</div>
+						  </td>
+						  <td>
+							<div class="blue tab-a" data-title="用户管理" data-id="78" data-href="{:url('admin/user/index')}">{$userCount}</div>
+							  <div class="num-title">前台用户</div>
+						  </td>
+						  <td>
+							<div class="blue tab-a" data-title="内容" data-id="1000" data-href="{:url('admin/document/index')}">{$docCount|default=0}</div>
+							  <div class="num-title">文档</div>
+						  </td>
+						  <td>
+							<div class="blue tab-a" data-title="附件管理" data-id="42" data-href="{:url('admin/files/index')}">{$fileCount}</div>
+							  <div class="num-title">附件</div>
+						  </td>
+						  <td>
+							<div class="blue tab-a" data-title="标签管理" data-id="70" data-href="{:url('admin/keywords/index')}">{$tagsCount}</div>
+							  <div class="num-title">标签</div>
+						  </td>
+						  <td>
+							<div class="blue tab-a" data-title="留言管理" data-id="1038" data-href="{:url('admin/form/message')}">{$messageCount}</div>
+							  <div class="num-title">线索</div>
+						  </td>
+						</tr>
+					</table>
+				</div>
+				{if condition="$showAccessPlaceholder"}
+				<div class="layui-card">
+					<div class="layui-card-title">
+						<i class="layui-icon layui-icon-chart" aria-hidden="true"></i> 访问统计
+						<small class="layui-icon layui-icon-tips layui-font-orange layui-font-12"> 请启用网站统计插件后才会显示</small>
+					</div>
+					<div class="layui-card-body">
+						<div class="dashboard-access-chart" aria-hidden="true"></div>
+					</div>
+				</div>
+				<div class="layui-card">
+					<div class="layui-card-title">
+						<i class="layui-icon layui-icon-chart" aria-hidden="true"></i> 近一年访问统计
+						<small class="layui-icon layui-icon-tips layui-font-orange layui-font-12"> 请启用网站统计插件后才会显示</small>
+					</div>
+					<div class="layui-card-body">
+						<div class="dashboard-access-chart dashboard-access-year" aria-hidden="true"></div>
+					</div>
+				</div>
+				{/if}
+				{$dashboardWidgets|raw}
+			</div>
+		</div>
+	</div>
+	<div class="layui-col-md4">
+		<div class="layui-card">
+			<div class="layui-card-title"><i class="layui-icon layui-icon-set-sm"></i> 系统信息</div>
+			<div class="px-3 pb-3">
+				<table class="layui-table" lay-skin="" lay-size="sm" style="margin:0">
+					{if condition="($install == true)"}
+					<tr>
+						<td class="info-td" style="color: #E94335; background-color:#f8f8f8">提醒：</td>
+						<td colspan="4" class="info-warning" style="color: #E94335; background-color:#f8f8f8">发现app目录下的install文件夹没删除，为了系统的安全,请手动去删除。</td>
+					</tr>
+					{/if}
+					<tr>
+						<td class="info-td">服务器系统</td>
+						<td>{:get_system_info('os')}</td>
+						<td class="info-td">PHP版本</td>
+						<td>{:get_system_info('php')}</td>
+					</tr>
+					<tr>
+						<td class="info-td">上传附件限制</td>
+						<td>{:get_system_config('upload_max_filesize')}M / {:get_system_info('upload_max_filesize')}</td>
+						<td class="info-td">执行超时时间</td>
+						<td class="info-value">{:get_system_info('max_execution_time')}</td>
+					</tr>
+					<tr>
+						<td class="info-td">米柚CMS版本</td>
+						<td colspan="3">{:CMS_VERSION}<a class="layui-badge layui-bg-blue" style="margin-left:8px"
+							href="{:config('official.docs')}/" target="_blank">开发文档</a></td>
+					</tr>
+					<tr>
+						<td class="info-td">ThinkPHP版本</td>
+						<td colspan="3">{$TP_VERSION}</td>
+					</tr>
+					<tr>
+						<td class="info-td">Layui版本</td>
+						<td colspan="3">{:LAYUI_VERSION}</td>
+					</tr>
+					<tr>
+						<td class="info-td">MiuCMS官网</td>
+						<td colspan="3"><a href="{:config('official.website')}" target="_blank">{:config('official.website')}</a></td>
+					</tr>
+					<tr>
+						<td class="info-td">BUG反馈</td>
+						<td colspan="3">5861860@qq.com</td>
+					</tr>
+					<tr>
+						<td class="info-td">QQ交流群</td>
+						<td colspan="3">685076572<br></td>
+					</tr>
+					
+				</table>
+			</div>
+		</div>
+
+		<div class="layui-card">
+			<div class="layui-card-title"><i class="layui-icon layui-icon-list"></i> 后台日志<a class="layui-icon layui-icon-eye layui-font-12 right tab-a" data-title="后台日志" data-id="29" data-href="{:url('admin/api/log_list')}" title="后台日志">&emsp;</a></div>
+			<div class="layui-card-body">
+				<ul class="layui-timeline" id="logs"></ul>
+			</div>
+		</div>
+	</div>
+</div>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	function getLogs() {
+		$.ajax({
+			url: "{:url('admin/api/get_log_list')}" ,
+			type: 'post',
+			data: {
+				page: 1,
+				limit: 20
+			},
+			success: function (e) {
+				if (e.code == 0) {
+					var html = '';
+					$.each(e.data, function (key, value) {
+						html += '<li class="layui-timeline-item">\
+										<i class="layui-icon layui-timeline-axis"></i>\
+										<div class="layui-timeline-content layui-text">\
+										  <div class="layui-timeline-title"><span title="'+ value.id + '">' + value.times + '</span>，' + value.content + '</div>\
+										</div>\
+									  </li>';
+					});
+					$('#logs').html(html);
+				}
+			}
+		})
+	}
+
+	layui.use(['tool'],function(){
+		var table = layui.table,tool = layui.tool;
+		$('body').on('click','[data-event="pay"]',function(){
+			var src=$(this).attr('src');
+			layer.open({
+				type:1,
+				title:'感谢您给作者加鸡腿🍗🍗',
+				content:'<img src="'+src+'" style="width:100%" align=center />',
+			});
+		})
+
+		getLogs();
+	})
+
+
+</script>
+{/block}
+<!-- /脚本 -->

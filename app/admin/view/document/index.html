@@ -1,0 +1,1033 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+
+<div class="doc-layout">
+  <div class="doc-nav-sidebar" id="docNavSidebar">
+    <div id="navTreeBox" class="doc-nav-tree"></div>
+    <div class="doc-nav-toggle" id="docNavToggle" title="收起/展开栏目导航">
+      <i class="layui-icon layui-icon-left"></i>
+    </div>
+  </div>
+  <!-- 栏目导航与内容区之间的分隔线，可左右拖动调整两边宽度 -->
+  <div class="doc-nav-resizer" id="docNavResizer" title="拖动调整栏目导航宽度"></div>
+  <div class="doc-main">
+    <div class="p-3" style="padding-top: 0;">
+	<form class="layui-form miucms-form-bar border-t border-x">
+		<div class="layui-form-item">
+			<div class="layui-inline">
+				<label class="layui-form-label">条件筛选：</label>
+				<div class="layui-input-inline" style="width:200px;">
+					<select name="nav_id">
+						<option value="">选择栏目</option>
+						{volist name="navsSearch" id="v"}
+						<option value="{$v.id}">{$v.title}</option>
+						{/volist}
+					</select>
+				</div>
+			</div>
+			<div class="layui-inline">
+				<div class="layui-input-inline" style="width:200px;">
+					<input type="text" name="keywords" placeholder="请输入关键字" lay-affix="clear" class="layui-input" autocomplete="off" />
+				</div>
+			</div>
+			<div class="layui-inline">
+				<div class="layui-input-inline" style="width:100px;">
+					<select name="flag">
+						<option value="">选择属性</option>
+						<option value="is_head">头条</option>
+						<option value="is_recommend">推荐</option>
+						<option value="is_special">特荐</option>
+						<option value="is_jump">跳转</option>
+					</select>
+				</div>
+			</div>
+			<div class="layui-inline">
+				<label class="layui-form-label">创建时间</label>
+				<div class="layui-input-inline" style="width:300px;" id="search-date-box">
+					<input type="text" name="add_time_start" class="layui-input" autocomplete="off" id="start-date" placeholder="起始时间" style="width:100px;display: inline;"> -
+					<input type="text" name="add_time_end" class="layui-input" autocomplete="off" id="end-date" placeholder="截止时间" style="width:100px;display: inline;">
+				</div>
+			</div>
+			<div class="layui-inline" style="width:150px">
+				<div class="layui-input-inline" style="width:200px;">
+						<button class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="table-search"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+						<button type="button" class="layui-btn layui-btn-reset" id="btnTableReset">清空</button>
+				</div>
+			</div>
+		</div>
+
+	</form>
+	<table class="layui-hide" id="article" lay-filter="article"></table>
+  </div>
+</div>
+
+<!-- 栏目导航数据注入 -->
+<script>
+  window.DOC_NAVS = {:json_encode($navs)};
+  window.DOC_HAS_ADD_NAVS = {:json_encode($hasAddNavs)};
+</script>
+
+<script type="text/html" id="arcrank">
+	<button class="layui-btn layui-btn-primary layui-btn-sm dropdown-arcrank">
+		<span>
+			{{# if(d.arcrank ==-1){ }}
+			未审核&emsp;
+			{{# } else if(d.arcrank ==0){ }}
+			开放浏览
+			{{# } else if(d.arcrank ==1){ }}
+			普通会员
+			{volist name="user_level" id="v"}
+			{{# } else if(d.arcrank =={$v.id}){ }}
+			{$v.title}
+			{/volist}
+			{{# } }}
+		</span>
+		<i class="layui-icon layui-icon-down layui-font-12"></i>
+	</button>
+</script>
+<script type="text/html" id="is_home">
+	<i class="layui-icon {{#  if(d.is_home == 1){ }}layui-icon-ok{{#  } else { }}layui-icon-close{{#  } }}"></i>
+</script>
+
+<script type="text/html" id="mytoolbar">
+	<div class="layui-btn-container">
+		<span class="layui-btn layui-btn-normal layui-btn-sm layui-btn-color layui-btn-radius" lay-event="addBtn" data-title="发布文档"><i class="layui-icon layui-icon-add-1"></i>发布文档</span>
+		<button class="layui-btn layui-btn-sm layui-btn-primary layui-btn-color table-btn-pull-right" id="rowMode">
+			<span>{{= d.lineStyle ? '多行' : '单行' }}模式</span>
+			<i class="layui-icon layui-icon-down layui-font-12"></i>
+		</button>
+		<button class="layui-btn layui-btn-sm layui-btn-primary layui-btn-color table-btn-pull-right" lay-event="draftBtn" style="margin-right: 12px !important;">
+			<span>草稿箱</span>
+		</button>
+		<button class="layui-btn layui-btn-sm layui-btn-primary layui-btn-color table-btn-pull-right" lay-event="recycleBtn" style="margin-right: 12px !important;">
+			<span>回收站</span>
+		</button>
+		<button class="layui-btn layui-btn-sm layui-btn-primary layui-btn-color layui-btn-radius" id="dropdownAudit">
+			批量审核
+			<i class="layui-icon layui-icon-down layui-font-12"></i>
+		</button>
+		<button class="layui-btn layui-btn-sm layui-btn-primary layui-btn-color layui-btn-radius" lay-event="delBtn">
+			<i class="layui-icon layui-icon-delete layui-font-14"></i>批量删除
+		</button>
+		{volist name="listToolbarActions" id="action"}
+		<button type="button" class="layui-btn {$action.class|default='layui-btn-primary'} layui-btn-sm layui-btn-color layui-btn-radius" data-admin-list-action="{$action.event}" data-list-type="{$listToolbarType}">{if condition="$action.icon neq ''"}<i class="layui-icon {$action.icon}" style="margin-right:4px;"></i>{/if}{$action.title}</button>
+		{/volist}
+	</div>
+</script>
+
+<script type="text/html" id="tableRigthBar">
+<div class="layui-btn-group">
+	<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">编辑</a>
+	<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+	<a class="layui-btn layui-btn-primary layui-border-blue layui-btn-xs" lay-event="read">浏览</a>
+	{volist name="documentListActions" id="action"}
+	<a class="layui-btn {$action.class|default='layui-btn-primary'} layui-btn-xs" lay-event="{$action.event}">{$action.title}</a>
+	{/volist}
+</div>
+</script>
+<script type="text/html" id="add_time">
+	{{= formatTime(d.add_time)}}
+</script>
+<script type="text/html" id="title">
+	{{# if(d.litpic && d.litpic != ''){ }}
+	<i class="layui-icon layui-icon-picture preview-thumb-icon" style="color:#1E9FFF;cursor:pointer;margin-right:4px;" data-src="{{= d.litpic}}"></i>
+	{{# } }}
+	<a href="javascript:;" lay-event="edit">{{# if(d.is_b ==1){ }}<b style="color:{{= d.title_color}}">{{d.title}}</b>{{# }else{ }}<b style="font-weight:normal;color:{{= d.title_color}}">{{d.title}}</b>{{# } }}</a>
+</script>
+<script type="text/html" id="is_head">
+	{{# if(d.is_head ==1){ }}
+	<input type="checkbox" name="is_head" value="{{= d.id}}" title="" lay-filter="fieldEdit" checked>
+	{{# }else{ }}
+	<input type="checkbox" name="is_head" value="{{= d.id}}" title="" lay-filter="fieldEdit">
+	{{# } }}
+</script>
+<script type="text/html" id="is_recommend">
+	{{# if(d.is_recommend ==1){ }}
+	<input type="checkbox" name="is_recommend" value="{{= d.id}}" title="" lay-filter="fieldEdit" checked>
+	{{# }else{ }}
+	<input type="checkbox" name="is_recommend" value="{{= d.id}}" title="" lay-filter="fieldEdit">
+	{{# } }}
+</script>
+<script type="text/html" id="is_special">
+	{{# if(d.is_special ==1){ }}
+	<input type="checkbox" name="is_special" value="{{= d.id}}" title="" lay-filter="fieldEdit" checked >
+	{{# }else{ }}
+	<input type="checkbox" name="is_special" value="{{= d.id}}" title="" lay-filter="fieldEdit">
+	{{# } }}
+</script>
+
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['tool','treeTable','dropdown','table','laydate','tree'],function(){
+		var table = layui.table,tool = layui.tool, form = layui.form,dropdown=layui.dropdown,laydate=layui.laydate,tree=layui.tree;
+		// 读取上次选择的每页条数，没有则默认 20
+		var savedLimit = parseInt(localStorage.getItem('doc_table_limit'), 10) || 20;
+		var curPage = 1; // 记录当前页码（done 回调更新），供删除后自动回退页码使用
+		// 从 URL 读取初始 nav_id 筛选条件
+		var initUrlParams = new URLSearchParams(window.location.search);
+		var initNavId = initUrlParams.get('nav_id') || '';
+		layui.pageTable = table.render({
+			id:'doc_table',
+			elem: '#article',
+			title: '所有文档',
+			toolbar: '#mytoolbar',
+			url: "{:url('admin/document/index')}",
+			where: { nav_id: initNavId },
+			defaultToolbar: ['filter', 'exports', 'print', { // 右上角工具图标
+				title: 'Tips',
+				layEvent: 'LAYTABLE_TIPS',
+				icon: 'layui-icon-tips',
+				onClick: function(obj) { // 2.9.12+
+					layer.alert('<i class="layui-icon layui-icon-tips"></i> 键盘ESC键可快速关闭发布窗口哦<br><i class="layui-icon layui-icon-tips"></i> 双击文章可快速打开编辑页');
+				}
+			}],
+			page: true,
+			limit: savedLimit,
+			height: 'full-83',
+			cellMinWidth: 50,
+			cols:[
+					[
+						{type: 'checkbox', fixed: 'left', align: 'center', rowspan: 2},
+						{field:'id',title:'ID',align:'center',width:80,sort: true, rowspan: 2},
+						{field:'title',title:'标题',toolbar:'#title', rowspan: 2},
+						{field:'nav_name',title:'所属栏目',align:'center',width:120, rowspan: 2},
+						{field:'click',title:'点击数',align:'center',width:90,edit: 'text',sort: true, rowspan: 2},
+						{field:'attr',title:'文章属性 <i class="layui-icon layui-icon-tips" lay-event="table-header-tips" title="该字段开启了编辑功能" style="margin-left: 3px;"></i>',align:'center',width:160,colspan: 3},
+						{field:'sort',title:'排序',align:'center',width:80,edit: 'text',sort: true, rowspan: 2},
+						{field:'arcrank',title:'审核',toolbar:'#arcrank', unresize: true,align:'center',sort: true,width:120, rowspan: 2},
+						{field:'add_time',title:'创建时间',align:'center',width:160,toolbar:'#add_time',sort: true, rowspan: 2},
+						{fixed:'right',width:'{$documentActionWidth|default=120}',title:'操作',toolbar:'#tableRigthBar',ignoreExport:true,align:'left', rowspan: 2}
+					],
+					[
+						{field:'is_head',title:'头条',align:'center',width:70,sort: true,toolbar:'#is_head'},
+						{field:'is_recommend',title:'推荐',align:'center',width:70,sort: true,toolbar:'#is_recommend'},
+						{field:'is_special',title:'特荐',align:'center',width:70,sort: true,toolbar:'#is_special'},
+					]
+				],
+			done: function(res, curr, count) {
+				curPage = curr || 1; // layui 官方回调参数，翻页/刷新后始终准确
+				var id = this.id;
+				// 表头批量审核下拉按钮
+				dropdown.render({
+					elem: '#dropdownAudit', // 可绑定在任意元素中，此处以上述按钮为例
+					data: [
+						{id: '0',title: '开放浏览'},
+						{id: '-1',title: '未审核'},
+						{volist name="user_level" id="v"}
+						{title: '{$v.title}', id: {$v.id}},
+						{/volist}
+					],
+					// 菜单被点击的事件
+					click: function(obj){
+						var checkStatus = table.checkStatus(id)
+						var data = checkStatus.data; // 获取选中的数据
+						if(data.length === 0) return layer.msg('至少选择一行');
+						const ids = data.map(function(item){
+							return item.id;
+						});
+						tool.post("{:url('admin/document/edit_field')}", { field: 'arcrank',value:obj.id,id:ids }, function(e) {
+							if (e.code == 0) {
+								layer.msg(e.msg, {icon: 1});
+							}else{
+								layer.msg(e.msg, {icon: 2});
+							}
+							layui.pageTable.reloadData();
+						});
+					}
+				});
+				// 行模式
+				dropdown.render({
+					elem: '#rowMode',
+					data: [{
+						id: 'default-row',
+						title: '单行模式（默认）'
+					},{
+						id: 'multi-row',
+						title: '多行模式'
+					}],
+					// 菜单被点击的事件
+					click: function(obj){
+						var checkStatus = table.checkStatus(id)
+						var data = checkStatus.data; // 获取选中的数据
+						switch(obj.id){
+							case 'default-row':
+								table.reload('doc_table', {
+									lineStyle: null // 恢复单行
+								});
+								layer.msg('已设为单行');
+								break;
+							case 'multi-row':
+								table.reload('doc_table', {
+									lineStyle: 'height: 95px;'
+								});
+								layer.msg('已设为多行');
+								break;
+						}
+					}
+				});
+				// 表内审核按钮下拉选项
+				dropdown.render({
+					elem: '.dropdown-arcrank',
+					// trigger: 'hover',
+					// 此处的 data 值，可根据 done 返回的 res 遍历来赋值
+					data: [{
+						title: '开放浏览',
+						value: 0
+					},{
+						title: '未审核',
+						value: -1
+					},
+						{volist name="user_level" id="v"}
+						{title: '{$v.title}', value: {$v.id}},
+						{/volist}
+					],
+					click: function(obj){
+						var tr = $(this.elem).closest('tr[data-index]');
+						var dataIndex = tr.data('index');
+						var tableData = table.getData('doc_table');
+						var data = tableData[dataIndex];
+						this.elem.find('span').html(obj.title);
+						// 更新数据中对应的字段
+						data.arcrank = obj.title;
+						// 更新审核字段
+						tool.post("{:url('admin/document/edit_field')}", { field: 'arcrank',value:obj.value,id:data.id }, function(e) {
+							if (e.code == 0) {
+								layer.msg(e.msg, {icon: 1});
+							}else{
+								layer.msg(e.msg, {icon: 2});
+							}
+							layui.pageTable.reloadData();
+						});
+					}
+				});
+			// 每次加载完成，把当前实际条数写回 localStorage
+			localStorage.setItem('doc_table_limit', layui.pageTable.config.page.limit);
+
+			// 缩略图图标悬停预览（事件委托，翻页后无需重新绑定）
+			$(document).off('mouseenter.previewThumb').on('mouseenter.previewThumb', '.preview-thumb-icon', function(){
+				var src = $(this).data('src');
+				if(!src) return;
+				layer.tips('<img src="'+ src +'" style="max-width:200px;max-height:200px;display:block;">', this, {
+					tips: [1, '#fff'],
+					time: 0,
+					area: ['auto', 'auto'],
+					skin: 'preview-thumb-tips'
+				});
+			}).off('mouseleave.previewThumb').on('mouseleave.previewThumb', '.preview-thumb-icon', function(){
+				layer.closeAll('tips');
+			});
+			
+			// 缩略图图标点击预览（layer.photos）
+			$(document).off('click.previewThumb').on('click.previewThumb', '.preview-thumb-icon', function(e){
+				e.stopPropagation();
+				var src = $(this).data('src');
+				if(!src) return;
+				parent.layer.photos({
+					photos: {
+						"title": "缩略图预览",
+						"start": 0,
+						"data": [
+							{
+								"alt": "缩略图",
+								"pid": 1,
+								"src": src
+							}
+						]
+					},
+					footer: false
+				});
+			});
+		}
+	});
+
+		/* ===== 左侧栏目树（layui tree 组件）===== */
+		(function(){
+			var urlParams = new URLSearchParams(window.location.search);
+			var activeNavId = urlParams.get('nav_id') || '';
+			var SPREAD_KEY = 'doc_nav_spread';
+
+			// 首项“所有文档”用和栏目一致的字段名，配合下面的 customName 直接复用原始数据
+			var treeData = [{ id: '', title: '所有文档' }].concat(window.DOC_NAVS || []);
+
+			// 栏目 id → 模型标识：点栏目时用来判断是不是单页（nid=single）
+			var navNidMap = {};
+			(function collectNid(list){
+				for (var i = 0; i < list.length; i++) {
+					var node = list[i];
+					if (node.id !== '' && node.id !== undefined && node.id !== null) {
+						navNidMap[String(node.id)] = node.nid || '';
+					}
+					if (node.children && node.children.length) {
+						collectNid(node.children);
+					}
+				}
+			})(window.DOC_NAVS || []);
+
+			// 栏目 id → 关联表单id：点 clue（留言）栏目时用它拼留言列表地址。
+			// 注意：layui tree 不会把 form_id 渲染成 data-form_id 属性，所以只能自己从数据源建映射
+			var navFormMap = {};
+			(function collectForm(list){
+				for (var i = 0; i < list.length; i++) {
+					var node = list[i];
+					if (node.id !== '' && node.id !== undefined && node.id !== null) {
+						navFormMap[String(node.id)] = node.form_id || '';
+					}
+					if (node.children && node.children.length) {
+						collectForm(node.children);
+					}
+				}
+			})(window.DOC_NAVS || []);
+
+			// 上次展开过的节点（存 localStorage，关掉浏览器再进来也还在）
+			var spreadIds = [];
+			try {
+				spreadIds = JSON.parse(localStorage.getItem(SPREAD_KEY) || '[]') || [];
+			} catch (e) {
+				spreadIds = [];
+			}
+
+			// 先完整遍历一遍，恢复上次展开过的节点。
+			// 注意不能和下面「展开当前栏目父级」的遍历合并：那个找到当前节点就会提前 return，
+			// 同级排在后面的节点就恢复不到了
+			(function restoreSpread(list){
+				for (var i = 0; i < list.length; i++) {
+					var node = list[i];
+					if (spreadIds.indexOf(String(node.id)) > -1) {
+						node.spread = true;
+					}
+					if (node.children && node.children.length) {
+						restoreSpread(node.children);
+					}
+				}
+			})(treeData);
+
+			// 再展开当前选中栏目的父级链，保证当前项可见
+			(function expandActiveParents(list, id){
+				for (var i = 0; i < list.length; i++) {
+					var node = list[i];
+					if (String(node.id) === String(id)) {
+						return true;
+					}
+					if (node.children && node.children.length && expandActiveParents(node.children, id)) {
+						node.spread = true;
+						return true;
+					}
+				}
+				return false;
+			})(treeData, activeNavId);
+
+			tree.render({
+				elem: '#navTreeBox',
+				data: treeData,
+				showLine: true, // 带连接线
+				onlyIconControl: true, // 展开图标只负责展开，跳转由下面的整行点击处理
+				customName: { id: 'id', title: 'title', children: 'children' }
+			});
+
+			// tree 组件没有选中态，渲染完成后给当前栏目整行加高亮
+			$('#navTreeBox').find('.layui-tree-set[data-id="' + activeNavId + '"]')
+				.children('.layui-tree-entry')
+				.addClass('doc-nav-active');
+
+			// 栏目标题后面的红色小字标记：单页 [单]、留言 [留]、隐藏 [隐]。
+			// 不用改 treeData 的 title：那样是纯文本，没法单独控制这小段的颜色和字号
+			(function markNavTags(list){
+				for (var i = 0; i < list.length; i++) {
+					var node = list[i];
+					if (node.id !== '' && node.id !== undefined && node.id !== null) {
+						var nid = navNidMap[String(node.id)] || '';
+						var tags = '';
+						if (nid === 'single') {
+							tags += '<span class="doc-nav-tag" title="单页栏目">[单]</span>';
+						}
+						if (nid === 'clue') {
+							tags += '<span class="doc-nav-tag" title="留言栏目">[留]</span>';
+						}
+						if (Number(node.is_show) === 1) {
+							tags += '<span class="doc-nav-tag" title="隐藏栏目">[隐]</span>';
+						}
+						if (tags) {
+							$('#navTreeBox').find('.layui-tree-set[data-id="' + node.id + '"]')
+								.children('.layui-tree-entry')
+								.find('.layui-tree-txt')
+								.append(tags);
+						}
+					}
+					if (node.children && node.children.length) {
+						markNavTags(node.children);
+					}
+				}
+			})(window.DOC_NAVS || []);
+
+			// 点整行都能跳转；有子栏目的行同时把子栏目展开
+			$('#navTreeBox').on('click', '.layui-tree-entry', function(e){
+				// 点展开图标时交给 tree 自己处理，只展开不跳转
+				if ($(e.target).closest('.layui-tree-iconClick').length) return;
+
+				var $entry = $(this);
+				var $set = $entry.closest('.layui-tree-set');
+
+				// 有子栏目且还没展开 → 展开
+				var $pack = $set.children('.layui-tree-pack');
+				if ($pack.length && !$set.hasClass('layui-tree-spread')) {
+					$set.addClass('layui-tree-spread');
+					$pack.slideDown(200);
+					$entry.find('.layui-tree-iconClick .layui-icon')
+						.removeClass('layui-icon-addition').addClass('layui-icon-subtraction');
+				}
+
+				var navId = $set.attr('data-id') || '';
+				var form_id = navFormMap[String(navId)] || '';
+
+				// 单页栏目（nid=single）没有文档列表，点它直接弹出「单页内容」编辑面板，
+				// 不做页面跳转；但高亮要跟着移到这个栏目上
+				if (navId && navNidMap[String(navId)] === 'single') {
+					$('#navTreeBox').find('.layui-tree-entry.doc-nav-active').removeClass('doc-nav-active');
+					$entry.addClass('doc-nav-active');
+					tool.side("{:url('admin/nav/content')}?pid=" + navId + "&id=" + navId);
+					return;
+				}
+				// 留言栏目（nid=clue）没有文档列表，点它直接弹出留言列表面板，
+				// 不做页面跳转；但高亮要跟着移到这个栏目上
+				if (navId && navNidMap[String(navId)] === 'clue') {
+					$('#navTreeBox').find('.layui-tree-entry.doc-nav-active').removeClass('doc-nav-active');
+					$entry.addClass('doc-nav-active');
+					tool.side("{:url('admin/form/message')}?form_id=" + form_id);
+					return;
+				}
+
+				// 跳转
+				var url = new URL(window.location.href);
+				if (navId) {
+					url.searchParams.set('nav_id', navId);
+				} else {
+					url.searchParams.delete('nav_id');
+				}
+				window.location.href = url.toString();
+			});
+
+			// 离开页面前记下展开的节点，下次进来保持展开状态
+			// 直接读 DOM 上的 layui-tree-spread，比读数据源更实时
+			$(window).on('beforeunload', function(){
+				var ids = [];
+				$('#navTreeBox').find('.layui-tree-set.layui-tree-spread').each(function(){
+					var id = $(this).attr('data-id');
+					if (id) {
+						ids.push(String(id));
+					}
+				});
+				try {
+					localStorage.setItem(SPREAD_KEY, JSON.stringify(ids));
+				} catch (e) {}
+			});
+		})();
+
+		// 栏目导航折叠/展开按钮
+		(function(){
+			var $docLayout = $('.doc-layout');
+			var $toggle = $('#docNavToggle');
+			if (!$docLayout.length || !$toggle.length) return;
+
+			$toggle.on('click', function() {
+				$docLayout.toggleClass('nav-collapsed');
+			});
+		})();
+
+		// 分隔线拖动：调整栏目导航与内容区的宽度比例
+		// 宽度记在 localStorage —— 点栏目会整页跳转，不记住的话每次都被重置
+		(function(){
+			var layout = document.querySelector('.doc-layout');
+			var resizer = document.getElementById('docNavResizer');
+			if (!layout || !resizer) return;
+
+			var KEY = 'doc_nav_width';
+			var MIN = 120; // 最窄
+			var MAX = 480; // 最宽，避免把内容区挤没
+
+			function setWidth(w) {
+				layout.style.setProperty('--doc-nav-w', w + 'px');
+			}
+			function getWidth() {
+				return parseInt(getComputedStyle(layout).getPropertyValue('--doc-nav-w'), 10) || 160;
+			}
+
+			// 恢复上次拖好的宽度
+			try {
+				var saved = parseInt(localStorage.getItem(KEY), 10);
+				if (saved >= MIN && saved <= MAX) {
+					setWidth(saved);
+				}
+			} catch (e) {}
+
+			var dragging = false;
+
+			function endDrag() {
+				if (!dragging) return;
+				dragging = false;
+				resizer.classList.remove('dragging');
+				document.body.style.cursor = '';
+				document.body.style.userSelect = '';
+				try {
+					localStorage.setItem(KEY, getWidth());
+				} catch (e) {}
+			}
+
+			resizer.addEventListener('mousedown', function(e){
+				e.preventDefault();
+				dragging = true;
+				resizer.classList.add('dragging');
+				// 拖动过程中保持左右箭头光标，并禁止选中文字
+				document.body.style.cursor = 'col-resize';
+				document.body.style.userSelect = 'none';
+			});
+
+			document.addEventListener('mousemove', function(e){
+				if (!dragging) return;
+				var w = e.clientX - layout.getBoundingClientRect().left;
+				setWidth(Math.max(MIN, Math.min(MAX, w)));
+			});
+
+			document.addEventListener('mouseup', endDrag);
+			// 鼠标拖出页面时兜底结束，避免拖动状态卡住
+			document.addEventListener('mouseleave', endDrag);
+		})();
+
+
+		//监听表头工具栏事件
+		table.on('toolbar(article)', function(obj){
+			if (obj.event === 'addBtn') {
+				if (!window.DOC_HAS_ADD_NAVS) return layer.msg('请先创建栏目');
+
+				// 从 URL 获取 nav_id 参数（空字符串视为无值）
+				var urlParams = new URLSearchParams(window.location.search);
+				var navId = urlParams.get('nav_id');
+				if(navId === null || navId.trim() === '') navId = '';
+
+				// 辅助函数：打开发布文档弹层
+				function openAddDocLayer(navId) {
+					var addIndex = layer.open({
+						type: 2,
+						area: ['80%','90%'],
+						content: "{:url('admin/document/add')}?nav_id=" + navId,
+						maxmin: true,
+						title:['发布文档 <span class="layui-font-12 layui-font-gray" style="float: right;margin-right: 20px;"><i class="layui-icon layui-icon-leaf" style="font-size: 12px;"></i> Esc快速关闭当前页</span>', 'font-size: 16px;'],
+						shade:0.3,
+						shadeClose: false,
+						scrollbar: true,
+						zIndex: layer.zIndex,
+						btn: ['立即提交', '取消'],
+						btnAlign: 'c',
+						success:function(layero2, index2){
+							layer.full(addIndex);
+							layer.setTop(layero2);
+							layer.escIndex = layer.escIndex || [];
+							layer.escIndex.unshift(index2);
+							layer.formChangedMap = layer.formChangedMap || {};
+							layer.formChangedMap[index2] = false;
+							layero2.on('mousedown', function(){
+								var _index = layer.escIndex.indexOf(index2);
+								if(_index !== -1){
+									layer.escIndex.splice(_index, 1);
+								}
+								layer.escIndex.unshift(index2);
+							});
+						},
+						yes: function(index2, layero3){
+							var iframeWin = layero3.find('iframe')[0].contentWindow;
+							iframeWin.layui.$('button[lay-submit][lay-filter="webform"]').trigger('click');
+							//加载中弹层
+							var loadIndex = layer.msg('加载中', {
+								icon: 16,
+								shade: 0.01
+							});
+							return false;
+						},
+						end: function(){
+							if(typeof layer.escIndex === 'object'){
+								layer.escIndex.splice(0, 1);
+							}
+							if(layer.formChangedMap && typeof layer.formChangedMap[addIndex] !== 'undefined'){
+								delete layer.formChangedMap[addIndex];
+							}
+						}
+					});
+				}
+
+				// 当前 URL 有 nav_id 参数，直接打开添加页面
+				if (navId) {
+					openAddDocLayer(navId);
+					return false;
+				}
+
+				// 没有 nav_id，弹出"请选择栏目"弹窗
+				var navHtml = '<div class="layui-form" style="padding:15px 20px;">'
+						+ '<div class="nav-list-box" style="max-height:360px;overflow-y:auto;">'
+						+ '{:renderNavTreeHtml($navs_for_add)}'
+						+ '</div>'
+						+ '</div>';
+
+				layer.open({
+					type: 1,
+					area: ['420px', 'auto'],
+					title: '请选择栏目',
+					shade: 0.3,
+					shadeClose:true,
+					content: navHtml,
+					success: function(layero, index){
+						var $items = layero.find('.nav-item');
+						$items.on('mouseenter', function(){
+							$(this).css({'background':'#f5f7fa'});
+						}).on('mouseleave', function(){
+							$(this).css({'background':'transparent'});
+						}).on('click', function(){
+							var navId = $(this).data('id');
+							layer.close(index);
+							openAddDocLayer(navId);
+						});
+					}
+				});
+				//tool.side("{:url('admin/document/add')}");
+				return false;
+			}
+			if (obj.event === 'delBtn'){
+				var checkStatus = table.checkStatus('doc_table')
+				var data = checkStatus.data; // 获取选中的数据
+				if(data.length === 0) return layer.msg('至少选择一行');
+				const ids = data.map(function(item){
+					return item.id;
+				});
+				layer.confirm('确定删除所选文档吗？', {
+					icon: 3,
+					title: '提示',
+				},function(index){
+					tool.delete("{:url('admin/document/delete')}", { id:ids }, function(e) {
+						if (e.code == 0) {
+							layer.msg(e.msg, {icon: 1});
+							// 勾选行数覆盖当前页全部数据时，删除后当前页会变空 → 自动回退一页；否则留当前页刷新
+							var tableId = 'doc_table';
+							var curData = layui.table.getData ? layui.table.getData(tableId) : (layui.table.cache[tableId] || []);
+							if (data.length >= curData.length && curPage > 1) {
+								layui.pageTable.reload({ page: { curr: curPage - 1 } });
+							} else {
+								layui.pageTable.reloadData(tableId);
+							}
+						}else{
+							layer.msg(e.msg, {icon: 2});
+							layui.pageTable.reloadData();
+						}
+					});
+				});
+			}
+			if (obj.event === 'draftBtn'){
+				layer.open({
+					type: 2,
+					area: ['80%','90%'],
+					content: "{:url('admin/document/draft')}",
+					maxmin: true,
+					title:['草稿箱', 'font-size: 16px;'],
+					shade:0.3,
+					shadeClose: false,
+					scrollbar: true,
+					success:function(layero2, index2){
+
+					},
+					yes: function(index2, layero3){
+
+					},
+					end: function(){
+
+					}
+				});
+			}
+			if (obj.event === 'recycleBtn'){
+				layer.open({
+					type: 2,
+					area: ['80%','90%'],
+					content: "{:url('admin/document/recycle')}",
+					maxmin: true,
+					title:['文档回收站', 'font-size: 16px;'],
+					shade:0.3,
+					shadeClose: false,
+					scrollbar: true,
+					success:function(layero2, index2){
+
+					},
+					yes: function(index2, layero3){
+
+					},
+					end: function(){
+
+					}
+				});
+			}
+
+		});
+
+		//监听表格行工具事件
+		table.on('tool(article)', function(obj) {
+			var data = obj.data;
+			if (obj.event === 'read') {
+				//前台详情页地址：后端按「SEO → URL配置」的 URL 模式算好，放在 data.url 里
+				window.open(data.url);
+			}
+			else if (obj.event === 'edit') {
+				var editIndex = layer.open({
+					type: 2,
+					area: ['80%','90%'],
+					content: "{:url('admin/document/edit')}?id=" + obj.data.id,
+					maxmin: true,
+					title:['编辑文档 <span class="layui-font-12 layui-font-gray" style="float: right;margin-right: 20px;"><i class="layui-icon layui-icon-leaf" style="font-size: 12px;"></i> Esc快速关闭当前页</span>', 'font-size: 16px;'],
+					shade:0.3,
+					shadeClose: false,
+					scrollbar: true,
+					zIndex: layer.zIndex,
+					btn: ['立即保存', '取消'],
+					btnAlign: 'c',
+					success:function(layero2, index2){
+						layer.full(editIndex);
+						layer.setTop(layero2);
+						layer.escIndex = layer.escIndex || [];
+						layer.escIndex.unshift(index2);
+						layer.formChangedMap = layer.formChangedMap || {};
+						layer.formChangedMap[index2] = false;
+						layero2.on('mousedown', function(){
+							var _index = layer.escIndex.indexOf(index2);
+							if(_index !== -1){
+								layer.escIndex.splice(_index, 1);
+							}
+							layer.escIndex.unshift(index2);
+						});
+					},
+					yes: function(index2, layero3){
+						var iframeWin = layero3.find('iframe')[0].contentWindow;
+						iframeWin.layui.$('button[lay-submit][lay-filter="webform"]').trigger('click');
+						return false;
+					},
+					end: function(){
+						if(typeof layer.escIndex === 'object'){
+							layer.escIndex.splice(0, 1);
+						}
+					}
+				});
+				//tool.side("{:url('admin/document/edit')}?id="+obj.data.id);
+			}
+			else if (obj.event === 'del') {
+				layer.confirm('确定要删除该文档吗?', {
+					icon: 3,
+					title: '提示',
+					focus:true,
+				}, function(index) {
+					let callback = function (e) {
+						if (e.code == 0) {
+							layer.msg(e.msg, {icon: 1});
+							var tableId = 'doc_table'; // render 时设置的 id
+							// 删除成功后前端缓存尚未刷新，仍含被删行；layui.table.getData 为官方 API，比 pageTable.config 更可靠
+							var curData = layui.table.getData ? layui.table.getData(tableId) : (layui.table.cache[tableId] || []);
+							// 当前页只剩这一条，删完会变空页 → 回退一页再加载；否则留在当前页刷新
+							if (curData.length <= 1 && curPage > 1) {
+								layui.pageTable.reload({ page: { curr: curPage - 1 } });
+							} else {
+								layui.pageTable.reloadData(tableId);
+							}
+						}else{
+							layer.msg(e.msg, {icon: 2});
+						}
+
+					}
+					tool.delete("{:url('admin/document/delete')}", { id: data.id }, callback);
+					layer.close(index);
+				});
+			}
+			return false;
+		});
+		// 表头自定义元素工具事件
+		table.on('colTool(article)', function(obj){
+			var event = obj.event;
+			//console.log(obj);
+			if(event === 'table-header-tips'){
+				var tipText = $('<div>').html(obj.col.title).find('i').attr('title');
+				layer.alert(tipText, {title: '提示'});
+			}
+		});
+		// 行单击事件：设置当前行为单选选中状态（包含固定列时同步高亮）
+		// table.on("row(article)", function (obj) {
+		// 	obj.setRowChecked({
+		// 		type: 'checkbox' // radio | checkbox
+		// 	});
+		// });
+		// 行双击事件
+		table.on('rowDouble(article)', function(obj){
+			// console.log(obj);       // 完整回调对象
+			// console.log(obj.data);  // 当前行数据
+			// console.log(obj.tr);    // 当前行 jQuery 元素
+			// console.log(obj.e);     // 原生 dblclick 事件对象
+			// 示例：双击打开编辑（与行内"编辑"按钮一样用 tool.side）
+			var id = obj.data.id;
+			var editIndex = layer.open({
+				type: 2,
+				area: ['80%','90%'],
+				content: "{:url('admin/document/edit')}?id=" + obj.data.id,
+				maxmin: true,
+				title:['编辑文档 <span class="layui-font-12 layui-font-gray" style="float: right;margin-right: 20px;"><i class="layui-icon layui-icon-leaf" style="font-size: 12px;"></i> Esc快速关闭当前页</span>', 'font-size: 16px;'],
+				shade:0.3,
+				shadeClose: false,
+				scrollbar: true,
+				zIndex: layer.zIndex,
+				btn: ['立即保存', '取消'],
+				btnAlign: 'c',
+				success:function(layero2, index2){
+					layer.full(editIndex);
+					layer.setTop(layero2);
+					layer.escIndex = layer.escIndex || [];
+					layer.escIndex.unshift(index2);
+					layero2.on('mousedown', function(){
+						var _index = layer.escIndex.indexOf(index2);
+						if(_index !== -1){
+							layer.escIndex.splice(_index, 1);
+						}
+						layer.escIndex.unshift(index2);
+					});
+				},
+				yes: function(index2, layero3){
+					var iframeWin = layero3.find('iframe')[0].contentWindow;
+					iframeWin.layui.$('button[lay-submit][lay-filter="webform"]').trigger('click');
+					return false;
+				},
+					end: function(){
+						if(typeof layer.escIndex === 'object'){
+							layer.escIndex.splice(0, 1);
+						}
+						if(layer.formChangedMap && typeof layer.formChangedMap[editIndex] !== 'undefined'){
+							delete layer.formChangedMap[editIndex];
+						}
+					}
+			});
+			// tool.side("{:url('admin/document/edit')}?id=" + id);
+		});
+		// 状态 - 开关操作
+		form.on('checkbox(fieldEdit)', function(obj){
+			console.log(this)
+			var id = this.value;
+			var name = this.name;
+			var value = obj.elem.checked==true?1:0;
+			// 编辑后续操作，如提交更新请求，以完成真实的数据更新
+			tool.post("{:url('admin/document/edit_field')}", { field: name,value:value,id:id }, function(e) {
+				if (e.code == 0) {
+					layer.msg(e.msg, {icon: 1});
+				}else{
+					layer.msg(e.msg, {icon: 2});
+				}
+				// setTimeout(function(){
+				// 	layui.pageTable.reloadData();
+				// },300)
+			});
+		});
+		// 单元格编辑后的事件
+		table.on('edit(article)', function(obj){
+			var field = obj.field; // 得到修改的字段
+			var value = obj.value // 得到修改后的值
+			var data = obj.data // 得到所在行所有键值
+			// 值的校验
+			if(value.replace(/\s/g, '') === ''){
+				layer.tips('值不能为空', this, {tips: 1});
+				return obj.reedit(); // 重新编辑 -- v2.8.0 新增
+			}
+			// 编辑后续操作，如提交更新请求，以完成真实的数据更新
+			tool.post("{:url('admin/document/edit_field')}", { field: field,value:value,id:data.id }, function(data) {
+				layer.msg(data.msg);
+			});
+
+		});
+		// 监听排序事件
+		table.on('sort(article)', function(obj){
+			layui.pageTable.reload({
+				where: $.extend({}, layui.pageTable.config.where || {}, {
+					field: obj.field,   // 排序字段，如 'click'、'sort'、'add_time'
+					order: obj.type       // 'asc' 或 'desc'
+				}),
+				page: {curr: 1}          // 排序后回到第1页
+			});
+		});
+		// 搜索框日期时间
+		laydate.render({
+			elem: '#search-date-box',
+			range: ['#start-date', '#end-date'],
+			rangeLinked: true,
+			type: 'date',
+			format: 'yyyy-MM-dd',
+		});
+
+		//监听搜索提交（与表单 lay-filter="table-search" 对应）
+		form.on('submit(table-search)', function(data) {
+			layui.pageTable.reload({
+				where: data.field,
+				page: {curr: 1}
+			});
+			return false;
+		});
+		// 监听清空按钮
+		$('#btnTableReset').on('click', function() {
+			$('select[name="nav_id"]').val('');
+			$('select[name="flag"]').val('');
+			$('input[name="keywords"]').val('');
+			$('input[name="add_time_start"]').val('');
+			$('input[name="add_time_end"]').val('');
+			form.render('select');
+			layui.pageTable.reload({
+				where: {},
+				page: {curr: 1}
+			});
+		});
+		// 多窗口模式 - esc 键
+		$(document).on('keyup', function(e){
+			if(e.keyCode === 27){
+				// 已有 confirm 等弹窗时先关闭它，避免重复弹出
+				if($('.layui-layer-dialog').length > 0){
+					var lastIndex = $('.layui-layer-dialog:last').attr('times');
+					if(lastIndex) layer.close(lastIndex);
+					return;
+				}
+				
+// 检查最上层弹层内表单是否改动（读取父页面集中状态表）
+			var topIndex = layer.escIndex ? layer.escIndex[0] : 0;
+			if(topIndex && layer.formChangedMap && layer.formChangedMap[topIndex]){
+				layer.confirm('文档内容已修改，是否保存？', {
+					btn: ['保存','不保存'],
+					icon: 3,
+					title: '提示',
+					focus:true,
+					// 动态取当前最顶层 z-index+1，避免固定小值被默认基数(19891014)遮挡
+					zIndex: (function(){
+						var max = 0;
+						$('.layui-layer').each(function(){
+							var z = parseInt($(this).css('z-index')) || 0;
+							if(z > max) max = z;
+						});
+						return max + 1;
+					})()
+				}, function(index){
+					// 点击保存：触发 iframe 内提交按钮
+					var iframe = $('#layui-layer'+topIndex).find('iframe')[0];
+					if(iframe && iframe.contentWindow){
+						iframe.contentWindow.layui.$('button[lay-submit][lay-filter="webform"]').trigger('click');
+					}
+					layer.close(index);
+				}, function(){
+					// 点击不保存：关闭 iframe 弹层
+					layer.close(topIndex);
+				});
+				return;
+			}
+				
+				layer.close(layer.escIndex ? layer.escIndex[0] : 0);
+			}
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

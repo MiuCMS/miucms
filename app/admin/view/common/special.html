@@ -1,0 +1,270 @@
+
+<div class="layui-tabs-item">
+	<style>
+	.special-node{position:relative;margin-bottom:14px;padding:18px 18px 0;border:1px solid #e6e6e6;border-radius:4px;background:#fff;}
+	.special-node-del{position:absolute;right:10px;top:10px;padding:2px 6px;border:0;background:transparent;color:#666;font-size:13px;cursor:pointer;}
+	.special-node-del:hover{color:#ff5722;}
+	.special-doc-table{margin:10px 0 0;}
+	.special-doc-table th,.special-doc-table td{text-align:center;}
+	.special-doc-table th:first-child,.special-doc-table td:first-child{text-align:left;}
+	.special-doc-del{color:#1e9fff;cursor:pointer;}
+	.special-doc-del:hover{color:#ff5722;}
+	.special-doc-sort{width:70px;height:30px;margin:0 auto;text-align:center;}
+	</style>
+	<div class="layui-row layui-col-space16">
+		<div class="layui-col-md12">
+			<div class="layui-form-item">
+				<div class="layui-input-block" style="margin-left:20px;">
+					<div class="layui-input-group" style="width:100%">
+						<button class="layui-btn layui-btn-primary layui-border-blue layui-btn-sm" type="button" id="addNode">增加节点</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+		<div class="layui-col-md12">
+			<div class="layui-form-item">
+				<div class="layui-input-block" style="margin-left:20px;">
+					<div id="specialNodeList"></div>
+				</div>
+			</div>
+		</div>
+		<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+		<!-- 节点数据（JSON），随表单一起提交 -->
+		<input type="hidden" name="special_nodes" id="specialNodesInput" value="">
+	</div>
+</div>
+<script>
+	layui.use(function(){
+		var $list = $('#specialNodeList');
+		var $input = $('#specialNodesInput');
+		var seq = 0; // 节点序号：用于生成默认名称/标识
+		var curNode = null;  // 当前正在选文档的节点
+		var curIndex = null; // 选择文档弹窗的 layer 索引
+
+		// HTML 转义
+		function esc(str){
+			return String(str == null ? '' : str).replace(/[&<>"']/g, function(s){
+				return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s];
+			});
+		}
+
+		// 节点卡片
+		function nodeHtml(opt){
+			return '<div class="special-node" data-uid="' + opt.uid + '">'
+				+ '<button type="button" class="special-node-del"><i class="layui-icon layui-icon-close"></i>删除</button>'
+				+ '<div class="layui-row layui-col-space16">'
+					+ '<div class="layui-col-md4"><div class="layui-form-item">'
+						+ '<label class="layui-form-label"><font>*</font>节点名称</label>'
+						+ '<div class="layui-input-block"><input type="text" class="layui-input special-node-name" placeholder="请输入节点名称" value="' + esc(opt.name) + '"></div>'
+					+ '</div></div>'
+					+ '<div class="layui-col-md4"><div class="layui-form-item">'
+						+ '<label class="layui-form-label"><font>*</font>节点标识</label>'
+						+ '<div class="layui-input-block"><input type="text" class="layui-input special-node-key" placeholder="请输入节点标识" value="' + esc(opt.ident) + '"></div>'
+					+ '</div></div>'
+					+ '<div class="layui-col-md3"><div class="layui-form-item">'
+						+ '<label class="layui-form-label">节点排序</label>'
+						+ '<div class="layui-input-block"><input type="number" class="layui-input special-node-sort" value="' + esc(opt.sort) + '"></div>'
+					+ '</div></div>'
+				+ '</div>'
+				+ '<div class="layui-row layui-col-space16">'
+					+ '<div class="layui-col-md12"><div class="layui-form-item">'
+						+ '<label class="layui-form-label">文档列表</label>'
+						+ '<div class="layui-input-block">'
+							+ '<button type="button" class="layui-btn layui-btn-normal layui-btn-sm special-pick-doc">选择文档</button>'
+							+ '<div class="special-doc-list"></div>'
+						+ '</div>'
+					+ '</div></div>'
+				+ '</div>'
+				+ '</div>';
+		}
+
+		// 文档行
+		function docRowHtml(doc){
+			return '<tr data-id="' + esc(doc.id) + '">'
+				+ '<td>' + esc(doc.title) + '</td>'
+				+ '<td><a class="special-doc-del">删除</a></td>'
+				+ '<td><input type="number" class="layui-input special-doc-sort" value="' + esc(doc.sort == null ? 100 : doc.sort) + '"></td>'
+				+ '</tr>';
+		}
+
+		// 文档列表（空时显示提示行）
+		function docTableHtml(rows){
+			if(!rows){
+				rows = '<tr class="special-doc-empty"><td colspan="3" style="color:#999;">暂无文档，点击“选择文档”添加</td></tr>';
+			}
+			return '<table class="layui-table special-doc-table">'
+				+ '<colgroup><col><col width="90"><col width="110"></colgroup>'
+				+ '<thead><tr><th>文档标题</th><th>操作</th><th>排序</th></tr></thead>'
+				+ '<tbody>' + rows + '</tbody></table>';
+		}
+
+		// 重绘某节点的文档列表
+		function renderDocs($node, docs){
+			var rows = '';
+			$.each(docs || [], function(i, doc){
+				rows += docRowHtml(doc);
+			});
+			$node.find('.special-doc-list').html(docTableHtml(rows));
+		}
+
+		// 把选中的文档追加到节点，按 id 去重，返回实际新增数量
+		function appendDocs($node, docs){
+			var $tbody = $node.find('.special-doc-list tbody');
+			if(!$tbody.length){
+				renderDocs($node, []);
+				$tbody = $node.find('.special-doc-list tbody');
+			}
+			$tbody.find('.special-doc-empty').remove();
+			var exists = {};
+			$tbody.find('tr[data-id]').each(function(){
+				exists[$(this).attr('data-id')] = 1;
+			});
+			var rows = '', added = 0;
+			$.each(docs, function(i, doc){
+				var id = String(doc.id);
+				if(exists[id]) return;
+				exists[id] = 1;
+				added++;
+				rows += docRowHtml({id: id, title: doc.title, sort: 100});
+			});
+			$tbody.append(rows);
+			syncData();
+			return added;
+		}
+
+		// 新增节点（默认插到最上面；prepend 传 false 则追加到末尾）
+		function addNode(data, prepend){
+			data = data || {};
+			seq++;
+			var $node = $(nodeHtml({
+				uid: 'n' + seq,
+				name: data.name || ('节点' + seq),
+				ident: data.ident || ('default' + seq),
+				sort: data.sort == null ? 100 : data.sort
+			}));
+			renderDocs($node, data.docs);
+			prepend === false ? $list.append($node) : $list.prepend($node);
+			syncData();
+			return $node;
+		}
+
+		// 节点数据 → 隐藏域 JSON
+		function syncData(){
+			var nodes = [];
+			$list.find('.special-node').each(function(){
+				var $node = $(this), docs = [];
+				$node.find('.special-doc-list tbody tr[data-id]').each(function(){
+					var $tr = $(this);
+					docs.push({
+						id: parseInt($tr.attr('data-id'), 10) || 0,
+						title: $.trim($tr.find('td').eq(0).text()),
+						sort: parseInt($tr.find('.special-doc-sort').val(), 10) || 0
+					});
+				});
+				nodes.push({
+					name: $.trim($node.find('.special-node-name').val()),
+					ident: $.trim($node.find('.special-node-key').val()),
+					sort: parseInt($node.find('.special-node-sort').val(), 10) || 0,
+					docs: docs
+				});
+			});
+			$input.val(JSON.stringify(nodes));
+		}
+
+		// 选择文档弹窗
+		function addDoc($node){
+			curNode = $node;
+			curIndex = layer.open({
+				type: 2,
+				area: ['80%','80%'],
+				content: "{:url('admin/document/index_lite')}",
+				maxmin: true,
+				title:['选择文档', 'font-size: 18px;'],
+				shade:0.3,
+				shadeClose: true,
+				scrollbar: true,
+				btn: ['确定', '取消'],
+				btnAlign: 'c',
+				success:function(layero2, index2){
+
+				},
+				yes: function(index2, layero3){
+					var iframe = layero3.find('iframe')[0];
+					var iframeWin = iframe && iframe.contentWindow;
+					var table = iframeWin && iframeWin.layui ? iframeWin.layui.table : null;
+					var checked = table ? (table.checkStatus('doc_table').data || []) : [];
+					if(!checked.length){
+						layer.msg('请先勾选要添加的文档');
+						return false; // 不关闭弹窗
+					}
+					var added = appendDocs(curNode, checked);
+					layer.close(index2);
+					if(added){
+						layer.msg('已添加 ' + added + ' 篇文档', {icon: 1});
+					}else{
+						layer.msg('所选文档已在该节点中');
+					}
+					return false;
+				},
+				end: function(){
+					curNode = null;
+					curIndex = null;
+				}
+			});
+		}
+
+		// 供选择文档弹窗（admin/document/index_lite）双击某行时回调：插入该文档并关闭弹窗
+		window.MIU_SPECIAL_PICK = function(doc){
+			if(!curNode || !doc || doc.id == null) return;
+			var added = appendDocs(curNode, [doc]);
+			if(curIndex !== null) layer.close(curIndex);
+			layer.msg(added ? '已添加该文档' : '该文档已在列表中');
+		};
+
+		// 增加节点
+		$('#addNode').on('click', function(){
+			addNode();
+		});
+
+		// 删除节点
+		$list.on('click', '.special-node-del', function(){
+			var $node = $(this).closest('.special-node');
+			var name = $.trim($node.find('.special-node-name').val()) || '该节点';
+			layer.confirm('确定删除「' + name + '」吗？', {icon: 3, title: '提示'}, function(index){
+				$node.remove();
+				layer.close(index);
+				syncData();
+			});
+		});
+
+		// 打开选择文档弹窗
+		$list.on('click', '.special-pick-doc', function(){
+			addDoc($(this).closest('.special-node'));
+		});
+
+		// 删除节点内的文档
+		$list.on('click', '.special-doc-del', function(){
+			var $node = $(this).closest('.special-node');
+			$(this).closest('tr').remove();
+			if(!$node.find('.special-doc-list tbody tr[data-id]').length){
+				renderDocs($node, []);
+			}
+			syncData();
+		});
+
+		// 任一字段变动都同步 JSON
+		$list.on('input change', 'input, textarea', syncData);
+
+		// 回显：编辑页由后端赋值 $special_nodes
+		var initNodes = {:json_encode($special_nodes ?? [])};
+		if(initNodes.length){
+			$.each(initNodes, function(i, node){
+				addNode(node, false); // 回显按原顺序追加，避免倒序
+			});
+		}else{
+			addNode(); // 默认给一个空节点
+		}
+		syncData();
+	});
+</script>

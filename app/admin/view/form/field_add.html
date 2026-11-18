@@ -1,0 +1,156 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<form class="layui-form">
+<div class="layui-tabs layui-tab-brief layui-container">
+	<ul class="layui-tabs-header">
+		<li class="layui-this">基本设置</li>
+		<li>高级设置</li>
+	</ul>
+	<div class="layui-tabs-body">
+		<div class="layui-tabs-item layui-show">
+			<div class="layui-row layui-col-space16">
+				<div class="layui-col-md6">
+					<div class="layui-form-item">
+						<label class="layui-form-label">字段名称<font>*</font></label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								<input type="text" name="attr_name" lay-verify="required" placeholder="例如：您的姓名、手机号码" lay-reqText="请输入字段名称" autocomplete="off" class="layui-input" value="{$info.attr_name|default=''}">
+								{tips tips="前台表单里显示的文字，如「姓名」「手机号」" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+				<div class="layui-col-md12">
+					<div class="layui-form-item">
+						<label class="layui-form-label">字段类型<font>*</font></label>
+						<div class="layui-input-block">
+							{volist name="types" id="tname"}
+							<input type="radio" name="attr_input_type" value="{$key}" title="{$tname}" {if condition="isset($info['attr_input_type']) AND $info['attr_input_type'] eq $key"}checked{/if}>
+							{/volist}
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+				<div class="layui-col-md6" id="valuesBox" style="display:none;">
+					<div class="layui-form-item">
+						<label class="layui-form-label">可选值列表<font>*</font></label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								<textarea name="attr_values" placeholder="一行代表一个可选值" class="layui-textarea" style="height:110px;">{$info.attr_values|default=''}</textarea>
+								{tips tips="下拉框 / 单选框 / 多选框 必填；每行一个选项" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">是否必填</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								{notempty name="$info"}
+								<input type="radio" name="required" value="1" title="是" {eq name="$info.required" value="1" }checked{/eq}>
+								<input type="radio" name="required" value="0" title="否" {eq name="$info.required" value="0" }checked{/eq}>
+								{else/}
+								<input type="radio" name="required" value="1" title="是">
+								<input type="radio" name="required" value="0" title="否" checked>
+								{/notempty}
+								{tips tips="必填时，前台表单必须填写才能提交" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">验证格式</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								<select name="validate_type">
+									<option value="0" {eq name="info.validate_type|default='0'" value="0"}selected{/eq}>不验证</option>
+									<option value="6" {eq name="info.validate_type|default='0'" value="6"}selected{/eq}>手机号码</option>
+									<option value="7" {eq name="info.validate_type|default='0'" value="7"}selected{/eq}>Email邮箱</option>
+								</select>
+								{tips tips="选「手机号码 / Email邮箱」时，前台提交会按格式校验" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+			</div>
+		</div>
+		<div class="layui-tabs-item">
+			<div class="layui-row layui-col-space16">
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">列表显示</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								{notempty name="$info"}
+								<input type="radio" name="is_showlist" value="1" title="显示" {eq name="$info.is_showlist" value="1" }checked{/eq}>
+								<input type="radio" name="is_showlist" value="0" title="隐藏" {eq name="$info.is_showlist" value="0" }checked{/eq}>
+								{else/}
+								<input type="radio" name="is_showlist" value="1" title="显示" checked>
+								<input type="radio" name="is_showlist" value="0" title="隐藏">
+								{/notempty}
+								{tips tips="留言列表里这一列要不要显示" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+				<div class="layui-col-md6">
+					<div class="layui-form-item">
+						<label class="layui-form-label">排序</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:250px;">
+								<input type="number" name="sort_order" placeholder="数字越大越靠前" autocomplete="off" class="layui-input" value="{$info.sort_order|default='0'}">
+								{tips tips="数字越大越靠前" /}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="layui-form-item mt-3">
+	<div class="layui-input-block">
+		<input type="hidden" name="id" value="{$id}" />
+		<input type="hidden" name="form_id" value="{$form_id}" />
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+	</div>
+</div>
+</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['tool','form'],function(){
+		var form = layui.form, tool = layui.tool, $ = layui.jquery;
+
+		function toggleValues() {
+			var v = $('input[name="attr_input_type"]:checked').val();
+			$('#valuesBox').toggle(v === '1' || v === '3' || v === '4');
+		}
+		form.on('radio', function () { toggleValues(); });
+		toggleValues();
+
+		form.on('submit(webform)', function (data) {
+			tool.post("{:url('admin/form/field_add')}", data.field, function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.sideClose(1000);
+				}
+			});
+			return false;
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

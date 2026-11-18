@@ -1,0 +1,215 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<style>
+	body.main-body{background: #fff;}
+	body.main-body .layui-form-item{padding-bottom: 15px;max-width:60%;}
+	/* 「默认值」那块：按变量类型切换控件，一次只显示一个 */
+	.dv-box { display: none; }
+	/* 图片/多媒体输入框后面那颗预览图标 */
+	.dv-preview-icon { margin-right: 5px; cursor: pointer; }
+</style>
+<div class="layui-card">
+	<form class="layui-form conf-layout p-page" lay-filter="webform">
+		<h3 class="pb-3">自定义变量</h3>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">字段标识<font>*</font></label>
+			<div class="layui-input-block">
+				<div class="layui-input-group" style="width:100%">
+					<input type="text" name="name" {if condition="isset($custom.id) && $custom.id"} disabled{/if} value="{$custom.name}" lay-verify="required" lay-reqText="请输入字段标识" lay-affix="clear" autocomplete="off" placeholder="英文标识，取值时用它，例如 kefu_qq" class="layui-input">
+					{tips tips="只能是字母、数字、下划线或短横线，最多 32 个字符，不能和已有变量重名" /}
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">字段名称<font>*</font></label>
+			<div class="layui-input-block">
+				<div class="layui-input-group" style="width:100%">
+					<input type="text" name="title" value="{$custom.title}" lay-verify="required" lay-reqText="请输入字段名称" lay-affix="clear" autocomplete="off" placeholder="后台显示用的名字，例如 客服QQ" class="layui-input">
+					{tips tips="给人看的名字，后台列表里显示这个" /}
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">变量类型<font>*</font></label>
+			<div class="layui-input-block">
+				<div class="layui-input-group" style="width:100%">
+					<select name="type" lay-filter="type" lay-verify="required">
+						{foreach name="type_map" item="v" key="k"}
+						<option value="{$k}" {if condition="$custom.type eq $k"}selected{/if}>{$v}</option>
+						{/foreach}
+					</select>
+					{tips tips="决定这个变量在表单里怎么填：文本 / 图片 / 开关 / 多媒体。换类型后下面的「变量值」控件会跟着换" /}
+				</div>
+			</div>
+		</div>
+
+		<!-- 最大长度：只有文本类型才显示 -->
+		<div class="layui-form-item" id="box-maxlength">
+			<label class="layui-form-label">最大长度</label>
+			<div class="layui-input-block">
+				<div class="layui-input-group" style="width:100%">
+					<input type="number" name="maxlength" value="{$custom.maxlength}" min="0" max="65535" placeholder="250" class="layui-input">
+					{tips tips="文本类型必填。单行文本建议 250；多行文本按需要填，超过 255 会按长文本存（最大 65535）" /}
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">变量值</label>
+			<div class="layui-input-block">
+				<!-- 单行文本 -->
+				<div class="dv-box" data-dv="text">
+					<input type="text" id="dv-text" value="{$custom.default_value}" lay-affix="clear" autocomplete="off" placeholder="留空就是没有变量值" class="layui-input">
+				</div>
+
+				<!-- 多行文本 -->
+				<div class="dv-box" data-dv="multitext">
+					<textarea id="dv-multitext" placeholder="留空就是没有变量值" class="layui-textarea">{$custom.default_value}</textarea>
+				</div>
+
+				<!-- 上传图片 -->
+				<div class="dv-box" data-dv="img">
+					<div class="layui-inline marginr-0">
+						<span style="display:inline-flex;align-items:center;">
+							<i class="layui-icon layui-icon-picture dv-preview-icon" id="dv-img-preview-icon"></i>
+							<input type="text" id="dv-img" value="{$custom.default_value}" lay-affix="clear" autocomplete="off" class="layui-input" style="width:370px;" placeholder="点击上传或输入图片地址">
+						</span>
+					</div>
+					<div class="layui-inline">
+						<button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue uploadBtn" data-bind="dv-img" data-filter="image">选择上传</button>
+					</div>
+				</div>
+
+				<!-- 开关类型 -->
+				<div class="dv-box" data-dv="switch">
+					<input type="checkbox" id="dv-switch" lay-skin="switch" lay-text="开|关" {if condition="$custom.default_value eq '1'"}checked{/if}>
+				</div>
+
+				<!-- 多媒体类型 -->
+				<div class="dv-box" data-dv="media">
+					<div class="layui-inline marginr-0">
+						<span style="display:inline-flex;align-items:center;">
+							<input type="text" id="dv-media" value="{$custom.default_value}" lay-affix="clear" autocomplete="off" class="layui-input" style="width:370px;" placeholder="点击上传或输入视频/音频地址">
+						</span>
+					</div>
+					<div class="layui-inline">
+						<button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue uploadBtn" data-bind="dv-media" data-filter="video">选择上传</button>
+					</div>
+				</div>
+
+				<!-- 上面几个控件是「按类型显示」的，真正提交的是这个隐藏字段，值在提交前由 JS 填进去 -->
+				<input type="hidden" name="default_value" id="default_value" value="{$custom.default_value}">
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">提示说明</label>
+			<div class="layui-input-block">
+				<div class="layui-input-group" style="width:100%">
+					<input type="text" name="tips" value="{$custom.tips}" lay-affix="clear" autocomplete="off" placeholder="填这个变量时的说明，会显示成问号提示" class="layui-input">
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">排序</label>
+			<div class="layui-input-block">
+				<div class="layui-input-group" style="width:100%">
+					<input type="number" name="sort" value="{$custom.sort}" placeholder="数字越小越靠前" class="layui-input">
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">状态</label>
+			<div class="layui-input-block">
+				<input type="checkbox" name="status" value="1" lay-skin="switch" lay-text="启用|停用" {if condition="$custom.status eq 1"}checked{/if}>
+				{tips tips="停用的变量不参与取值" /}
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<div class="layui-input-block">
+				<input type="hidden" name="id" value="{$id}" />
+				<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</div>
+	</form>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['form','tool'], function () {
+		var form = layui.form, tool = layui.tool, $ = layui.$;
+
+		//当前选中的变量类型
+		var curType = '{$custom.type}';
+
+		//按类型显示对应的「变量值」控件；最大长度只有文本类型才要
+		function applyType(type) {
+			curType = type || 'text';
+			$('.dv-box').each(function () {
+				$(this).toggle($(this).attr('data-dv') === curType);
+			});
+			$('#box-maxlength').toggle(curType === 'text' || curType === 'multitext');
+		}
+		applyType(curType);
+		form.on('select(type)', function (data) {
+			applyType(data.value);
+		});
+
+		//读取当前生效的那个「变量值」控件的内容（开关没勾上就是 0）
+		function readDefaultValue() {
+			switch (curType) {
+				case 'multitext':
+					return $('#dv-multitext').val() || '';
+				case 'img':
+					return $('#dv-img').val() || '';
+				case 'media':
+					return $('#dv-media').val() || '';
+				case 'switch':
+					return $('#dv-switch').prop('checked') ? '1' : '0';
+				default:
+					return $('#dv-text').val() || '';
+			}
+		}
+
+		//图片预览：鼠标移到输入框前面那颗小图标上看大图
+		initThumbPreview('dv-img', 'dv-img-preview-icon');
+
+		//文件管理器：图片走 image 过滤，多媒体走 video 过滤
+		$('.uploadBtn').on('click', function () {
+			var $btn = $(this);
+			//data-filter 优先；兼容老页面写在 filter 属性上的写法
+			var filter = $btn.attr('data-filter') || $btn.attr('filter') || 'image';
+			openFileManager($btn.attr('data-bind'), filter);
+			return false;
+		});
+
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			//把当前显示的那个「变量值」控件的值，写进真正提交的字段
+			data.field.default_value = readDefaultValue();
+
+			let callback = function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					//关闭抽屉并重载列表（layui.pageTable）
+					tool.sideClose(1000);
+				}
+			}
+			tool.post("{:url('admin/custom/add')}", data.field, callback);
+			return false;
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

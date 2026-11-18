@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body class="theme-blog">
+{include file="header" /}
+<main id="main">
+    <section class="page-intro blog-list-intro"><div class="container">{miu:position /}<p class="blog-kicker">{miu:lang key='latestArticles' /}</p><h1>{$nav.title}</h1><p>{$nav.seo_description|default=''}</p></div></section>
+    <section class="container blog-archive">
+        {miu:list id='vo' pagesize='12'}
+        <article class="blog-archive-entry"><time>{$vo.date}</time><div><span class="blog-entry-channel">{$vo.nav_name}</span><h2><a href="{$vo.url}">{$vo.title}</a></h2><p>{$vo.seo_description|default=''}</p></div>{notempty name="vo.litpic"}<a class="blog-archive-image" href="{$vo.url}"><img src="{$vo.litpic}" alt="{$vo.title}" loading="lazy"></a>{/notempty}</article>
+        {/miu:list}
+        {miu:pagelist theme='light' /}
+    </section>
+</main>
+{include file="footer" /}
+</body>
+</html>

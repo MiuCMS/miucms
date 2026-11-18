@@ -1,0 +1,228 @@
+{extend name="common/base"/}
+{block name="style"}
+<link rel="stylesheet" href="{__ADMIN__}/css/index.css?v={:CMS_VERSION}&rev=2">
+{/block}
+
+<!-- 主体 -->
+{block name="body"}
+<div class="layui-layout-body">
+    <div id="MiuApp" data-upgrade-check-url="{:url('admin/index/upgrade_check')}" data-upgrade-token="{$upgradeCsrfToken}">
+        <div class="layui-layout miucms-layout miucms-layout-three no-sub" id="mainLayout">
+
+            <!-- 顶部 header（保持原有） -->
+            <div class="layui-header">
+                <div class="layui-layout-left" style="left:120px !important;">
+                    <span class="miucms-head-item miu-effects miucms-head-home" style="margin-left: 20px;">
+                        <a href="/" target="_blank" title="前台首页" class="layui-show-md-block"><i class="layui-icon layui-icon-home layui-font-14"></i><span class="layui-font-14"> 预览站点</span></a>
+                    </span>
+                    <span class="miucms-head-item miu-effects miucms-head-cache" title="清缓存">
+                        <a href="javascript:;" class="layui-show-md-block" miu-event="cache" data-href="{:url('admin/api/cache_clear')}"><i class="layui-icon layui-icon-fonts-clear layui-font-14"></i><span class="layui-font-14"> 清缓存</span></a>
+                    </span>
+                </div>
+                <div class="layui-layout-right">
+                    <span class="miucms-head-item miu-effects miucms-head-refresh">
+                        <a href="javascript:;" class="refreshThis" miu-event="refresh" title="刷新"><i class="layui-icon layui-icon-refresh layui-font-14"></i><span class="layui-font-14"></span></a>
+                    </span>
+                    <span class="miucms-head-item miu-effects miucms-head-search">
+                        <a href="javascript:;" class="search" title="功能搜索"><i class="layui-icon layui-icon-search layui-font-14"></i><span class="layui-font-14"></span></a>
+                    </span>
+                    <span class="miucms-head-item miu-effects miucms-head-screen">
+                        <a href="javascript:;" miu-event="screen" data-screen="full" title="全屏"><i class="fullScreen layui-icon layui-icon-screen-full layui-font-14"></i><span class="fullScreen layui-font-14"></span></a>
+                    </span>
+                    <span class="miucms-head-item miu-effects miucms-head-note">
+                        <a href="javascript:;" miu-event="note" title="便签"><i class="layui-icon layui-icon-note layui-font-14"></i><span class="layui-font-14"></span></a>
+                    </span>
+                    <span class="miucms-head-item miu-effects miucms-head-lockScreen">
+                        <a href="javascript:;" miu-event="lockScreen" title="锁屏"><i class="layui-icon layui-icon-lock layui-font-16"></i><span class=" layui-font-14"></span></a>
+                    </span>
+                    <span class="miucms-head-item miu-effects miucms-head-set">
+                        <a href="javascript:;" id="theme" title="主题"><i class="layui-icon layui-icon-theme layui-font-14"></i><span class="layui-font-14"></span></a>
+                    </span>
+                    <span class="miucms-head-item miu-effects miucms-head-message">
+                        <a href="javascript:;" data-title="留言管理" title="消息中心"><i class="layui-icon layui-icon-notice layui-font-14"></i><div class="miucms-message-num" id="formUnreadBadge" style="{if condition="$formUnreadCount <= 0"}display:none{/if}"><span>{$formUnreadCount}</span></div></a>
+                    </span>
+                    <span class="miucms-head-item miucms-head-lang">
+                        <div class="miu-lang-switcher" data-miu-lang-switcher>
+                            <button type="button" class="miu-lang-toggle" data-miu-lang-toggle aria-expanded="false" aria-label="切换语言">
+                                <i class="layui-icon layui-icon-website"></i><span data-miu-lang-current>简体中文</span><i class="layui-icon layui-icon-down miuui-lang-arrow"></i>
+                            </button>
+                            <div class="miu-lang-menu" role="menu">
+                                <button type="button" data-miu-lang-option="zh-CN" role="menuitem">简体中文</button>
+                                <button type="button" data-miu-lang-option="zh-HK" role="menuitem">繁體中文</button>
+                                <button type="button" data-miu-lang-option="en" role="menuitem">English</button>
+                            </div>
+                        </div>
+                    </span>
+                    <span class="miucms-head-item miucms-head-avatar">
+                        <ul class="layui-nav">
+                            <li class="layui-nav-item">
+                                <a href="javascript:;">
+                                    <img src="{:get_login_admin('thumb')}" onerror="javascript:this.src='{__ADMIN__}/images/default_avatar.png';this.onerror=null;">
+                                    <cite>{:get_login_admin('nickname')}</cite>
+                                </a>
+                                <dl class="layui-nav-child" style="text-align: center; cursor: pointer;">
+                                    <dd><a data-href="{:url('admin/admin/add')}?id={:get_login_admin('id')}" data-width="80%" class="side-a">基本资料</a></dd>
+                                    <dd><a data-href="{:url('admin/admin/add')}?id={:get_login_admin('id')}" data-width="80%" class="side-a">修改密码</a></dd>
+                                    <hr><dd miu-event="logout"><a>退出</a></dd>
+                                </dl>
+                            </li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+
+            <!-- 左侧：一级菜单（只显示图标+文字） -->
+            <div class="layui-side layui-side-menu layui-side-{$theme}">
+                <div class="layui-side-scroll">
+                    <div class="layui-logo" miu-event="closeAllTabs">
+                        <div lay-href="/">
+                            <span>MiuCMS</span>
+                        </div>
+                    </div>
+                    <ul id="menuList" class="layui-nav layui-nav-tree layui-inline" lay-shrink="all">
+                        <li class="layui-nav-item menu-li active" data-id="0" data-title="概览" data-href="{:url('admin/index/main')}">
+                            <a href="javascript:;" class="miucms-menu-l1">
+                                <span class="menu-content">
+                                    <i class="icon layui-icon layui-icon-home{if condition="$theme == 'white'"} layui-font-black{/if}"></i>
+                                    <span class="menu-text{if condition="$theme == 'white'"} layui-font-black{/if}">概览</span>
+                                </span>
+                            </a>
+                        </li>
+                        {foreach name="menu" item="a"}
+                        <li class="layui-nav-item menu-li" data-id="{$a.id}" data-title="{$a.title}" data-href="{$a.src}">
+                            <a href="javascript:;" class="miucms-menu-l1">
+                                <span class="menu-content">
+                                    <i class="icon layui-icon {$a.icon}{if condition="$theme == 'white'"} layui-font-black{/if}"></i>
+                                    <span class="menu-text{if condition="$theme == 'white'"} layui-font-black{/if}">{$a.title}</span>
+                                </span>
+                            </a>
+                        </li>
+                        {/foreach}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 中间：二级菜单面板（纯前端 JS 渲染） -->
+            <div class="miucms-sub-side" id="subSide">
+                <div class="miucms-sub-title" id="subTitle">菜单</div>
+                <div class="miucms-sub-toggle" miu-event="toggleSubSide"><i class="layui-icon layui-icon-left"></i></div>
+                <div class="miucms-sub-scroll">
+                    <!-- 二级菜单用 layui 树组件渲染，结构与内容列表页左侧栏目树一致 -->
+                    <div class="miucms-sub-tree" id="subNav">
+                        <!-- 由 JS 动态填充 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：标签页 + iframe 内容（保持原有，仅位置自动让出） -->
+            <div id="pageTabs" class="page-tabs">
+                <div class="layui-icon miucms-tabs-control layui-icon-prev" miu-event="tabRollLeft"></div>
+                <div class="layui-icon miucms-tabs-control layui-icon-next" miu-event="tabRollRight"></div>
+                <div class="layui-icon miucms-tabs-control layui-icon-down">
+                    <ul class="layui-nav miucms-tabs-select">
+                        <li class="layui-nav-item">
+                            <a href="javascript:;"></a>
+                            <dl class="layui-nav-child layui-anim-fadein">
+                                <dd miu-event="closeThisTabs"><a href="javascript:;">关闭当前</a></dd>
+                                <dd miu-event="closeOtherTabs"><a href="javascript:;">关闭其它</a></dd>
+                                <dd miu-event="closeAllTabs"><a href="javascript:;">关闭全部</a></dd>
+                            </dl>
+                        </li>
+                    </ul>
+                </div>
+                <div class="layui-tab miucms-admin-tab" lay-unauto lay-allowClose="true" lay-filter="miucms-admin-tab">
+                    <ul class="layui-tab-title" id="pageTabUl">
+                        <li lay-id="0" lay-attr="view/home/index.html" class="layui-this"><i class="layui-icon layui-icon-home"></i></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="layui-body" id="MiuAppBody">
+                <div class="miucms-tab-page layui-show" id="tabItem0">
+                    <iframe id="0" data-frameid="0" name="myiframe" src="{:url('admin/index/main')}" frameborder="0" align="left" width="100%" height="100%" scrolling="yes"></iframe>
+                </div>
+            </div>
+            <div class="miucms-body-shade" miu-event="shade"></div>
+
+            <!-- 功能搜索弹层：默认隐藏，点搜索图标显示，小箭头指向上面的搜索图标。
+                 放在外层（不在按钮里），left 由 JS 按按钮位置算 -->
+            <div class="miu-search" id="miuSearch">
+                <div class="miu-search-arrow"></div>
+                <div class="miu-search-field">
+                    <i class="layui-icon layui-icon-search"></i>
+                    <input type="text" id="miuSearchInput" autocomplete="off" spellcheck="false" placeholder="搜索后台菜单（名称 / 地址）">
+                </div>
+                <ul class="miu-search-list" id="miuSearchList"></ul>
+            </div>
+
+            <!-- 系统通知弹层：鼠标移入消息图标显示；目前只有「未读留言」这一条。
+                 放在外层（不在按钮里），left 由 JS 按按钮位置算 -->
+            <div class="miu-notice" id="miuNotice">
+                <div class="miu-notice-arrow"></div>
+                <div class="miu-notice-title index-tip">系统通知</div>
+                <ul class="miu-notice-list">
+                    <li class="miu-notice-item tab-a" data-title="留言管理" data-id="1038" data-href="{:url('admin/form/message')}" id="miuNoticeMsg" style="{if condition="$formUnreadCount <= 0"}display:none{/if}">
+                        <i class="layui-icon layui-icon-dialogue miu-notice-icon" aria-hidden="true"></i>
+                        <div class="miu-notice-text">
+                            <p class="t">您有未读留言</p>
+                            <p class="d">有 <b id="miuNoticeCount">{$formUnreadCount}</b> 个留言未处理</p>
+                        </div>
+                    </li>
+                    <li class="miu-notice-item tab-a" data-title="系统升级" data-id="987654321" data-href="{:url('admin/index/upgrade')}" id="miuUpgradeNotice" style="display:none">
+                        <i class="layui-icon layui-icon-upload-circle miu-notice-icon" aria-hidden="true"></i>
+                        <div class="miu-notice-text">
+                            <p class="t">发现系统新版本</p>
+                            <p class="d">可升级到 <b id="miuUpgradeNoticeVersion"></b>，点击查看并升级</p>
+                        </div>
+                    </li>
+                    <li class="miu-notice-empty" id="miuNoticeEmpty" style="{if condition="$formUnreadCount > 0"}display:none{/if}">暂无新通知</li>
+                </ul>
+            </div>
+
+            <!-- 标签卡右键菜单：右键标签栏弹出。
+                 4 个菜单项都带 miu-event，直接复用 admin.js 挂在 #MiuApp 上的处理器
+                 （refresh / closeThisTabs / closeOtherTabs / closeAllTabs） -->
+            <div class="miu-tab-menu" id="miuTabMenu">
+                <ul>
+                    <li miu-event="refresh" class="refreshThis"><i class="layui-icon layui-icon-refresh"></i><span>刷新</span></li>
+                    <li miu-event="closeThisTabs"><i class="layui-icon layui-icon-close"></i><span>关闭</span></li>
+                    <li miu-event="closeOtherTabs"><i class="layui-icon layui-icon-error"></i><span>关闭其它</span></li>
+                    <li miu-event="closeAllTabs"><i class="layui-icon layui-icon-template-1"></i><span>全部关闭</span></li>
+                </ul>
+            </div>
+
+            <!-- 搜索弹层的「点外部关闭」遮罩：iframe 里的点击不会冒泡到父页面，用这层接住 -->
+            <div class="miu-search-mask" id="miuSearchMask"></div>
+        </div>
+    </div>
+</div>
+
+<!-- 锁屏遮罩（默认隐藏，点右上角「锁屏」显示） -->
+<div id="miuLockScreen" class="miu-lock-screen">
+    <div class="miu-lock-inner">
+        <i class="layui-icon layui-icon-lock lock-icon"></i>
+        <div class="miu-lock-time" id="miuLockTime">--:--</div>
+        <div class="miu-lock-date" id="miuLockDate"></div>
+        <div class="miu-lock-form">
+            <!-- 这里必须是 type="text"：浏览器在页面加载时就把 type="password" 的框登记成密码框，
+                 之后再改 type 它照样弹已保存的密码。所以一开始就用 text，
+                 遮字符靠 CSS 的 -webkit-text-security: disc（见 .miu-lock-input），
+                 不支持的浏览器由 hardenLockInput() 退回 password 类型 -->
+            <input type="text" id="miuLockPwd" class="miu-lock-input" placeholder="请输入密码"
+                autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
+                data-lpignore="true" data-1p-ignore="true" data-bwignore="true">
+            <button type="button" id="miuLockBtn" class="miu-lock-btn">解锁</button>
+        </div>
+        <div class="miu-lock-tip">输入管理员密码解锁</div>
+    </div>
+</div>
+
+<!-- 注入菜单数据，供前端纯动态渲染中间面板（index.js 里读取 window.MIU_MENU） -->
+<script>window.MIU_MENU = {:json_encode($menu ?? [])};</script>
+{/block}
+
+<!-- 脚本 -->
+{block name="script"}
+<script src="{__ADMIN__}/js/index.js?v={:CMS_VERSION}"></script>
+{/block}
+<!-- /脚本 -->

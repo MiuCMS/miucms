@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="{miu:locale name='current'/}">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{miu:lang key='account.login_title' /} - {miu:global name='site_name'/}</title>
+    {include file="head" /}
+    <link rel="stylesheet" href="/static/home/user/css/user.css" />
+    <script defer src="/static/home/user/js/user.js"></script>
+</head>
+<body data-page="member-login">
+{include file="header" /}
+<main id="main" class="account-page">
+    <div class="account-layout">
+        <section class="account-story" aria-label="{miu:lang key='account.member_service' /}">
+            <div>
+                <p class="eyebrow">MEMBER ACCESS</p>
+                <h1>{miu:lang key='account.welcome_back' /}</h1>
+                <p>{miu:lang key='account.login_hero_copy' /}</p>
+            </div>
+            <div class="account-story-note">{miu:lang key='account.login_note' /}</div>
+        </section>
+        <section class="account-card" aria-labelledby="account-title">
+            <h2 id="account-title">{miu:lang key='account.login_title' /}</h2>
+            <p class="account-card-intro">{miu:lang key='account.login_intro' /}</p>
+            <form class="account-form" data-account-form action="{:url_entry()}/login_submit" method="post" autocomplete="off" data-success-url="{:url_entry()}/user/index">
+                <div class="account-field account-float-field">
+                    <label for="login-name">{miu:lang key='account.account_or_email' /}</label>
+                    <input id="login-name" name="name" type="text" autocomplete="off" data-no-autofill maxlength="100" placeholder="{miu:lang key='account.login_placeholder' /}" required />
+                </div>
+                <div class="account-field account-float-field">
+                    <label for="login-password">{miu:lang key='account.password' /}</label>
+                    <input id="login-password" name="password" type="password" autocomplete="off" data-no-autofill placeholder="{miu:lang key='account.password_placeholder' /}" required />
+                </div>
+                <div class="account-captcha account-field">
+                    <div class="account-float-field">
+                        <label for="login-captcha">{miu:lang key='account.captcha' /}</label>
+                        <input id="login-captcha" name="captcha" type="text" autocomplete="off" inputmode="text" maxlength="8" placeholder="{miu:lang key='account.captcha_placeholder' /}" required />
+                    </div>
+                    <button class="captcha-refresh" type="button" data-captcha-refresh aria-label="{miu:lang key='account.captcha_refresh' /}"><img src="{:captcha_src()}" alt="{miu:lang key='account.captcha' /}" title="{miu:lang key='account.captcha_title' /}" /></button>
+                </div>
+                <button class="button button-dark account-submit" type="submit">{miu:lang key='account.login_member_center' /} <span aria-hidden="true">→</span></button>
+                <p class="account-feedback" data-form-feedback role="status" aria-live="polite"></p>
+            </form>
+            <p class="account-recovery-link"><a href="{:url_entry()}/forgot">{miu:lang key='account.forgot_link' /}</a></p>
+            <p class="account-foot">{miu:lang key='account.no_account' /} <a href="{:url_entry()}/reg">{miu:lang key='account.create_account' /}</a></p>
+            <p class="account-privacy">{miu:lang key='account.login_privacy' /}</p>
+        </section>
+    </div>
+</main>
+{include file="footer" /}
+</body>
+</html>

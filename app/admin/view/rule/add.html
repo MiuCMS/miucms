@@ -1,0 +1,190 @@
+{extend name="common/base" /}
+<!-- 主体 -->
+{block name="body"}
+<style>
+	/* 图标选择器的图标网格 */
+	.miu-icon-grid{display:flex;flex-wrap:wrap;gap:6px;max-height:470px;overflow:auto;margin-top:10px;}
+	.miu-icon-grid a{display:flex;flex-direction:column;align-items:center;justify-content:center;width:84px;height:72px;border:1px solid #eee;border-radius:3px;color:#666;text-decoration:none;box-sizing:border-box;}
+	.miu-icon-grid a:hover{border-color:#1e9fff;color:#1e9fff;background:#f7fbff;}
+	.miu-icon-grid a i{font-size:22px;}
+	.miu-icon-grid a span{font-size:11px;margin-top:4px;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+</style>
+<form class="layui-form p-page">
+	<h3 class="pb-3">功能菜单/节点</h3>
+	{if condition="$id eq 0"}
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray-2">父级菜单/节点<font>*</font></td>
+			<td>
+				<select name="pid" lay-verify="required" lay-reqText="请选择父级菜单/节点">
+					<option value="0">作为顶级菜单/节点</option>
+					{volist name=":set_recursion(get_admin_rule())" id="v"}
+					<option value="{$v.id}" {eq name="pid" value="$v.id" }selected="" {/eq}>{$v.title} </option>
+					{/volist}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray-2">左侧菜单显示<font>*</font></td>
+			<td>
+				<input type="radio" name="menu" value="1" title="是">
+				<input type="radio" name="menu" value="2" checked="true" title="否">
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">菜单/节点名称<font>*</font></td>
+			<td><input type="text" name="title" lay-verify="required" placeholder="请输入菜单/节点名称" lay-reqText="请输入菜单/节点名称" class="layui-input"></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">操作日志名称<font>*</font></td>
+			<td><input type="text" name="name" lay-verify="required" placeholder="请输入操作日志名称" lay-reqText="请输入操作日志名称" class="layui-input"></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">菜单/节点URL</td>
+			<td><input type="text" name="src" placeholder="请输入菜单/节点URL，可空" class="layui-input"></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">菜单排序</td>
+			<td><input type="text" name="sort" value="0" placeholder="请输入数字，越小越靠前" class="layui-input"></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">菜单图标</td>
+			<td colspan="3">
+				<input type="text" name="icon" id="icon" style="width:220px; display:inline-block;" placeholder="可空，点右侧按钮选择" autocomplete="off" class="layui-input">
+				<i id="icon-preview" class="layui-icon" style="font-size:22px; margin-left:10px; vertical-align:middle;"></i>
+				<button type="button" class="layui-btn layui-btn-primary layui-border-blue layui-btn-xs" id="iconPicker" style="margin-left:10px;">选择图标</button>
+			</td>
+		</tr>
+	</table>
+	{else/}
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray-2">父级菜单/节点<font>*</font></td>
+			<td>
+				<select name="pid" lay-verify="required" lay-reqText="请选择父级菜单/节点">
+					<option value="0">作为顶级节点</option>
+					{volist name=":set_recursion(get_admin_rule())" id="v"}
+					<option value="{$v.id}" {eq name="$detail.pid" value="$v.id" }selected="" {/eq}>{$v.title} </option>
+					{/volist}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray-2">左侧菜单显示<font>*</font></td>
+			<td>
+				<input type="radio" name="menu" value="1" title="是" {eq name="$detail.menu" value="1" } checked{/eq}>
+				<input type="radio" name="menu" value="2" title="否" {eq name="$detail.menu" value="2" } checked{/eq}>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">菜单/节点名称<font>*</font></td>
+			<td><input type="text" name="title" value="{$detail.title}" lay-verify="required" autocomplete="off" placeholder="请输入菜单/节点名称" lay-reqText="请输入菜单/节点名称" class="layui-input"></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">操作日志名称<font>*</font></td>
+			<td><input type="text" name="name" value="{$detail.name}" lay-verify="required" placeholder="请输入操作日志名称" lay-reqText="请输入操作日志名称" class="layui-input"></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">菜单/节点URL</td>
+			<td><input type="text" name="src" value="{$detail.src}" placeholder="请输入菜单/节点URL，可空" class="layui-input"></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">菜单排序</td>
+			<td><input type="text" name="sort" value="{$detail.sort}" placeholder="请输入数字，越小越靠前" class="layui-input"></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">菜单图标</td>
+			<td colspan="3">
+				<input type="text" name="icon" id="icon" value="{$detail.icon}" style="width:220px; display:inline-block;" placeholder="可空，点右侧按钮选择" autocomplete="off" class="layui-input">
+				<i id="icon-preview" class="layui-icon {$detail.icon}" style="font-size:22px; margin-left:10px; vertical-align:middle;"></i>
+				<button type="button" class="layui-btn layui-btn-primary layui-border-blue layui-btn-xs" id="iconPicker" style="margin-left:10px;">选择图标</button>
+			</td>
+		</tr>
+	</table>
+	{/if}
+	<div class="py-3">
+		<input type="hidden" name="id" value="{$id}">
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+	</div>
+</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	//图标清单来自 config/icon.php（改图标去那里改），这里只负责输出给图标选择器用
+	var LAYUI_ICONS = {:json_encode(config('icon.icons'))};
+
+	layui.config({base:'/static/admin/layui/components/',}).extend({tool:'tool'}).use(['tool'],function(){
+		var form = layui.form,tool=layui.tool;
+
+		//菜单图标选择器
+		var iconLayerIndex = null;
+		$('#iconPicker').on('click', function () {
+			var content = '<div style="padding:12px;">'
+				+ '<input type="text" id="iconSearch" class="layui-input" autocomplete="off" placeholder="输入关键字筛选，例如 home、user、set">'
+				+ '<div class="miu-icon-grid" id="iconGrid"></div>'
+				+ '</div>';
+			iconLayerIndex = layer.open({
+				type: 1,
+				title: '选择菜单图标',
+				area: ['780px', '600px'],
+				shadeClose: true,
+				content: content,
+				success: function (layero) {
+					var render = function (kw) {
+						var list = kw ? LAYUI_ICONS.filter(function (n) { return n.indexOf(kw) !== -1; }) : LAYUI_ICONS;
+						if (!list.length) {
+							layero.find('#iconGrid').html('<div style="color:#999;">没有匹配的图标</div>');
+							return;
+						}
+						var html = '';
+						list.forEach(function (n) {
+							html += '<a href="javascript:;" data-icon="' + n + '" title="' + n + '">'
+								+ '<i class="layui-icon ' + n + '"></i>'
+								+ '<span>' + n.replace('layui-icon-', '') + '</span></a>';
+						});
+						layero.find('#iconGrid').html(html);
+					};
+					render('');
+					layero.find('#iconSearch').on('input', function () {
+						render($(this).val().trim().toLowerCase());
+					});
+					layero.on('click', '.miu-icon-grid a', function () {
+						var icon = $(this).data('icon');
+						$('#icon').val(icon);
+						$('#icon-preview').attr('class', 'layui-icon ' + icon);
+						layer.close(iconLayerIndex);
+					});
+				}
+			});
+		});
+		//手动输入或点「重置」后同步预览
+		$('#icon').on('input', function () {
+			$('#icon-preview').attr('class', 'layui-icon ' + $.trim($(this).val()));
+		});
+
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			if (!data.field.menu || data.field.menu == '') {
+				layer.msg('请选择是否在左侧菜单显示');
+				return false;
+			}
+			let callback = function (e) {
+				parent.layui.layer.msg(e.msg);
+				if (e.code == 0) {
+					parent.layui.trees.reloadData()
+					setTimeout(function () {
+						parent.layui.layer.closeAll();
+					}, 1000);					
+				}
+			}
+			tool.post("{:url('admin//admin/rule/add')}", data.field, callback);
+			return false;
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

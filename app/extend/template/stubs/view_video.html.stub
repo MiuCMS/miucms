@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body>
+{include file="header" /}
+<main id="main" class="section container">
+    {miu:position /}
+    <header class="document-heading"><h1>{$doc.title}</h1><p>{$doc.title_ext_1|default=''}</p></header>
+    {notempty name="doc.videos"}
+    <section class="video-layout" data-video-page data-error="{miu:lang key='playError' /}">
+        <div class="player-stage"><video id="starter-video" controls playsinline preload="metadata" poster="{$doc.litpic}" aria-label="{$doc.title}"></video><div id="starter-dplayer" hidden></div><p class="player-error" role="status" hidden></p></div>
+        <div class="episode-section"><h2>{miu:lang key='episodes' /}</h2>
+            {if condition="count($doc['videos']) gt 1"}<label class="visually-hidden" for="starter-line">{miu:lang key='playGroup' /}</label><select id="starter-line">{volist name="doc.videos" id="vo" key="groupNo"}<option value="{$groupNo}">{$vo.name}</option>{/volist}</select>{/if}
+            {volist name="doc.videos" id="vo" key="groupNo"}
+            <div class="episode-group" data-group="{$groupNo}" {if condition="$groupNo neq 1"}hidden{/if}><p>{$vo.name} · {miu:lang key='total' /} {:count($vo['episodes'])} {miu:lang key='episodeUnit' /}</p><div class="episode-list">
+                {foreach $vo.episodes as $episode}<button type="button" data-src="{$episode.url}" data-player="{$vo.player}">{$episode.title}</button>{/foreach}
+            </div></div>
+            {/volist}
+        </div>
+    </section>
+    <script src="/static/home/dplayer/hls.min.js"></script>
+    {notempty name="doc.has_dplayer"}<script src="/static/home/dplayer/dplayer.js"></script>{/notempty}
+    {else/}<p class="empty-state">{miu:lang key='empty' /}</p>{/notempty}
+    <article class="reading-layout">{include file="document_body" /}</article>
+    {include file="detail_end" /}
+</main>
+{include file="footer" /}
+</body>
+</html>

@@ -1,0 +1,626 @@
+{extend name="common/base"/}
+{block name="style"}
+<style>
+	/* 后台全局样式把 html,body 设成了 height:100%，弹层自适应高度要放开 */
+	html, body { height: auto;background: #fff; }
+	.dev-doc { line-height: 1.9; color: #333; }
+	.dev-doc h3 { font-size: 15px; font-weight: 700; margin: 22px 0 8px; padding-bottom: 6px; border-bottom: 1px solid #eee; }
+	.dev-doc h3:first-child { margin-top: 0; }
+	.dev-doc h4 { font-size: 14px; font-weight: 700; margin: 16px 0 6px; color: #1e9fff; }
+	.dev-doc pre { background: #f7f8fa; border: 1px solid #eee; border-radius: 4px; padding: 10px 12px; overflow-x: auto; font-size: 12px; line-height: 1.7; margin: 0 0 10px; }
+	.dev-doc code { background: #f2f4f7; padding: 1px 5px; border-radius: 3px; font-size: 12px; font-family: Consolas, Monaco, monospace; }
+	.dev-doc ul, .dev-doc ol { padding-left: 22px; margin: 0 0 10px; }
+	.dev-doc li { margin-bottom: 4px; }
+	.dev-doc table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+	.dev-doc th, .dev-doc td { border: 1px solid #eee; padding: 6px 10px; text-align: left; font-size: 13px; vertical-align: top; }
+	.dev-doc th { background: #fafafa; font-weight: 600; }
+	.dev-doc .note { background: #f6f8fa; border-left: 3px solid #1e9fff; padding: 8px 12px; margin: 0 0 10px; font-size: 13px; color: #555; }
+	.dev-doc .warn { color: #ff5722; }
+	.dev-doc .file { color: #16a34a; font-weight: 600; }
+	/* 图标选择器的图标网格（照 app/admin/view/rule/add.html 来的） */
+	.miu-icon-grid{display:flex;flex-wrap:wrap;gap:6px;max-height:470px;overflow:auto;margin-top:10px;}
+	.miu-icon-grid a{display:flex;flex-direction:column;align-items:center;justify-content:center;width:84px;height:72px;border:1px solid #eee;border-radius:3px;color:#666;text-decoration:none;box-sizing:border-box;}
+	.miu-icon-grid a:hover{border-color:#1e9fff;color:#1e9fff;background:#f7fbff;}
+	.miu-icon-grid a i{font-size:22px;}
+	.miu-icon-grid a span{font-size:11px;margin-top:4px;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+	#helpAreaEditor{width:100%;}
+	#helpAreaEditor.editormd{margin-bottom:0;}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-3">
+	<div class="layui-tab layui-tab-brief" lay-filter="devTab">
+		<ul class="layui-tab-title">
+			<li class="layui-this">生成插件骨架</li>
+			<li>开发文档</li>
+		</ul>
+		<div class="layui-tab-content">
+
+			<!-- ==================== Tab 1：生成骨架 ==================== -->
+			<div class="layui-tab-item layui-show">
+				<form class="layui-form" lay-filter="scaffoldForm">
+					<div class="layui-row layui-col-space16">
+						<div class="layui-col-md4">
+							<div class="layui-form-item">
+								<label class="layui-form-label">插件标识<font>*</font></label>
+								<div class="layui-input-block">
+									<div class="layui-input-group" style="width:100%">
+										<input type="text" name="name" autofocus lay-verify="required" lay-reqText="请输入插件标识" placeholder="如 myplugin" autocomplete="off" class="layui-input">
+										{tips tips="字母开头，只含字母/数字/下划线；会生成目录 plugins/标识/，也是插件的唯一标识。不能用系统保留词（PHP 关键字如 list/class/array、框架目录名、应用名等）" /}
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="layui-col-md12" style="height:0;padding:0;"></div>
+
+						<div class="layui-col-md4">
+							<div class="layui-form-item">
+								<label class="layui-form-label">插件名称<font>*</font></label>
+								<div class="layui-input-block">
+									<div class="layui-input-group" style="width:100%">
+										<input type="text" name="title" lay-verify="required" lay-reqText="请输入插件名称" placeholder="如 我的插件" autocomplete="off" class="layui-input">
+										{tips tips="后台插件列表里显示的名称" /}
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="layui-col-md12" style="height:0;padding:0;"></div>
+
+						<div class="layui-col-md4">
+							<div class="layui-form-item">
+								<label class="layui-form-label">版本号</label>
+								<div class="layui-input-block">
+									<div class="layui-input-group" style="width:100%">
+										<input type="text" name="version" value="1.0.0" autocomplete="off" class="layui-input">
+										{tips tips="插件版本号，自己维护" /}
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="layui-col-md12" style="height:0;padding:0;"></div>
+
+						<div class="layui-col-md4">
+							<div class="layui-form-item">
+								<label class="layui-form-label">作者</label>
+								<div class="layui-input-block">
+									<div class="layui-input-group" style="width:100%">
+										<input type="text" name="author" placeholder="选填" autocomplete="off" class="layui-input">
+										{tips tips="选填" /}
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="layui-col-md12" style="height:0;padding:0;"></div>
+
+						<div class="layui-col-md4">
+							<div class="layui-form-item">
+								<label class="layui-form-label">作者官网</label>
+								<div class="layui-input-block">
+									<div class="layui-input-group" style="width:100%">
+										<input type="url" name="author_url" lay-verify="authorUrl" maxlength="2048" placeholder="选填，例如 https://example.com" autocomplete="url" class="layui-input">
+										{tips tips="选填；需填写完整的 http:// 或 https:// 网址，生成后写入 Plugin.php 的 $authorUrl 属性" /}
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="layui-col-md12" style="height:0;padding:0;"></div>
+
+						<div class="layui-col-md6">
+							<div class="layui-form-item">
+								<label class="layui-form-label">插件图标</label>
+								<div class="layui-input-block">
+									<div class="layui-input-group" style="width:100%">
+										<!-- readonly：只能点右边按钮选，不让手填 -->
+										<input type="text" name="icon" id="pluginIcon" value="layui-icon-star" readonly autocomplete="off" class="layui-input" style="cursor:pointer;" title="点右侧按钮选择图标">
+										<i id="pluginIconPreview" class="layui-icon layui-icon-star layui-font-20"></i>
+										<button type="button" class="layui-btn layui-btn-primary layui-border-blue layui-btn-xs" id="pluginIconPicker">选择图标</button>
+										{tips tips="加后台菜单时用这个图标；只能点「选择图标」挑，不能手填" /}
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="layui-col-md12" style="height:0;padding:0;"></div>
+						<div class="layui-col-md12">
+							<div class="layui-form-item">
+								<label class="layui-form-label">生成内容</label>
+								<div class="layui-input-block">
+									<div class="layui-input-group" style="width:100%">
+										<input type="checkbox" name="with_admin" value="1" title="后台菜单+控制器+视图" checked>
+										<input type="checkbox" name="with_front" value="1" title="前台路由+控制器+视图" checked>
+										<input type="checkbox" name="with_hooks" value="1" title="钩子回调示例" checked>
+										<input type="checkbox" name="with_taglib" value="1" title="模板标签">
+										<input type="checkbox" name="with_sql" value="1" title="安装/卸载 SQL">
+										{tips tips="勾选要一起生成的文件；生成完去「插件管理」列表点「安装」" /}
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="layui-col-md12" style="height:0;padding:0;"></div>
+
+						<div class="layui-col-md6">
+							<div class="layui-form-item">
+								<label class="layui-form-label">插件描述</label>
+								<div class="layui-input-block">
+									<div class="layui-input-group" style="width:100%">
+										<textarea name="description" placeholder="选填" class="layui-textarea" style="resize:none;height:80px;"></textarea>
+										{tips tips="选填" /}
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="layui-col-md12" style="height:0;padding:0;"></div>
+
+						<div class="layui-col-md12">
+							<div class="layui-form-item">
+								<label class="layui-form-label">帮助说明</label>
+								<div class="layui-input-block">
+									<p class="layui-font-gray" style="margin:0 0 8px;">选填，支持 Markdown；生成后会显示在插件配置页的帮助说明中。</p>
+									<textarea id="helpAreaMarkdown" style="display:none;"></textarea>
+									<div id="helpAreaEditor"></div>
+								</div>
+							</div>
+						</div>
+
+					</div>
+
+				</form>
+			</div>
+
+			<!-- ==================== Tab 2：开发文档 ==================== -->
+			<div class="layui-tab-item">
+				<div class="dev-doc">
+
+					<h3>一、最快上手</h3>
+					<ol>
+						<li>切到左边「生成插件骨架」tab，填标识、名称，勾选要生成的内容，点「生成骨架」。</li>
+						<li>去「插件管理」列表找到新插件，点「安装」。</li>
+						<li>左侧菜单会多出插件菜单（勾了后台菜单的话），前台按路由地址访问（勾了前台路由的话）。</li>
+					</ol>
+					<div class="note">生成的是可运行骨架。下面是从零手写的完整教程，也是"看懂生成出来的代码"的说明。</div>
+
+					<h3>二、从零手写一个插件（8 步）</h3>
+					<div class="note">下面以插件标识 <code>hello</code>（名称"打招呼"）为例，目录名和命名空间都跟着这个标识走。</div>
+
+					<h4>步骤 1：建目录和主类（必须）</h4>
+					<p>新建文件 <span class="file">plugins/hello/Plugin.php</span>：</p>
+					<pre>{literal}&lt;?php
+declare(strict_types=1);
+
+namespace plugins\hello;          // 必须是 plugins\目录名
+
+use app\extend\plugin\PluginBase;
+
+class Plugin extends PluginBase     // 类名必须叫 Plugin
+{
+    protected string $name        = 'hello';
+    protected string $title       = '打招呼';
+    protected string $version     = '1.0.0';
+    protected string $author      = '你的名字';
+    protected string $authorUrl   = 'https://example.com'; // 作者官网，可留空
+    protected string $description = '一个演示插件';
+}{/literal}</pre>
+					<div class="note">只要这个文件存在且语法正确，「插件管理」列表就能扫到它 —— 这已经是一个能安装的最小插件了。</div>
+
+					<h4>步骤 2：加配置项（可选）</h4>
+					<p>在 <code>Plugin</code> 类里加 <code>getConfigFields()</code>，后台「插件管理 → 配置」会按它自动生成表单。支持 <code>text / textarea / switch / number / radio / select / password / help_area</code>：</p>
+					<pre>{literal}public function getConfigFields(): array
+{
+    return [
+        [
+            'name'    => 'word',         // 配置键
+            'title'   => '打招呼用语',    // 后台显示的名称
+            'type'    => 'text',         // text / textarea / switch / number / select
+            'default' => '你好',
+            'tips'    => '前台会显示这个词',
+        ],
+        [
+            'name'    => 'enable',
+            'title'   => '是否启用',
+            'type'    => 'switch',
+            'default' => 1,
+        ],
+    ];
+}{/literal}</pre>
+					<p><code>help_area</code> 是只读帮助区域，<code>default</code> 填 Markdown 原文，系统会安全转换后显示在插件配置页；它不会作为插件设置写入数据库。创建插件时填写的帮助说明会自动写入生成的 <code>plugins/插件标识/Plugin.php</code>。</p>
+					<p>读取配置：</p>
+					<pre>{literal}// 插件类内部
+$word = $this->getConfig('word', '你好');
+
+// 插件外部（前台控制器等）
+$config = \app\extend\plugin\PluginManager::instance()->getPluginConfig('hello');
+$word   = $config['word'] ?? '你好';{/literal}</pre>
+					<p>插件代码通过 <code>PluginManager</code> 读取记录时，只能读取自身标识对应的配置；查询其他插件会被拒绝，查询已安装插件列表也只会返回自身记录。插件运行在 CMS 的 PHP 进程中，这项限制约束插件系统提供的读取接口，不构成 PHP 代码或直接数据库访问的沙箱。</p>
+
+					<h4>步骤 3：加后台菜单和页面（可选）</h4>
+					<p>① 菜单定义 <span class="file">plugins/hello/admin/menu.php</span>：</p>
+					<pre>{literal}&lt;?php
+return [
+    [
+        'title'    => '打招呼',
+        'url'      => '',              // 有子菜单时留空
+        'children' => [
+            // 插件自己的后台页面用这个约定地址，不用自己配路由
+            ['title' => '设置页', 'url' => 'admin/plugin/run?name=hello&a=index'],
+        ],
+    ],
+];{/literal}</pre>
+					<p>② 后台控制器 <span class="file">plugins/hello/admin/controller/Index.php</span>：</p>
+					<pre>{literal}&lt;?php
+declare(strict_types=1);
+
+namespace plugins\hello\admin\controller;
+
+use app\extend\plugin\PluginAdminBase;
+use app\extend\plugin\PluginManager;
+
+class Index extends PluginAdminBase      // 继承它 = 自带后台登录校验 + $this->render()
+{
+    protected string $plugin = 'hello';
+
+    public function index()
+    {
+        return $this->render('index', [
+            'config' => PluginManager::instance()->getPluginConfig('hello'),
+        ]);
+    }
+}{/literal}</pre>
+					<p>③ 后台视图 <span class="file">plugins/hello/admin/view/index.html</span>：</p>
+					<pre>{literal}&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;link rel="stylesheet" href="{__ADMIN__}/css/miu.css"&gt;
+    &lt;script src="{__ADMIN__}/layui/layui.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class="p-3"&gt;
+    当前打招呼用语：{$config.word|default='（未设置）'}
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;{/literal}</pre>
+					<div class="note">安装插件<b>不会</b>自动加菜单。装完去「插件管理」列表点一下「<b>添加后台菜单</b>」按钮（那列里带 <code>+</code> 图标的），确认后菜单才会写进 <code>cms_admin_rule</code> 并授权给超管组，左侧才会出现「打招呼 → 设置页」。加过之后这个按钮会变成减号（<b>删除后台菜单</b>），点它可以只删菜单、不动插件和数据。禁用插件时菜单自动隐藏，卸载时自动删除。<br>菜单图标用的是插件类里声明的 <code>$icon</code>（创建插件时选的那个），排序固定 100。</div>
+
+					<h4>步骤 4：加前台页面（可选）</h4>
+					<p>① 路由 <span class="file">plugins/hello/route.php</span>：</p>
+					<pre>{literal}&lt;?php
+// 格式：'路由规则' =&gt; '完整控制器类@方法'
+return [
+    'hello/index' =&gt; 'plugins\hello\controller\Index@index',
+];{/literal}</pre>
+					<p>② 前台控制器 <span class="file">plugins/hello/controller/Index.php</span>：</p>
+					<pre>{literal}&lt;?php
+declare(strict_types=1);
+
+namespace plugins\hello\controller;
+
+use app\extend\plugin\PluginManager;
+use think\facade\View;
+
+class Index
+{
+    public function index()
+    {
+        $pm = PluginManager::instance();
+
+        // 把视图目录指到插件自己的 view/
+        View::config([
+            'view_path' =&gt; $pm-&gt;getPluginPath() . 'hello' . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR,
+        ]);
+
+        // 模板名以 / 开头 = 相对上面设的 view_path；
+        // 不加 / 的话框架会按「当前控制器」自动加前缀，容易拼出找不到的路径
+        return View::fetch('/index', [
+            'config' =&gt; $pm-&gt;getPluginConfig('hello'),
+        ]);
+    }
+}{/literal}</pre>
+					<p>③ 前台视图 <span class="file">plugins/hello/view/index.html</span>：</p>
+					<pre>{literal}&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;title&gt;打招呼&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;{$config.word|default='你好'}&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;{/literal}</pre>
+					<div class="note">启用插件后访问 <code>http://你的域名/hello/index</code> 即可打开。</div>
+
+					<h4>步骤 5：加模板标签（可选）</h4>
+					<p>① 标签类 <span class="file">plugins/hello/taglib/Hello.php</span>：</p>
+					<pre>{literal}&lt;?php
+declare(strict_types=1);
+
+namespace plugins\hello\taglib;
+
+use think\template\TagLib;
+
+class Hello extends TagLib
+{
+    // 标签定义：attr 是允许的属性名，close=0 表示自闭合标签
+    protected $tags = [
+        'word' =&gt; ['attr' =&gt; 'default', 'close' =&gt; 0],
+    ];
+
+    // 编译标签：返回的是一段 PHP 代码，不是直接输出
+    public function tagWord(array $tag, string $content): string
+    {
+        $default = (string) ($tag['default'] ?? '你好');
+        return '&lt;?php echo \plugins\hello\taglib\Hello::render(' . var_export($default, true) . '); ?&gt;';
+    }
+
+    public static function render(string $default = '你好'): string
+    {
+        $cfg  = \app\extend\plugin\PluginManager::instance()-&gt;getPluginConfig('hello');
+        $word = $cfg['word'] ?? $default;
+        return htmlspecialchars($word, ENT_QUOTES);
+    }
+}{/literal}</pre>
+					<p>② 在任何前台模板里用：</p>
+					<pre>{literal}{hello:word default='你好' /}{/literal}</pre>
+					<div class="note">标签前缀 = 标签类类名的小写，所以类叫 <code>Hello</code> 就写 <code>{literal}{hello:xxx}{/literal}</code>。注意别和别的插件的类名撞车。</div>
+
+					<h4>步骤 6：监听钩子（可选）</h4>
+					<p>在 <code>Plugin</code> 类里定义<b>与钩子同名的驼峰方法</b>，系统会自动注册（完整清单见下面第三节）：</p>
+					<pre>{literal}    // 文档发布后
+    public function documentAdded(int $id, array $data): void
+    {
+        // $id 是新文档ID，$data['title'] 是标题
+    }
+
+    // 用户登录后（$user 是引用，改了会带到调用方）
+    public function userLogin(array &$user): void
+    {
+        $user['last_login_from'] = 'plugin';
+    }
+
+    // 模板解析完成、输出前（$content 是整页 HTML，可插入内容）
+    public function templateParse(string &$content): void
+    {
+        $content = str_replace('&lt;/body&gt;', '&lt;div&gt;页脚&lt;/div&gt;&lt;/body&gt;', $content);
+    }{/literal}</pre>
+					<p>也可以改用映射方式，新建 <span class="file">plugins/hello/hooks.php</span>：</p>
+					<pre>{literal}&lt;?php
+return [
+    'document_added' =&gt; 'onDocAdded',   // 钩子名 =&gt; 插件类里的方法名
+];{/literal}</pre>
+					<div class="warn">两种方式二选一，别对同一个钩子重复声明，否则回调会被注册两次。</div>
+					<div class="warn">
+						<b>引用传参的坑（重要）：</b>带 <code>&amp;</code> 的参数是<b>引用</b>，插件方法里必须也写成 <code>&amp;$x</code> 才能改到调用方的值；只写 <code>$x</code> 拿到的是副本，改了没用。
+						另外，引用参数只能传「变量」，不能传字面量或表达式——自己在插件里手动触发钩子时，要写 <code>Hook::trigger('user_login', $user)</code>，
+						不能写 <code>Hook::trigger('user_login', $this-&gt;getUser())</code> 或 <code>Hook::trigger('user_login', ['a'=&gt;1])</code>，
+						否则 PHP 会直接报 <code>Argument #2 cannot be passed by reference</code>。不确定某个钩子的参数是不是引用，先看第二节的清单或 <span class="file">PluginBase</span> 里的方法签名。
+					</div>
+
+
+					<h4>步骤 7：建自己的数据表（可选）</h4>
+					<p>① <span class="file">plugins/hello/install.sql</span>（安装时执行）：</p>
+					<pre>{literal}CREATE TABLE IF NOT EXISTS `__PREFIX__hello_log` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `content` varchar(255) NOT NULL DEFAULT '',
+  `created_at` int(11) UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='打招呼日志';{/literal}</pre>
+					<p>② <span class="file">plugins/hello/uninstall.sql</span>（卸载时执行）：</p>
+					<pre>{literal}DROP TABLE IF EXISTS `__PREFIX__hello_log`;{/literal}</pre>
+					<p>③ 插件里读写（表名不用写前缀，<code>Db::name()</code> 会自动加）：</p>
+					<pre>{literal}use think\facade\Db;
+
+Db::name('hello_log')-&gt;insert(['content' =&gt; 'hi', 'created_at' =&gt; time()]);
+
+$rows = Db::name('hello_log')-&gt;order('id', 'desc')-&gt;limit(10)-&gt;select()-&gt;toArray();{/literal}</pre>
+					<div class="note"><code>__PREFIX__</code> 会被自动替换成项目实际表前缀。表名建议带插件标识（如 <code>hello_log</code>），避免和主表冲突。</div>
+
+					<h4>步骤 8：安装并测试</h4>
+					<ol>
+						<li>后台 → 插件 → 插件管理 → 找到你的插件 → 点「安装」。</li>
+						<li>安装会执行 <code>install.sql</code> → 写插件记录 → 启用插件 → 注册钩子。<b>后台菜单不会自动加</b>，要回列表点「添加后台菜单」按钮（已加过的会变成减号，点一下就是删除）。</li>
+						<li>左侧菜单出现插件菜单；前台按 <code>route.php</code> 的规则访问。</li>
+						<li>改完代码后：改了模板标签要去后台点「清缓存」（模板要重新编译）；改了钩子/菜单去插件管理「禁用」再「启用」。</li>
+					</ol>
+
+					<h3>三、钩子清单（共 {$hooks|count} 个）</h3>
+					<table>
+						<thead>
+							<tr><th style="width:180px;">钩子名</th><th style="width:130px;">触发时机</th><th>插件类里写的方法名</th></tr>
+						</thead>
+						<tbody>
+							{volist name="hooks" id="h"}
+							<tr>
+								<td><code>{$h.name}</code></td>
+								<td>{$h.title}</td>
+								<td><code>{$h.method}()</code></td>
+							</tr>
+							{/volist}
+						</tbody>
+					</table>
+					<div class="note">方法名是钩子名的驼峰形式（<code>document_add</code> → <code>documentAdd</code>）。带 <code>&amp;</code> 的参数是引用传参，插件里改了调用方拿到的是改后的值。</div>
+
+					<h3>四、常用 API 速查</h3>
+					<table>
+						<thead><tr><th style="width:200px;">用途</th><th>写法</th></tr></thead>
+						<tbody>
+							<tr><td>插件内取配置</td><td><code>$this-&gt;getConfig('键名', 默认值)</code></td></tr>
+							<tr><td>插件外取配置</td><td><code>PluginManager::instance()-&gt;getPluginConfig('标识')</code></td></tr>
+							<tr><td>取插件实例</td><td><code>PluginManager::instance()-&gt;makePlugin('标识')</code></td></tr>
+							<tr><td>插件根目录</td><td><code>PluginManager::instance()-&gt;getPluginPath()</code></td></tr>
+							<tr><td>已启用的插件</td><td><code>PluginManager::instance()-&gt;getEnabledPluginNames()</code></td></tr>
+							<tr><td>后台渲染插件视图</td><td>继承 <code>PluginAdminBase</code> 后用 <code>$this-&gt;render('模板名', $变量)</code></td></tr>
+							<tr><td>前台渲染插件视图</td><td><code>View::config(['view_path'=&gt;...]); View::fetch('/index', $变量);</code>（模板名以 <code>/</code> 开头）</td></tr>
+							<tr><td>数据库</td><td><code>Db::name('表名')</code>（不带前缀）</td></tr>
+						</tbody>
+					</table>
+
+					<h3>五、命名与约定（必看）</h3>
+					<ul>
+						<li><b>目录名 = 插件标识</b>：字母开头，只含字母/数字/下划线；命名空间必须是 <code>plugins\标识</code>，主类必须叫 <code>Plugin</code>。</li>
+						<li><b>后台页面地址</b>：<code>admin/plugin/run?name=&lt;标识&gt;&amp;c=&lt;控制器&gt;&amp;a=&lt;方法&gt;</code>（c 默认 Index，a 默认 index），后台菜单的 url 就这么写，不用自己配路由。</li>
+						<li><b>后台 action 用蛇形命名</b>（如 <code>save_config</code>）。鉴权按节点 src 匹配且会转小写，驼峰 action 会匹配不上。</li>
+						<li><b>表名带插件前缀</b>（如 <code>hello_log</code>），避免和主表冲突。</li>
+						<li><b>渲染插件视图时模板名要以 <code>/</code> 开头</b>（如 <code>View::fetch('/index')</code>）。不加的话框架会按「当前控制器」自动加前缀 —— 后台插件页地址是 <code>admin/plugin/run</code>，控制器是 <code>plugin</code>，传 <code>'index'</code> 会被拼成 <code>plugin/index.html</code>，报「模板文件不存在」。后台继承 <code>PluginAdminBase</code> 用 <code>$this-&gt;render()</code> 的已自动处理，手写前台控制器时要注意。</li>
+						<li><b>type 2 弹层自适应高度</b>：子页面要加 <code>html,body{height:auto}</code>，否则后台全局的 <code>height:100%</code> 会让 <code>layer.iframeAuto</code> 量不出真实高度；另外 <code>maxHeight</code> 要写数字，不能写 <code>'700px'</code>。</li>
+						<li><b>缓存</b>：装/卸/启用/禁用会自动清插件缓存；模板标签改了要手动点「清缓存」重新编译。</li>
+					</ul>
+
+					<h3>六、常见问题排错</h3>
+					<ul>
+						<li><b>列表里看不到我的插件</b>：检查目录名、命名空间、类名三者是否一致；<code>Plugin.php</code> 有语法错误也会扫不到。</li>
+						<li><b>后台菜单没出现</b>：先确认点过列表里的「添加后台菜单」按钮（安装不会自动加）；加过之后菜单会授权给「超级管理员」组，如果你用的不是超管账号，去 系统 → 权限角色 给对应角色勾上；也可以去 系统 → 功能节点 看节点在不在。</li>
+						<li><b>点按钮提示"你没有权限"</b>：每个后台操作动作都要在 系统 → 功能节点 里有对应节点（src 与访问路径一致），否则连超管都会被拦。</li>
+						<li><b>模板标签没生效</b>：后台点一下「清缓存」重新编译模板。</li>
+						<li><b>弹层高度不对</b>：见上面「命名与约定」里的弹层那条。</li>
+						<li><b>报 Class not found</b>：命名空间和目录没对上，或文件名大小写不符。</li>
+						<li><b>改完代码没反应</b>：先点「清缓存」；还不行就把插件禁用再启用。</li>
+					</ul>
+
+					<h3>七、参考示例</h3>
+					<div class="note">
+						系统自带一个完整示例插件 <span class="file">plugins/demo/</span>，把配置、钩子、后台菜单、前台路由、模板标签、建表全演示了一遍，直接照抄最快。
+					</div>
+
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	//图标清单来自 config/icon.php（改图标去那里改），这里只负责输出给图标选择器用
+	//和 app/admin/view/rule/add.html 里的「选择图标」用的是同一份
+	var LAYUI_ICONS = {:json_encode(config('icon.icons'))};
+
+			layui.use(['form', 'element', 'editormd'], function () {
+	var form = layui.form;
+	var element = layui.element;
+	form.verify({
+		authorUrl: function (value) {
+			value = value.trim();
+			if (!value) return;
+			try {
+				var parsedUrl = new URL(value);
+				if (!/^https?:$/.test(parsedUrl.protocol) || !parsedUrl.hostname) {
+					return '作者官网必须是 http:// 或 https:// 网址';
+				}
+			} catch (e) {
+				return '请输入有效的作者官网网址';
+			}
+		}
+	});
+	var helpAreaEditor = layui.editormd.render('helpAreaEditor', {
+		width: '100%',
+		height: 320,
+		markdown: document.getElementById('helpAreaMarkdown').value
+	});
+	setTimeout(function () {
+		var pluginNameInput = document.querySelector('input[name="name"]');
+		if (pluginNameInput) pluginNameInput.focus();
+	}, 100);
+
+	// ===== 弹层高度自适应 =====
+	// 本页两个 tab 高度差很大（「开发文档」那个很长），切 tab 后必须重新量一次，
+	// 否则弹层高度还停在「生成骨架」tab 的高度上，文档就被压在滚动条里
+	function resizeLayer() {
+		if (window.parent && window.parent.layer && window.parent.layer.iframeAuto) {
+			window.parent.layer.iframeAuto(window.parent.layer.getFrameIndex(window.name));
+		}
+	}
+
+	//渲染完先量一次（父窗口的 iframe.onload 也会量，这里兜底）
+	setTimeout(resizeLayer, 50);
+
+	//切换 tab 后重新量（等浏览器完成布局再量，不然拿到的还是旧高度）
+	element.on('tab(devTab)', function (data) {
+		if (typeof window.updateScaffoldDialogButton === 'function') {
+			window.updateScaffoldDialogButton(data.index === 0);
+		}
+		setTimeout(resizeLayer, 60);
+	});
+	window.submitPluginScaffold = function () {
+		return form.submit('scaffoldForm');
+	};
+
+	// ===== 插件图标选择器（照 app/admin/view/rule/add.html 的写法）=====
+	var iconLayerIndex = null;
+	$('#pluginIconPicker').on('click', function () {
+		var content = '<div style="padding:12px;">'
+			+ '<input type="text" id="iconSearch" class="layui-input" autocomplete="off" placeholder="输入关键字筛选，例如 home、user、set">'
+			+ '<div class="miu-icon-grid" id="iconGrid"></div>'
+			+ '</div>';
+		iconLayerIndex = layer.open({
+			type: 1,
+			title: '选择插件图标',
+			offset:'rt',
+			//高度自适应：图标网格那层自己有 max-height + 滚动条，弹层跟着内容撑高
+			area: ['780px', 'auto'],
+			shadeClose: true,
+			maxHeight: Math.min(800, Math.round($(window).height() * 0.98)),
+			content: content,
+			success: function (layero) {
+				var render = function (kw) {
+					var list = kw ? LAYUI_ICONS.filter(function (n) { return n.indexOf(kw) !== -1; }) : LAYUI_ICONS;
+					if (!list.length) {
+						layero.find('#iconGrid').html('<div style="color:#999;">没有匹配的图标</div>');
+						return;
+					}
+					var html = '';
+					list.forEach(function (n) {
+						html += '<a href="javascript:;" data-icon="' + n + '" title="' + n + '">'
+							+ '<i class="layui-icon ' + n + '"></i>'
+							+ '<span>' + n.replace('layui-icon-', '') + '</span></a>';
+					});
+					layero.find('#iconGrid').html(html);
+				};
+				render('');
+				layero.find('#iconSearch').on('input', function () {
+					render($(this).val().trim().toLowerCase());
+				});
+				layero.on('click', '.miu-icon-grid a', function () {
+					var icon = $(this).data('icon');
+					$('#pluginIcon').val(icon);
+					$('#pluginIconPreview').attr('class', 'layui-icon ' + icon);
+					layer.close(iconLayerIndex);
+				});
+			}
+		});
+	});
+	//输入框是 readonly（不让手填），点它也打开选择器
+	$('#pluginIcon').on('click', function () { $('#pluginIconPicker').trigger('click'); });
+
+	form.on('submit(scaffoldForm)', function (data) {
+		var d = data.field;
+		//图标来自只读选择框；显式读取当前值，确保自定义 miuai 图标随表单一起提交。
+		d.icon = $('#pluginIcon').val() || 'layui-icon-star';
+		d.help_area = helpAreaEditor ? helpAreaEditor.getMarkdown() : document.getElementById('helpAreaMarkdown').value;
+		//复选框没勾时不会出现在 data.field 里，这里显式补 0，否则后端会当成默认勾选
+		['with_admin', 'with_front', 'with_hooks', 'with_taglib', 'with_sql'].forEach(function (k) {
+			d[k] = d[k] ? 1 : 0;
+		});
+
+		var loadIndex = layer.msg('生成中...', { icon: 16, shade: 0.01, time: 0 });
+		$.post("{:url('admin/plugin/make')}", d, function (res) {
+			layer.close(loadIndex);
+			if (res.code !== 0) {
+				layer.msg(res.msg, { icon: 2 });
+				return;
+			}
+			var files = (res.data || []).join('<br>');
+			layer.alert('生成成功！<br><br>已生成文件：<br>' + files + '<br><br>去列表里点「安装」即可使用。', { icon: 1, title: '完成' }, function (idx) {
+				layer.close(idx);
+				//关掉开发弹层，刷新插件列表
+				var pidx = parent.layer.getFrameIndex(window.name);
+				parent.layer.close(pidx);
+				parent.location.reload();
+			});
+		});
+		return false;
+	});
+	form.render();
+});
+</script>
+{/block}
+<!-- /脚本 -->

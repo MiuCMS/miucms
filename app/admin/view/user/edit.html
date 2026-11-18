@@ -1,0 +1,361 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<style>
+	.user-edit-section { margin: 20px 0 10px; padding-top: 14px; border-top: 1px solid #f0f0f0; }
+	.user-edit-section h4 { margin: 0 0 16px; font-size: 15px; font-weight: 600; }
+	.user-edit-readonly { color: #777; background: #f8f8f8; }
+	.user-edit-avatar { display: flex; align-items: center; gap: 10px; }
+	.user-edit-avatar .layui-input { flex: 1; min-width: 0; }
+	@media screen and (max-width: 767.98px) {
+		.user-edit-avatar { gap: 6px; }
+	}
+</style>
+<div class="layui-card">
+	<form class="layui-form p-page" lay-filter="webform">
+		<h3 class="pb-3">编辑用户信息</h3>
+
+		<div class="user-edit-section">
+			<h4>账号与会员状态</h4>
+			<div class="layui-row layui-col-space16">
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">用户ID</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="text" class="layui-input user-edit-readonly" value="{$user.id}" readonly></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">登录账号</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="text" class="layui-input user-edit-readonly" value="{$user.username}" readonly></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">用户等级<font>*</font></label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%">
+							<select name="level" lay-verify="required" lay-reqText="请选择用户等级">
+								<option value="">请选择用户等级</option>
+								{volist name="levels" id="v"}
+								<option value="{$v.id}" {eq name="$user.level" value="$v.id"}selected{/eq}>{$v.title}</option>
+								{/volist}
+							</select>
+						</div></div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">账号状态</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%">
+							<select name="status">
+								<option value="1" {eq name="$user.status" value="1"}selected{/eq}>正常</option>
+								<option value="0" {eq name="$user.status" value="0"}selected{/eq}>禁用</option>
+								<option value="-1" {eq name="$user.status" value="-1"}selected{/eq}>已删除</option>
+							</select>
+						</div></div>
+					</div>
+				</div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">手机绑定</label>
+						<div class="layui-input-block">
+							<input type="radio" name="mobile_status" value="0" title="未绑定" {eq name="$user.mobile_status" value="0"}checked{/eq}>
+							<input type="radio" name="mobile_status" value="1" title="已绑定" {eq name="$user.mobile_status" value="1"}checked{/eq}>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">性别</label>
+						<div class="layui-input-block">
+							<input type="radio" name="sex" value="0" title="未设置" {eq name="$user.sex" value="0"}checked{/eq}>
+							<input type="radio" name="sex" value="1" title="女" {eq name="$user.sex" value="1"}checked{/eq}>
+							<input type="radio" name="sex" value="2" title="男" {eq name="$user.sex" value="2"}checked{/eq}>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="user-edit-section">
+			<h4>基本资料</h4>
+			<div class="layui-row layui-col-space16" data-location-cascade data-location-url="/static/location/locations.json">
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">用户昵称<font>*</font></label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="text" name="nickname" maxlength="255" placeholder="请输入用户昵称" lay-verify="required" lay-reqText="请输入用户昵称" autocomplete="off" class="layui-input" value="{$user.nickname}"></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">真实姓名</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="text" name="name" maxlength="100" placeholder="请输入真实姓名" autocomplete="off" class="layui-input" value="{$user.name}"></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">手机号码</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="text" name="mobile" maxlength="20" placeholder="请输入手机号码" autocomplete="off" class="layui-input" value="{$user.mobile}"></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">电子邮箱</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="email" name="email" maxlength="50" placeholder="请输入电子邮箱" autocomplete="off" class="layui-input" value="{$user.email}"></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md6">
+					<div class="layui-form-item">
+						<label class="layui-form-label">头像地址</label>
+						<div class="layui-input-block">
+							<div class="user-edit-avatar">
+								<span style="display:inline-flex;align-items:center;">
+									<i class="layui-icon layui-icon-picture" style="margin-right:5px;cursor:pointer;" id="headimgurl-preview-icon"></i>
+									<input type="text" id="headimgurl" name="headimgurl" maxlength="255" value="{$user.headimgurl}" lay-affix="clear" autocomplete="off" class="layui-input" placeholder="点击选择或输入图片地址">
+								</span>
+								<button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue uploadBtn" data-bind="headimgurl">选择上传</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">生日</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="text" id="profile-birthday" name="birthday" class="layui-input" value="{$user.birthday}" autocomplete="off"></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">国家/地区</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><select id="user-country" name="country" lay-filter="userCountry" data-location-country><option value="{$user.country}" selected>{$user.country|default='请选择国家/地区'}</option></select></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">省份/州</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><select id="user-province" name="province" lay-filter="userProvince" data-location-province><option value="{$user.province}" selected>{$user.province|default='请选择省份/州'}</option></select></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">城市</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><select id="user-city" name="city" data-location-city><option value="{$user.city}" selected>{$user.city|default='请选择城市'}</option></select></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md6">
+					<div class="layui-form-item">
+						<label class="layui-form-label">联系地址</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="text" name="address" maxlength="100" autocomplete="off" class="layui-input" value="{$user.address}"></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+				<div class="layui-col-md12">
+					<div class="layui-form-item">
+						<label class="layui-form-label">个人简介</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><textarea name="desc" maxlength="1000" placeholder="请输入个人简介" class="layui-textarea">{$user.desc}</textarea></div></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="user-edit-section">
+			<h4>来源与账号记录</h4>
+			<div class="layui-row layui-col-space16">
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">推荐人ID</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="text" class="layui-input user-edit-readonly" value="{$user.puid}" readonly></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">邀请二维码ID</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="text" class="layui-input user-edit-readonly" value="{$user.qrcode_invite}" readonly></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">注册来源平台</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="text" class="layui-input user-edit-readonly" value="{$user.wx_platform}" readonly></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">注册时间</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="text" class="layui-input user-edit-readonly" value="{if condition='$user.register_time gt 0'}{:date('Y-m-d H:i:s', $user.register_time)}{else/}—{/if}" readonly></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">注册IP</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="text" class="layui-input user-edit-readonly" value="{$user.register_ip}" readonly></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">资料更新时间</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="text" class="layui-input user-edit-readonly" value="{if condition='$user.update_time gt 0'}{:date('Y-m-d H:i:s', $user.update_time)}{else/}—{/if}" readonly></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding:0;"></div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">累计登录</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="text" class="layui-input user-edit-readonly" value="{$user.login_num}" readonly></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">最后登录时间</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="text" class="layui-input user-edit-readonly" value="{if condition='$user.last_login_time gt 0'}{:date('Y-m-d H:i:s', $user.last_login_time)}{else/}—{/if}" readonly></div></div>
+					</div>
+				</div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">最后登录IP</label>
+						<div class="layui-input-block"><div class="layui-input-group" style="width:100%"><input type="text" class="layui-input user-edit-readonly" value="{$user.last_login_ip}" readonly></div></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-form-item mt-3">
+			<div class="layui-input-block">
+				<input type="hidden" name="id" value="{$user.id}">
+				<button class="layui-btn layui-btn-normal" lay-submit lay-filter="webform">立即提交</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</div>
+	</form>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['tool', 'form', 'laydate'], function(){
+		var tool = layui.tool, form = layui.form, laydate = layui.laydate, $ = layui.$;
+		laydate.render({
+			elem: '#profile-birthday'
+		});
+
+		function initLocationCascade() {
+			var $wrapper = $('[data-location-cascade]');
+			if (!$wrapper.length) return;
+			var $countrySelect = $wrapper.find('[data-location-country]');
+			var $provinceSelect = $wrapper.find('[data-location-province]');
+			var $citySelect = $wrapper.find('[data-location-city]');
+			if (!$countrySelect.length || !$provinceSelect.length || !$citySelect.length) return;
+
+			var current = { country: $countrySelect.val(), province: $provinceSelect.val(), city: $citySelect.val() };
+			var validName = function (value) {
+				return typeof value === 'string' && $.trim(value) !== '' && $.trim(value).length <= 20;
+			};
+			var normalizeName = function (value) {
+				return $.trim(value || '').toLowerCase().replace(/\s+/g, '')
+					.replace(/(?:特别行政区|维吾尔自治区|壮族自治区|回族自治区|自治区|自治州|省|市|地区|盟)$/u, '');
+			};
+			var matchesName = function (candidate, value) {
+				return normalizeName(candidate) !== '' && normalizeName(candidate) === normalizeName(value);
+			};
+			var regionNames = null;
+			try {
+				regionNames = typeof Intl.DisplayNames === 'function' ? new Intl.DisplayNames(['zh-CN'], { type: 'region' }) : null;
+			} catch (e) {}
+
+			$.ajax({
+				url: $wrapper.attr('data-location-url'),
+				dataType: 'json',
+				cache: true,
+				success: function (data) {
+					data = data || {};
+					var countries = $.map($.isArray(data.countries) ? data.countries : [], function (country) {
+						var localizedName = '';
+						try { localizedName = regionNames ? regionNames.of(country.code) || '' : ''; } catch (e) {}
+						var label = '';
+						$.each([localizedName, country.native, country.name, country.code], function (index, name) {
+							if (validName(name)) { label = name; return false; }
+						});
+						var states = $.map($.grep($.isArray(country.states) ? country.states : [], function (state) {
+							return validName(state.name);
+						}), function (state) {
+							var cities = $.grep($.isArray(state.cities) ? state.cities : [], validName);
+							if (cities.length === 0) cities.push(state.name);
+							return { label: state.name, value: state.name, aliases: [state.name], cities: $.map(cities, function (name) { return { label: name, value: name, aliases: [name] }; }) };
+						});
+						return label ? { label: label, value: label, aliases: $.grep([label, country.name, country.native, country.code, country.code === 'CN' ? '中华人民共和国' : ''], function (name) { return !!name; }), states: states } : null;
+					});
+					countries.sort(function (a, b) { return a.label.localeCompare(b.label); });
+
+					function fillSelect($select, items, placeholder, previousValue) {
+						$select.empty().append($('<option>').val('').text(placeholder));
+						var selected = null;
+						$.each(items, function (index, item) {
+							var $option = $('<option>').val(item.value).text(item.label).attr('data-location-index', index);
+							$select.append($option);
+							var matched = false;
+							$.each($.merge([item.value, item.label], item.aliases || []), function (aliasIndex, name) {
+								if (matchesName(name, previousValue)) { matched = true; return false; }
+							});
+							if (!selected && previousValue && matched) {
+								selected = item;
+								$option.prop('selected', true);
+							}
+						});
+						if (!selected && previousValue) $select.append($('<option>').val(previousValue).text(previousValue).prop('selected', true));
+						$select.prop('disabled', items.length === 0 && !previousValue);
+						return selected;
+					}
+					function selectedItem($select, items) {
+						var index = $select.find('option:selected').attr('data-location-index');
+						return index === undefined || index === '' ? null : items[Number(index)] || null;
+					}
+
+					var activeCountry = fillSelect($countrySelect, countries, '请选择国家/地区', current.country);
+					var activeProvince = fillSelect($provinceSelect, activeCountry ? activeCountry.states : [], '请选择省份/州', current.province);
+					fillSelect($citySelect, activeProvince ? activeProvince.cities : [], '请选择城市', current.city);
+					form.on('select(userCountry)', function () {
+						activeCountry = selectedItem($countrySelect, countries);
+						activeProvince = fillSelect($provinceSelect, activeCountry ? activeCountry.states : [], '请选择省份/州', '');
+						fillSelect($citySelect, activeProvince ? activeProvince.cities : [], '请选择城市', '');
+						form.render('select', 'webform');
+					});
+					form.on('select(userProvince)', function () {
+						activeProvince = selectedItem($provinceSelect, activeCountry ? activeCountry.states : []);
+						fillSelect($citySelect, activeProvince ? activeProvince.cities : [], '请选择城市', '');
+						form.render('select', 'webform');
+					});
+					form.render('select', 'webform');
+				},
+				error: function () { layer.msg('地区数据加载失败，请刷新页面后重试'); }
+			});
+		}
+		initLocationCascade();
+
+		$('.uploadBtn').on('click', function(){
+			openFileManager($(this).attr('data-bind'));
+			return false;
+		});
+		form.on('submit(webform)', function (data) {
+			data.field.country = $('#user-country').val() || '';
+			data.field.province = $('#user-province').val() || '';
+			data.field.city = $('#user-city').val() || '';
+			tool.post("{:url('admin/user/edit')}", data.field, function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.sideClose(1000);
+				}
+			});
+			return false;
+		});
+		initThumbPreview('headimgurl','headimgurl-preview-icon');
+	})
+</script>
+{/block}
+<!-- /脚本 -->

@@ -1,0 +1,169 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-3">
+	<div>
+		<table class="layui-hide" id="treeTable" lay-filter="treeTable"></table>
+	</div>
+</div>
+<!-- 表头 -->
+<script type="text/html" id="table_header">
+	<div class="layui-btn-container">
+		<button type="button" class="layui-btn layui-btn-sm layui-btn-color layui-btn-radius" lay-event="add-menu">
+			<i class="layui-icon layui-icon-add-1"></i>添加菜单/节点
+		</button>
+		<button type="button" class="layui-btn layui-btn-danger layui-btn-sm layui-btn-color layui-btn-radius" lay-event="delete">
+			<i class="layui-icon layui-icon-delete"></i>删除
+		</button>
+		<button type="button" class="layui-btn layui-btn-primary layui-btn-sm layui-btn-color layui-btn-radius" lay-event="expand">
+			<i class="layui-icon layui-icon-down"></i>展开
+		</button>
+	</div>
+</script>
+<!-- /表头 -->
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+
+<script>
+	layui.config({base:'/static/admin/layui/components/',}).extend({tool:'tool'}).use(['tool'],function(){
+		var treeTable = layui.treeTable, tool = layui.tool;
+		var isExpand=false;
+
+		layui.trees = treeTable.render({
+			elem: '#treeTable'
+			,url: "{:url('admin//admin/rule/index')}"
+			,toolbar: '#table_header'
+			,tree: { // treeTable 特定属性集
+				customName: {name:'title'},
+				data: {},
+				view: {showIcon:false},
+				async: {},
+				callback: {}
+			}
+			, cellMinWidth: 80
+			, cols: [[
+				{type: 'checkbox', fixed: 'left'},
+				{ field: 'id', width: 80, title: 'ID', align: 'center' }
+				, { field: 'sort', width: 80, title: '排序', align: 'center',edit:true }
+				,{field:'icon',title: '菜单图标',width: 80, align: 'center' ,templet: function(d){
+						if(!d.icon){
+							return '';
+						}
+						//图标值是 layui 图标类名，如 layui-icon-home
+						return '<i style="font-size:20px;" class="layui-icon '+d.icon+'"></i>';
+					}}
+				, { field: 'title', width: 160, title: '菜单/节点名称' }
+				, { field: 'pid', title: '父ID', width: 80, align: 'center' }
+				, { field: 'src', title: '节点URL' }
+				, {
+					field: 'menu', width: 100, title: '是否是菜单', align: 'center', templet: function (d) {
+						var html = '<span style="color:#fbbc05">否</span>';
+						if (d.menu == '1') {
+							html = '<span style="color:#12bb37">是</span>';
+						}
+						return html;
+					}
+				}
+				, { field: 'name', width: 110, title: '操作日志名称', align: 'center',edit:true }
+				, { title: '操作', align: 'left'
+					, templet: function (d) {
+						var html = '<span class="layui-btn-group"><button class="layui-btn layui-btn-xs" lay-event="add">添加子菜单/节点</button><button class="layui-btn  layui-btn-normal layui-btn-xs" lay-event="edit">编辑</button><button class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</button>';
+						return html;
+					}
+				}
+			]]
+			, page: false
+		});
+		// 表头工具栏工具事件
+		treeTable.on("toolbar(treeTable)", function (obj) {
+			if (obj.event === "add-menu") {
+				tool.side("{:url('admin//admin/rule/add')}");
+			}
+			if (obj.event === "delete") {
+				var data = treeTable.checkStatus(obj.config.id).data,arr=[];
+				for(var i=0; i<data.length;i++){
+					arr.push(data[i]['id']);
+				}
+				if(arr.length<=0){
+					layer.msg('未选择任何数据');
+					return false;
+				}
+				layer.confirm('删除所有选定数据，删除后不可恢复！你确定吗?', { icon: 3, title: '提示' }, function (index) {
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							setTimeout(function(){
+								layui.trees.reloadData();
+							},300)
+						}
+					}
+					tool.delete("{:url('admin/rule/delete')}", { id: arr }, callback);
+					layer.close(index);
+				});
+			}
+			if (obj.event === "expand") {
+				if(isExpand==false){
+					isExpand=true;
+					treeTable.expandAll('treeTable', true);
+					$(this).html('<i class="layui-icon layui-icon-up"></i>收缩');
+				}else{
+					isExpand=false;
+					treeTable.expandAll('treeTable', false);
+					$(this).html('<i class="layui-icon layui-icon-down"></i>展开');
+				}
+			}
+		});
+		// 行单击事件：设置当前行为单选选中状态（包含固定列时同步高亮）
+		treeTable.on("row(treeTable)", function (obj) {
+			obj.setRowChecked({
+				type: 'checkbox' // radio | checkbox
+			});
+		});
+
+		//操作按钮
+		treeTable.on('tool(treeTable)', function (obj) {
+
+			if (obj.event === 'add') {
+				tool.side("{:url('admin//admin/rule/add')}?pid=" + obj.data.id);
+				return;
+			}
+			if (obj.event === 'edit') {
+				tool.side("{:url('admin//admin/rule/add')}?id=" + obj.data.id);
+				return;
+			}
+			if (obj.event === 'del') {
+				layer.confirm('确定要删除吗?', { icon: 3, title: '提示' }, function (index) {
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							obj.del();
+						}
+					}
+					tool.delete("{:url('admin/rule/delete')}", { id: [obj.data.id] }, callback);
+					layer.close(index);
+				});
+			}
+		});
+		// 单元格编辑后的事件
+		treeTable.on('edit(treeTable)', function(obj){
+			var field = obj.field; // 得到修改的字段
+			var value = obj.value // 得到修改后的值
+			var data = obj.data // 得到所在行所有键值
+			// 值的校验
+			if(value.replace(/\s/g, '') === ''){
+				layer.tips('值不能为空', this, {tips: 1});
+				return obj.reedit(); // 重新编辑 -- v2.8.0 新增
+			}
+			// 编辑后续操作，如提交更新请求，以完成真实的数据更新
+			$.post("{:url('admin//admin/rule/edit_field')}", { field: field,value:value,id:data.id }, function(data) {
+				layer.msg(data.msg);
+			});
+
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

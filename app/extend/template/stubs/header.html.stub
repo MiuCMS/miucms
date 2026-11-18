@@ -1,0 +1,39 @@
+<!-- 公共头部：栏目与语言均读取后台数据，不绑定固定栏目 ID。 -->
+<a class="skip-link" href="#main">{miu:lang key='skip' /}</a>
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" href="{:home_url()}">{miu:global name='site_name' /}</a>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-navigation">{miu:lang key='menu' /}</button>
+        <nav class="main-navigation" id="main-navigation" aria-label="{miu:lang key='navigation' /}">
+            <a href="{:home_url()}" class="{miu:isindex text='active' /}">{miu:lang key='home' /}</a>
+            {miu:nav id='vo' currentstyle='active'}
+            {if condition="$vo.has_children"}
+            <details class="navigation-group {$vo.currentstyle}">
+                <summary>{$vo.title}</summary>
+                <div class="navigation-children">
+                    <a href="{$vo.url}">{$vo.title}</a>
+                    {foreach $vo.children as $child}
+                    <a href="{:nav_url($child)}">{$child.title}</a>
+                    {/foreach}
+                </div>
+            </details>
+            {else/}<a href="{$vo.url}" class="{$vo.currentstyle}">{$vo.title}</a>{/if}
+            {/miu:nav}
+        </nav>
+        <!-- 搜索框默认收起：收起时按钮负责展开，展开后同一个按钮提交表单。 -->
+        <form class="header-search" method="get" action="{:miu_search_url()}">
+            <label class="visually-hidden" for="site-keyword">{miu:lang key='search' /}</label>
+            <input id="site-keyword" type="search" name="keyword" maxlength="50" placeholder="{miu:lang key='searchPlaceholder' /}">
+            <button type="submit" aria-expanded="false" aria-controls="site-keyword">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+                <span class="visually-hidden">{miu:lang key='search' /}</span>
+            </button>
+        </form>
+        <div class="header-tools">
+            <details class="language-switch"><summary>{miu:lang key='language' /}</summary><div class="navigation-children">
+                {miu:langlist id='vo'}<a href="{$vo.url}" hreflang="{$vo.code}" class="{if condition='$vo.current eq 1'}active{/if}">{$vo.name}</a>{/miu:langlist}
+            </div></details>
+            <a class="button" href="{:url_entry()}/login">{miu:lang key='login' /}</a>
+        </div>
+    </div>
+</header>

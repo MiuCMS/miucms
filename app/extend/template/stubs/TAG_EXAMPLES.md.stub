@@ -1,0 +1,221 @@
+# 全部内置自定义标签调用示例
+
+当前共 18 个内置标签，每个标签均单独给出示例。本文档不会作为 HTML 模板执行；把需要的代码复制到对应页面后使用。
+
+成对标签的 id 和 name 含义相同，仅写法不同，任选其一即可；默认值为 vo。global/custom 的 name 是配置键或字段标识，locale 的 name 是 current，这些不属于循环变量。
+
+示例中的栏目 ID、广告标识、自定义变量名、表单和字段 ID，需要替换成后台真实配置。不要把调用示例包在 HTML 注释中来“禁用”，模板引擎仍可能解析；不执行的示例请保存在 Markdown 文档中。
+
+## 1. global：公开网站配置
+
+```html
+<h1>{miu:global name='site_name' /}</h1>
+{miu:global name='site_copyright' raw='1' /}
+```
+
+只支持公开配置白名单。raw 仅用于可信 HTML，不读取数据库、邮件或云存储密码。
+
+## 2. custom：自定义变量
+
+先在后台创建并启用 contact_phone。
+
+```html
+<p>{miu:custom name='contact_phone' default='暂未填写' /}</p>
+```
+
+## 3. nav：栏目导航
+
+```html
+{miu:nav id='vo' currentstyle='active'}
+<a href="{$vo.url}" class="{$vo.currentstyle}">{$vo.title}</a>
+{/miu:nav}
+```
+
+栏目页取顶级栏目下一级：
+
+```html
+{miu:nav name='vo' pid='$nav.top_navid'}
+<a href="{$vo.url}">{$vo.title}</a>
+{/miu:nav}
+```
+
+显式 navid='2,3,1' 且未填 order/sort 时，按填写顺序输出。key 默认为 index，从 0 开始。
+
+## 4. list：文档列表
+
+普通栏目主列表不填 navid，包含当前栏目及全部子孙栏目（含隐藏子栏目），按 pagesize 分页：
+
+```html
+{miu:list id='vo' pagesize='12' emptykey='empty'}
+<a href="{$vo.url}">{$vo.title}</a>
+{/miu:list}
+{miu:pagelist theme='light' /}
+```
+
+首页、详情页的小列表使用 limit；栏目 2 只是示例：
+
+```html
+{miu:list id='vo' navid='2' limit='5' flag='r'}
+<a href="{$vo.url}">{$vo.title}</a>
+{/miu:list}
+```
+
+默认头条优先，再按 sort 降序、release_time 降序。order='rand' 仍保留头条优先，忽略 sort。是否分页由页面上下文决定，不是由是否填写 navid 决定。
+
+## 5. pagelist：分页
+
+```html
+{miu:pagelist theme='default' /}
+{miu:pagelist theme='light' listitem='pre,pageno,next,info' /}
+{miu:pagelist theme='dark' type='mini' /}
+```
+
+实际页面选择一种即可。需要有效的分页上下文；首页和详情页不会因加入此标签就产生分页。
+
+## 6. position：默认面包屑
+
+```html
+{miu:position class='breadcrumb' delimiter='/' /}
+```
+
+默认输出 ul/li，当前项无链接。
+
+## 7. positionraw：自定义面包屑
+
+```html
+<nav aria-label="面包屑">
+{miu:positionraw id='vo'}
+{if condition="$index gt 1"}<span>/</span>{/if}
+{notempty name="vo.url"}<a href="{$vo.url}">{$vo.name}</a>{else/}<span>{$vo.name}</span>{/notempty}
+{/miu:positionraw}
+</nav>
+```
+
+index 从 1 开始。currenturl='1' 可让末项也提供 url/full_url。
+
+## 8. prenext：上一篇、下一篇
+
+```html
+{miu:prenext id='vo' type='pre' titlelen='24'}
+<a href="{$vo.link}" class="{$vo.disclass}">上一篇：{$vo.title|default='没有了'}</a>
+{/miu:prenext}
+{miu:prenext id='vo' type='next' titlelen='24'}
+<a href="{$vo.link}" class="{$vo.disclass}">下一篇：{$vo.title|default='没有了'}</a>
+{/miu:prenext}
+```
+
+仅适用于有当前文档的详情页。同栏目内按文档 ID 判断，不按当前列表排序；无相邻记录时 disclass 默认 disabled。
+
+## 9. adv：广告、轮播
+
+先在后台建立标识为 INDEX_BANNER 的图片广告。
+
+```html
+{miu:adv id='vo' mark='INDEX_BANNER' active='active'}
+<a href="{$vo.url}"{$vo.target} class="{$vo.active}"><img src="{$vo.src}" alt="{$vo.title}"></a>
+{/miu:adv}
+```
+
+index 从 1 开始，第一条 active 有值。target 已是完整属性片段，不要再包一层 target="..."，无需手动 raw。广告数据不会自动变成轮播组件，轮播切换交互需自行实现。
+
+## 10. tag：当前文档标签、标签云
+
+```html
+{miu:tag id='vo'}<a href="{$vo.url}">{$vo.title}</a>{/miu:tag}
+```
+
+首页取全站标签：
+
+```html
+{miu:tag id='vo' gettype='1' num='12' sort='hot'}
+<a href="{$vo.url}">{$vo.title}</a>
+{/miu:tag}
+```
+
+标签文档列表页使用控制器提供的 list；当前 list 标签不会自动附加标签页的 tag_id 筛选。
+
+## 11. link：友情链接
+
+```html
+{miu:link id='vo'}
+<a href="{$vo.url}"{if condition="$vo.target_blank eq 1"} target="_blank" rel="noopener noreferrer"{/if}>{$vo.name}</a>
+{/miu:link}
+```
+
+友情链接的 target/target_blank 是 0/1，区别于广告的 target 属性片段。
+
+## 12. isindex：首页判断
+
+```html
+<a href="{:home_url()}" class="{miu:isindex text='active' /}">首页</a>
+```
+
+当前语言首页输出 active，其他页面输出空值。
+
+## 13. clue：留言表单
+
+示例假设表单 ID 为 1，字段 ID 为 1、2；按后台实际值修改。留言栏目已关联表单时可以省略 formid。
+
+```html
+{miu:clue id='vo' formid='1'}
+<form method="post" action="{$vo.action}" onsubmit="return miuClueSubmit(this)">
+<label>{$vo.itemname_1}</label><input name="{$vo.attr_1}" type="text" required>
+<label>{$vo.itemname_2}</label><textarea name="{$vo.attr_2}"></textarea>
+{$vo.hidden|raw}
+<button type="submit">提交留言</button>
+</form>
+{$vo.script|raw}
+{/miu:clue}
+```
+
+clue 的标签体执行一次，不循环所有字段。生成的 list_clue.html/form_fields.html 还提供根据真实字段 ID、类型和选项自动排版的示例。
+
+## 14. markdown：正文转换
+
+```html
+{if condition="$editor eq '2'"}
+{miu:markdown value='$doc.md_content' /}
+{else/}
+{$doc.content|default=''|raw}
+{/if}
+```
+
+value 只接受变量路径；转换结果直接是处理后的 HTML。
+
+## 15. lang：界面文案
+
+```html
+<button type="button">{miu:lang key='search' default='搜索' /}</button>
+```
+
+读取 lang/当前语言.json，缺失时回退 zh-cn.json，再回退 default 或键名。JSON 中可使用点分隔的嵌套键。
+
+## 16. locale：HTML 语言代码
+
+```html
+<html lang="{miu:locale /}">
+```
+
+输出 zh-CN、zh-HK、en 等。name 省略或填 current，不是 vo。
+
+## 17. langurl：指定语言入口
+
+```html
+<a href="{miu:langurl locale='en' /}">English</a>
+```
+
+目标语言应先在后台启用；不手工拼接语言前缀。
+
+## 18. langlist：语言清单
+
+```html
+{miu:langlist id='vo'}
+<a href="{$vo.url}" hreflang="{$vo.code}" class="{if condition='$vo.current eq 1'}active{/if}">{$vo.name}</a>
+{/miu:langlist}
+```
+
+code、name、url、full_url、current 分别表示语言代码、名称、相对/完整地址、当前状态。当前状态为 1/0。
+
+## 安全与缓存
+
+普通输出保留默认 HTML 转义。只有可信 HTML 正文使用 raw，不在公开模板中输出配置密码。标签 PHP 更新需清理模板编译缓存；生成静态页面后，后台数据或语言变化还需要重新生成相关页面。

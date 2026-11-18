@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body class="theme-image">
+{include file="header" /}
+<main id="main">
+    <section class="image-masthead"><div class="container"><p class="image-kicker">{miu:lang key='imageIndex' /}</p><h1>{miu:global name='site_title' /}</h1><p>{miu:global name='site_desc' /}</p></div></section>
+    <section class="container image-home-section"><div class="gallery-wall">
+        {miu:list id='vo' limit='12'}
+        <article class="gallery-tile"><a class="gallery-tile-image" href="{$vo.url}">{notempty name="vo.litpic"}<img src="{$vo.litpic}" alt="{$vo.title}" loading="lazy">{else/}<span>{miu:lang key='noImage' /}</span>{/notempty}</a><div class="gallery-tile-caption"><span>{$vo.nav_name}</span><h2><a href="{$vo.url}">{$vo.title}</a></h2></div></article>
+        {/miu:list}
+    </div></section>
+</main>
+{include file="footer" /}
+</body>
+</html>

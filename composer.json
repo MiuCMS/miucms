@@ -1,0 +1,59 @@
+{
+    "name": "miu/cms",
+    "description": "the miucms project",
+    "type": "project",
+    "keywords": [
+        "dev",
+        "oa",
+        "cms"
+    ],
+    "homepage": "http://www.miucms.com/",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "cms",
+            "email": "hdm58@qq.com"
+        }        
+    ],
+    "require": {
+        "php": ">=8.0",
+        "ext-fileinfo": "*",
+        "topthink/framework": "8.1.*",
+		"topthink/think-filesystem": "^2.0",
+        "topthink/think-multi-app": "^1.0",
+        "topthink/think-view": "^2.0",
+		"topthink/think-image": "^1.0",
+        "topthink/think-captcha": "^3.0",
+        "topthink/think-helper": "^3.1",
+        "phpmailer/phpmailer": "^6.8",
+        "firebase/php-jwt": "^7.0",
+		"symfony/var-exporter": "^5.4",
+		"ezyang/htmlpurifier":"^4.1",
+        "overtrue/pinyin": "4.0",
+        "league/commonmark": "^2.7",
+        "alibabacloud/oss-v2": "^0.5.0",
+        "qcloud/cos-sdk-v5": "^2.6.17"
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^6.0",
+        "topthink/think-trace":"2.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "app\\": "app",
+            "plugins\\": "plugins"
+        },
+        "psr-0": {
+            "": "extend/"
+        }
+    },
+    "config": {
+        "preferred-install": "dist"
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@php think service:discover",
+            "@php think vendor:publish"
+        ]
+    }
+}

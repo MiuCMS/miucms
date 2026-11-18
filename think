@@ -1,0 +1,30 @@
+#!/usr/bin/env php
+<?php
+namespace think;
+
+// 命令行入口文件
+define('CMS_ROOT', __DIR__ . DIRECTORY_SEPARATOR);
+// 加载基础文件
+require __DIR__ . '/vendor/autoload.php';
+
+// 应用初始化
+$console = (new App())->console;
+$plugins = \app\extend\plugin\PluginManager::instance();
+foreach ($plugins->getEnabledPluginNames() as $pluginName) {
+    $manifest = $plugins->getPluginPath() . $pluginName . '/console.php';
+    if (!is_file($manifest)) continue;
+    try {
+        $commands = require $manifest;
+    } catch (\Throwable $e) {
+        trace('插件命令加载失败：' . $e->getMessage(), 'error');
+        continue;
+    }
+    if (!is_array($commands)) continue;
+    foreach ($commands as $name => $class) {
+        if (is_string($name) && is_string($class) && !$console->hasCommand($name) &&
+            str_starts_with($class, "plugins\\{$pluginName}\\") && is_subclass_of($class, \think\console\Command::class)) {
+            $console->addCommand($class, $name);
+        }
+    }
+}
+$console->run();

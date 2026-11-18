@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body class="theme-video">
+{include file="header" /}
+<main id="main">
+    <section class="page-intro video-list-intro"><div class="container">{miu:position /}<p class="video-kicker">{miu:lang key='videoIndex' /}</p><h1>{$nav.title}</h1><p>{$nav.seo_description|default=''}</p></div></section>
+    <section class="container video-list-section"><nav class="category-links">{miu:nav id='vo' pid='$nav.top_navid'}<a href="{$vo.url}" class="{$vo.currentstyle}">{$vo.title}</a>{/miu:nav}</nav>
+        <div class="video-chapters">{miu:list id='vo' pagesize='12'}<article class="video-chapter"><a class="video-chapter-poster" href="{$vo.url}">{notempty name="vo.litpic"}<img src="{$vo.litpic}" alt="{$vo.title}" loading="lazy">{else/}<span>{miu:lang key='noImage' /}</span>{/notempty}<i aria-hidden="true">▶</i></a><div><span>{$vo.nav_name} · {$vo.date}</span><h2><a href="{$vo.url}">{$vo.title}</a></h2><p>{$vo.title_ext_1|default=''}</p></div></article>{/miu:list}</div>
+        {miu:pagelist theme='light' /}
+    </section>
+</main>
+{include file="footer" /}
+</body>
+</html>

@@ -1,0 +1,99 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-3">
+	<table class="layui-hide" id="field" lay-filter="field"></table>
+</div>
+
+<script type="text/html" id="status">
+	<i class="layui-icon {{#  if(d.status == 1){ }}layui-icon-ok{{#  } else { }}layui-icon-close{{#  } }}"></i>
+</script>
+<script type="text/html" id="toolbarDemo">
+  <div class="layui-btn-container ">
+	  <button class="layui-btn layui-btn-sm layui-btn-normal layui-btn-color layui-btn-radius add-menu">+ 添加字段</button>
+	  <font class="layui-icon layui-icon-tips layui-font-13 layui-font-orange">系统内置字段在此不显示</font>
+  </div>
+</script>
+<script type="text/html" id="handle">
+	{{# if(d.is_system!=1 && d.is_important!=1){ }}
+		<div class="layui-btn-group"><button class="layui-btn layui-btn-xs" lay-event="edit">编辑</button><button class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</button></div>
+	{{#  } else { }}
+		<div class="layui-btn-group"><button class="layui-btn layui-btn-xs layui-btn-disabled" disabled>编辑</button><button class="layui-btn layui-btn-danger layui-btn-xs layui-btn-disabled" disabled>删除</button></div>
+	{{# } }}
+</script>
+<script type="text/html" id="add_time">
+	{{= formatTime(d.add_time)}}
+</script>
+<script type="text/html" id="channel_name">
+	{$channel_name}
+</script>
+<script type="text/html" id="type">
+	<span style="color:#12bb37">[{{= d.ftitle}}]</span>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	var channel_id = '{$channel_id}';
+	var id = '{$id}';
+	layui.use(['tool'],function(){
+		var table = layui.table, tool = layui.tool;
+		layui.pageTable = table.render({
+			elem: '#field',
+			title: '字段列表',
+			toolbar: '#toolbarDemo',
+			defaultToolbar:[],
+			url: "{:url('admin/channel/field')}", //数据接口
+			where: {
+				channel_id: channel_id
+			},
+			page: false, //开启分页				
+			cols: [
+				[
+					{field: 'id',width: 80,title: 'ID',align: 'center'},
+					{field: 'title', title: '字段标题',},
+					{field: 'channel_name', title: '所属模型',toolbar: '#channel_name'},
+					{field: 'name', title: '字段名称',},
+					{field: 'type',width: 180, title: '字段类型',toolbar: '#type'},
+					{field: 'add_time',width: 180, title: '创建时间',toolbar: '#add_time'},
+					{field: 'status',width: 80, title: '状态',toolbar: '#status',align: 'center'},
+					{field: 'sort',width: 80, title: '排序',},
+					{ title: '操作', align: 'left',toolbar: '#handle'}
+				]
+			]
+		});
+
+		//表头工具栏事件
+		$('body').on('click', '.add-menu', function () {
+			tool.side("{:url('admin/channel/field_add')}?id="+id+"&channel_id=" + channel_id);
+			return;
+		});
+		//监听行工具事件
+		table.on('tool(field)', function (obj) {
+			var data = obj.data;
+			if (obj.event === 'edit') {
+				tool.side("{:url('admin/channel/field_add')}?id="+obj.data.id+"&channel_id="+channel_id);
+				return;
+			}
+			if (obj.event === 'del') {
+				layer.confirm('确定删除该字段吗？<br/> <font style="color:red">该操作将删除数据库中的对应字段，不可恢复！<br/>谨慎操作！</font>', {
+					icon: 3,
+					title: '提示'
+				}, function (index) {
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							obj.del();
+						}
+					}
+					tool.delete("{:url('admin/channel/field_delete')}", { id: data.id }, callback);
+					layer.close(index);
+				});
+			}
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

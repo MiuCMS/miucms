@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="{$nav.seo_description}"/>
+    <meta name="keywords" content="{$nav.seo_keywords}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="{miu:global name='site_name'/}" />
+    <meta property="og:title" content="{$page_title}" />
+    <meta property="og:description" content="{$nav.seo_description}"/>
+    <title>{$page_title}</title>
+    {include file="head" /}
+</head>
+<body data-page="news">
+{include file="header"/}
+<main id="main">
+    <section class="page-intro page-intro--cases">
+        <div class="container">
+            <div class="breadcrumbs">
+                {miu:positionraw name='vo'}
+                {if condition="$vo.url"}<a href="{$vo.url}">{$vo.name}</a><span>/</span>{else/}{$vo.name}{/if}
+                {/miu:positionraw}
+            </div>
+
+            <h1>{$nav.title}</h1>
+            <p class="intro-copy">{$nav.title_ext_1}</p>
+        </div>
+    </section>
+    <section class="container listing-section">
+        <div class="list-toolbar">
+            <nav class="filter-row category-subfilters" data-filter-group="cases">
+                {miu:nav id='vo' navid='$nav.top_navid'}
+                <a class="filter-chip {eq name='nav.id' value='$nav.top_navid'}{$vo.currentstyle}{/eq}" href="{$vo.url}">{miu:lang key='common.all_scenes' /}</a>
+                {/miu:nav}
+                {miu:nav id='sub' pid='$nav.top_navid' includehidden='1'}
+                <a class="filter-chip {$sub.currentstyle}" href="{$sub.url}">{$sub.title}</a>
+                {/miu:nav}
+            </nav>
+            <button type="button" class="video-layout-toggle" data-layout-toggle data-layout-target="#case-grid" data-initial-layout="vertical" aria-pressed="false">
+                <span data-layout-label>{miu:lang key='common.layout_toggle' /}</span><span aria-hidden="true">↔</span>
+            </button>
+        </div>
+        <div class="cases-grid" id="case-grid">
+            {miu:list name='vo' pagesize='6' order='add_time' sort='desc'}
+            <article class="case-card">
+                <a class="case-image" href="{$vo.url}"
+                ><img class="" src="{$vo.litpic|default='/skin/default/images/none.png'}" alt="{$vo.title}" loading="lazy"
+                /></a>
+                <div class="case-copy">
+                    <div class="card-meta">
+                        <span>{$nav.title}</span>
+                        {volist name='vo.tag_list' id='tag'}
+                        <a class="tag" href="{$tag.url}">#{$tag.title}</a>
+                        {/volist}
+                    </div>
+                    <h3>{$vo.title}</h3>
+                    <p>{$vo.title_ext_1}</p>
+                    <a class="text-link" href="{$vo.url}">{miu:lang key='common.view_story' /} <span aria-hidden="true">↗</span></a>
+                </div>
+            </article>
+            {/miu:list}
+        </div>
+        {miu:pagelist type='full' listitem='index,pre,pageno,next,end' /}
+    </section>
+</main>
+{include file="footer" /}
+</body>
+</html>

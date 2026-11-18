@@ -1,0 +1,187 @@
+{extend name="common/base"/}
+{block name="body"}
+<style>
+	.market-wrap{padding:20px 22px 24px;color:#323232}
+	/* 工具栏：任何宽度都保持单行不换行——下拉面板(top:42px)永远在整行下方展开，不会盖住同行/下方的搜索框；
+	   控件统一 38px 高，窄容器时按比例收缩（筛选框最小 96px，搜索框最小 120px） */
+	.market-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:nowrap;margin-bottom:18px}
+	.market-toolbar .layui-input,.market-toolbar .layui-form-select .layui-input{height:38px;line-height:38px}
+	.market-toolbar .layui-btn{height:38px;line-height:38px;flex:none;padding:0 16px}
+	.market-toolbar input{flex:1 1 160px;min-width:120px;max-width:240px}
+	.market-filter{flex:0 1 132px;min-width:96px;margin:0!important}
+	.market-filter select,.market-filter .layui-form-select{width:100%}
+	.market-toolbar .layui-form-select dl{width:100%!important;min-width:100%!important}
+	.market-toolbar .layui-form-select dl dd,.market-toolbar .layui-form-select dl dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+	.market-login{max-width:420px;margin:40px auto}
+	.market-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+	/* 插件卡片：浅色模式——白色玻璃拟态、24px 大圆角、悬停品牌蓝描边发光（不上浮）、
+	   封面 16:10 悬停缩放、左上状态标签、右下药丸按钮（布局结构与官网 res-card 一致，配色用浅色档） */
+	.market-card{display:flex;flex-direction:column;min-width:0;overflow:hidden;border:1px solid rgba(10,11,13,.12);border-radius:24px;background:rgba(255,255,255,.82);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);transition:border-color .35s cubic-bezier(.22,.68,.32,1),box-shadow .35s cubic-bezier(.22,.68,.32,1)}
+	.market-card:hover{border-color:rgba(0,82,255,.4);box-shadow:0 28px 60px rgba(31,45,61,.14)}
+	.market-cover{position:relative;aspect-ratio:16/10;background:#eef1f5;overflow:hidden}
+	.market-cover img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.22,.68,.32,1)}
+	.market-card:hover .market-cover img{transform:scale(1.08)}
+	.market-cover-empty{height:100%;display:flex;align-items:center;justify-content:center;color:#8a929d;font-size:13px}
+	.market-card-badge{position:absolute;top:12px;left:12px;display:inline-flex;gap:6px;margin:0}
+	.market-tag{display:inline-flex;align-items:center;padding:4px 12px;border-radius:999px;border:1px solid rgba(10,11,13,.14);background:rgba(255,255,255,.88);color:#697482;font-size:.78rem;font-weight:700}
+	.market-tag.free{color:#0e9f5f;border-color:rgba(14,159,95,.35);background:rgba(14,159,95,.1)}
+	.market-tag.owned{color:#0052ff;border-color:rgba(0,82,255,.35);background:rgba(0,82,255,.08)}
+	.market-card-body{display:flex;flex-direction:column;gap:8px;flex:1;padding:14px 16px 16px}
+	.market-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+	.market-title{min-width:0;flex:1}
+	.market-title h3{margin:0;font-size:1rem;line-height:1.35;font-weight:700;color:#1b1e24;overflow-wrap:anywhere}
+	.market-id{margin-top:2px;font-size:.75rem;color:#8a929d;overflow-wrap:anywhere}
+	.market-version{flex:0 0 auto;font-family:"Cascadia Code",Consolas,monospace;font-size:.78rem;color:#0052ff;padding:0;background:none}
+	.market-desc{min-height:0;margin:0;color:#5f6771;font-size:.85rem;line-height:1.6;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+	.market-card-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:auto;padding-top:14px;border-top:1px solid rgba(10,11,13,.08)}
+	.market-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:.82rem;color:#697482}
+	.market-price{font-size:.9rem;font-weight:700;color:#e55b32}
+	.market-price.free{color:#0e9f5f}
+	.market-action{flex:none}
+	.market-action .layui-btn{border:none;border-radius:999px;padding:0 18px;height:34px;line-height:34px;background:#0052ff;box-shadow:0 6px 18px rgba(0,82,255,.32);transition:box-shadow .2s,background .2s}
+	.market-action .layui-btn:hover{background:#2f6dff;box-shadow:0 10px 26px rgba(0,82,255,.45)}
+	.market-action .layui-btn-warm{background:#ff7a45;box-shadow:0 6px 18px rgba(255,122,69,.3)}
+	.market-action .layui-btn-warm:hover{background:#ff8f60;box-shadow:0 10px 26px rgba(255,122,69,.42)}
+	.market-action .layui-badge{border-radius:999px;padding:5px 12px}.market-empty{grid-column:1/-1;padding:48px 16px;text-align:center;color:#78818d;background:#fafbfc;border:1px dashed #dfe3e8;border-radius:8px}.market-pages{display:flex;justify-content:center;margin-top:14px}.market-error{margin:10px 0;padding:12px 14px;color:#a64034;background:#fff5f3;border:1px solid #f1d4cf;border-radius:6px}
+	@media(max-width:900px){.market-toolbar .layui-btn{padding:0 12px}.market-filter{flex-basis:110px;min-width:90px}.market-toolbar input{min-width:110px;max-width:200px}}
+	@media(max-width:760px){.market-wrap{padding:14px}.market-grid{grid-template-columns:1fr;gap:10px}}
+</style>
+<div class="market-wrap">
+	{if !$loggedIn}
+	<div class="layui-card market-login"><div class="layui-card-header">登录米柚CMS官网</div><div class="layui-card-body">
+		<form class="layui-form" id="marketLoginForm" autocomplete="off">
+			<div class="layui-form-item"><label class="layui-form-label">官网账号</label><div class="layui-input-block"><input class="layui-input" name="username" required lay-verify="required" autocomplete="off"></div></div>
+			<div class="layui-form-item"><label class="layui-form-label">密码</label><div class="layui-input-block"><input class="layui-input" name="password" type="password" required lay-verify="required" autocomplete="new-password"></div></div>
+			<div class="layui-form-item"><div class="layui-input-block"><button class="layui-btn layui-btn-normal" lay-submit>登录并浏览插件</button></div></div>
+		</form>
+		<p class="layui-font-gray">账号凭证仅用于本次登录请求；后台只保存官网返回的短期访问令牌。</p>
+	</div></div>
+	{else/}
+	<div class="market-toolbar layui-form">
+		<div class="layui-input-inline market-filter"><select id="marketPrice" lay-filter="marketPrice"><option value="all">价格：全部</option><option value="free">免费</option><option value="paid">付费</option></select></div>
+		<div class="layui-input-inline market-filter"><select id="marketSource" lay-filter="marketSource"><option value="all">出品：全部</option><option value="official">官方自营</option><option value="third">第三方</option></select></div>
+		<div class="layui-input-inline market-filter"><select id="marketCategory" lay-filter="marketCategory"><option value="0">分类：全部</option></select></div>
+		<div class="layui-input-inline market-filter"><select id="marketPurchase" lay-filter="marketPurchase"><option value="all">全部</option><option value="purchased">已购买</option><option value="not_purchased">未购买</option></select></div>
+		<input type="text" class="layui-input" id="marketKeyword" placeholder="搜索插件名称、标识或简介">
+		<button class="layui-btn layui-btn-normal" id="marketSearch">搜索</button>
+		<button class="layui-btn layui-btn-primary" id="marketReset">重置</button>
+		<button class="layui-btn layui-btn-primary" id="marketLogout" style="margin-left:auto">退出官网账号</button>
+	</div>
+	<div id="marketError" class="market-error" role="alert" hidden></div>
+	<div id="marketGrid" class="market-grid" aria-live="polite"></div>
+	<div id="marketPages" class="market-pages"></div>
+	{/if}
+</div>
+{/block}
+{block name="script"}
+<script>
+layui.use(['form','laypage'],function(){
+	var form=layui.form,laypage=layui.laypage;
+	var marketLoggedIn = {:json_encode((bool) $loggedIn)};
+	if(!marketLoggedIn){
+		form.on('submit',function(data){
+		$.post("{:url('admin/plugin/market_login')}",data.field,function(res){
+			layer.msg(res.msg,{icon:Number(res.code)===0?1:2});
+			if(Number(res.code)===0)setTimeout(function(){location.reload();},500);
+		},'json');return false;
+		});
+	}else{
+	var activeKeyword='',activeLimit=20,activePrice='all',activeSource='all',activeCategory='0',activePurchase='all',pendingPrice='all',pendingSource='all',pendingCategory='0',pendingPurchase='all';
+	function openDetails(url){try{var serviceHost=new URL('{:config("official.service")}').hostname;var websiteHost=new URL('{:config("official.website")}').hostname;var u=new URL(url,'{:config("official.service")}');if(u.protocol!=='https:'||![serviceHost,websiteHost].includes(u.hostname))throw new Error();window.open(u.href,'_blank','noopener');}catch(e){layer.msg('官网详情页地址无效',{icon:2});}}
+	function renderCards(items){
+		var $grid=$('#marketGrid').empty();
+		if(!items.length){
+			$grid.append('<div class="market-empty">没有找到符合条件的插件</div>');
+			return;
+		}
+		items.forEach(function(item){
+			var $card=$('<article class="market-card"></article>'),$head=$('<div class="market-card-head"></div>'),$cover=$('<div class="market-cover"></div>');
+			var name=String(item.name||item.id||'插件');
+			var status=item.purchase_status||'',statusText={free:'免费',purchased:'已购买',owner:'作者'}[status]||'未购买';
+			var statusCls={free:'free',purchased:'owned',owner:'owned'}[status]||'';
+			var coverUrl='';
+			try{var cover=new URL(item.cover||item.image||item.icon||'','{:config("official.service")}');if(cover.protocol==='https:')coverUrl=cover.href;}catch(e){}
+			if(coverUrl){
+				$cover.append($('<img>').attr({
+					src:coverUrl,
+					alt:name+'封面'}
+				).on('error',function(){
+					$cover.empty().append('<div class="market-cover-empty">暂无封面图</div>');
+				}));
+			}
+			else $cover.append('<div class="market-cover-empty">暂无封面图</div>');
+			$cover.append($('<p class="market-card-badge"></p>').append($('<span class="market-tag"></span>').addClass(statusCls).text(statusText)));
+			var $title=$('<div class="market-title"></div>').append($('<h3></h3>').text(name)).append($('<div class="market-id"></div>').text(item.id||''));
+			$head.append($title,$('<span class="market-version"></span>').text('v'+(item.version||'-')));
+			var $desc=$('<p class="market-desc"></p>').text(item.description||'暂无简介');
+			var price=Number(item.price)>0?(item.currency||'')+' '+item.price:'免费';
+			var $meta=$('<div class="market-meta"></div>').append($('<span></span>').text(item.author||'')).append($('<span class="market-price"></span>').toggleClass('free',Number(item.price)<=0).text(price));
+			var $action=$('<div class="market-action"></div>');
+			if(item.downloaded)$action.append($('<span class="layui-badge layui-bg-gray">已下载</span>'));
+			else if(item.can_download)$action.append($('<button type="button" class="layui-btn layui-btn-sm layui-btn-normal">下载</button>').on('click',function(){downloadPlugin(item.id,$action);}));
+			else $action.append($('<button type="button" class="layui-btn layui-btn-sm layui-btn-warm">购买</button>').on('click',function(){openDetails(item.detail_url);}));
+			$card.append($cover,$('<div class="market-card-body"></div>').append($head,$desc,$('<div class="market-card-foot"></div>').append($meta,$action)));$grid.append($card);
+		});
+	}
+	function fillFilter($select,options,valueKey,labelKey,current){
+		$select.empty();
+		options.forEach(function(option){
+			$select.append($('<option></option>').val(String(option[valueKey])).text(String(option[labelKey]||'')));
+		});
+		if(!$select.find('option[value="'+String(current).replace(/"/g,'\\"')+'"]').length)$select.val($select.find('option:first').val());else $select.val(String(current));
+	}
+	function updateFilters(filters,items){
+		var priceOptions=filters.price||[{value:'all',label:'全部'},{value:'free',label:'免费'},{value:'paid',label:'付费'}];
+		var sourceOptions=filters.source||[{value:'all',label:'全部'},{value:'official',label:'官方自营'},{value:'third',label:'第三方'}];
+		var categoryOptions=filters.categories;
+		if(!Array.isArray(categoryOptions)){
+			categoryOptions=[{id:0,name:'全部'}];var seen={};
+			(items||[]).forEach(function(item){var category=item.category||{},id=Number(category.id)||0;if(id>0&&!seen[id]){seen[id]=true;categoryOptions.push({id:id,name:category.name||('分类 '+id)});}});
+		}
+		fillFilter($('#marketPrice'),priceOptions,'value','label',pendingPrice);
+		fillFilter($('#marketSource'),sourceOptions,'value','label',pendingSource);
+		fillFilter($('#marketCategory'),categoryOptions,'id','name',pendingCategory);
+		pendingPrice=$('#marketPrice').val()||'all';pendingSource=$('#marketSource').val()||'all';pendingCategory=$('#marketCategory').val()||'0';
+		form.render('select');
+	}
+	function downloadPlugin(id,$action){
+		var $button=$action.find('button').prop('disabled',true).text('下载中…');
+		$.post("{:url('admin/plugin/market_download')}",{name:id},function(res){
+			if(Number(res.code)===0){
+				$action.empty().append($('<span class="layui-badge layui-bg-gray">已下载</span>'));if(window.parent&&window.parent.location)window.parent.location.reload();
+			}
+			else $button.prop('disabled',false).text('下载');
+			layer.msg(res.msg,{icon:Number(res.code)===0?1:2});
+		},'json').fail(function(){
+			$button.prop('disabled',false).text('下载');
+			layer.msg('下载请求失败，请稍后重试',{icon:2});
+		});
+	}
+	function loadMarket(page,keyword,limit,price,source,category,purchase){
+		activeKeyword=keyword;activeLimit=limit;activePrice=price||activePrice;activeSource=source||activeSource;activeCategory=category||activeCategory;activePurchase=purchase||activePurchase;
+		$('#marketGrid').html('<div class="market-empty">正在加载插件…</div>');$('#marketError').prop('hidden',true).text('');
+		$.getJSON("{:url('admin/plugin/market_list')}",{page:page,per_page:limit,keyword:keyword,price:activePrice,source:activeSource,category_id:activeCategory,purchase_status:activePurchase}).done(function(res){
+			if(Number(res.code)!==0){
+				$('#marketGrid').empty();$('#marketError').text(res.msg||'插件市场请求失败').prop('hidden',false);$('#marketPages').empty();
+				return;
+			}
+			var data=res.data||{},pagination=data.pagination||{};updateFilters(data.filters||{},data.items||[]);renderCards(data.items||[]);
+			laypage.render({elem:'marketPages',count:Number(pagination.total)||0,curr:Number(pagination.page)||page,limit:Number(pagination.per_page)||limit,limits:[10,20,50],layout:['count','prev','page','next','limit','skip'],jump:function(obj,first){if(first)return;loadMarket(obj.curr,activeKeyword,obj.limit);}});
+		}).fail(function(){
+			$('#marketGrid').empty();$('#marketError').text('插件市场连接失败，请检查网络后重试').prop('hidden',false);$('#marketPages').empty();
+		});
+	}
+	form.on('select(marketPrice)',function(data){pendingPrice=data.value;});
+	form.on('select(marketSource)',function(data){pendingSource=data.value;});
+	form.on('select(marketCategory)',function(data){pendingCategory=data.value;});
+	form.on('select(marketPurchase)',function(data){pendingPurchase=data.value;});
+	loadMarket(1,'',activeLimit);
+	$('#marketSearch').on('click',function(){loadMarket(1,$('#marketKeyword').val().trim(),activeLimit,pendingPrice,pendingSource,pendingCategory,pendingPurchase);});
+	$('#marketKeyword').on('keydown',function(e){if(e.key==='Enter')$('#marketSearch').trigger('click');});
+	$('#marketReset').on('click',function(){pendingPrice=activePrice='all';pendingSource=activeSource='all';pendingCategory=activeCategory='0';pendingPurchase=activePurchase='all';$('#marketKeyword').val('');$('#marketPrice').val('all');$('#marketSource').val('all');$('#marketCategory').val('0');$('#marketPurchase').val('all');form.render('select');loadMarket(1,'',activeLimit,'all','all','0','all');});
+	$('#marketLogout').on('click',function(){$.post("{:url('admin/plugin/market_logout')}",{},function(res){layer.msg(res.msg,{icon:Number(res.code)===0?1:2});if(Number(res.code)===0)location.reload();},'json');});
+	$('#marketError').on('click',function(){$(this).prop('hidden',true);loadMarket(1,activeKeyword,activeLimit);});
+	}
+});
+</script>
+{/block}

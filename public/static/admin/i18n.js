@@ -1,0 +1,1981 @@
+/* MIUCMS 后台界面语言切换：简体中文、繁体中文、英文 */
+(function (window, document) {
+  'use strict';
+
+  var STORAGE_KEY = 'miu_admin_locale';
+  var LOCALES = ['zh-CN', 'zh-HK', 'en'];
+  var LABELS = {
+    'zh-CN': '简体中文',
+    'zh-HK': '繁體中文',
+    en: 'English'
+  };
+  var SWITCH_LABELS = { 'zh-CN': '切换语言', 'zh-HK': '切換語言', en: 'Change language' };
+
+  // 只收录界面文案。不会翻译输入值、表格数据、编辑器内容和代码片段。
+  var DICT = {
+    'zh-HK': {
+      '基础内容': '基本內容', '多语言': '多語言',
+      '清缓存': '清除快取', '刷新': '重新整理', '功能搜索': '功能搜尋', '全屏': '全螢幕',
+      '便签': '便箋', '锁屏': '鎖定畫面', '主题': '主題', '消息中心': '訊息中心', '前台首页': '前台首頁',
+      '基本资料': '基本資料', '修改密码': '修改密碼', '退出': '登出', '概览': '總覽', '菜单': '選單',
+      '系统': '系統', '工具': '工具', '基础': '基礎', '会员': '會員', '栏目': '欄目', 'SEO': 'SEO', '留言': '留言', '插件': '外掛',
+      '备份数据': '備份資料', '表单管理': '表單管理', '操作日志': '操作記錄',
+      '功能节点': '功能節點', '钩子管理': '掛鉤管理', '广告/轮播': '廣告／輪播', '还原数据': '還原資料', '后台日志': '後台記錄',
+      '留言管理': '留言管理', '模型管理': '模型管理', '权限角色': '權限角色',
+      '数据库备份': '資料庫備份', '搜索关键字': '搜尋關鍵字', '页面生成': '頁面產生', '用户等级': '使用者等級', '友情链接': '友情連結',
+      '自定义变量': '自訂變數', 'AI创作': 'AI創作', 'AI创作基础配置': 'AI創作基本設定', 'AI创作模型配置': 'AI創作模型設定', 'AI创作首页': 'AI創作首頁', 'URL配置': 'URL設定',
+      '关闭当前': '關閉目前', '关闭其它': '關閉其他', '关闭全部': '關閉全部', '关闭': '關閉', '全部关闭': '關閉全部', '切换语言': '切換語言',
+      '系统通知': '系統通知', '您有未读留言': '您有未讀留言', '有 ': '有 ', ' 个留言未处理': ' 則留言尚未處理', '暂无新通知': '暫無新通知',
+      '系统升级': '系統升級', '发现系统新版本': '發現系統新版本', '可升级到': '可升級至', '点击查看并升级': '點擊查看並升級', '，点击查看并升级': '，點擊查看並升級',
+      'MiuCMS 版本升级': 'MiuCMS 版本升級', '当前版本：': '目前版本：', '最新版本：': '最新版本：', '发现可用增量升级：': '發現可用增量升級：',
+      '升级包使用 RSA-SHA256 数字签名和 SHA-256 校验。每次只升级一个连续版本；执行前自动备份数据库和将要变更的程序文件，升级失败时尝试自动恢复。': '升級套件使用 RSA-SHA256 數位簽章和 SHA-256 校驗。每次只升級一個連續版本；執行前會自動備份資料庫及將變更的程式檔案，升級失敗時會嘗試自動還原。',
+      '当前没有可直接应用的下一版本升级包。': '目前沒有可直接套用的下一版本升級套件。', '重新检查': '重新檢查', '立即检查': '立即檢查',
+      '确认系统升级': '確認系統升級', '开始升级': '開始升級', '升级完成：': '升級完成：', '。备份保存在 ': '。備份位於 ', '升级会短暂暂停前台、后台和接口请求，并自动备份数据库及将要替换的程序文件。确认开始升级吗？': '升級期間會短暫暫停前台、後台和 API 請求，並自動備份資料庫及將替換的程式檔案。確定開始升級嗎？',
+      '正在下载、验签并应用增量升级包，请勿关闭页面…': '正在下載、驗證簽章並套用增量升級套件，請勿關閉頁面…', '检查完成，正在刷新结果': '檢查完成，正在重新整理結果',
+      '检查失败，请稍后重试': '檢查失敗，請稍後重試', '检查请求失败，请稍后重试': '檢查請求失敗，請稍後重試', '升级失败': '升級失敗',
+      '升级请求中断。若升级期间连接断开，系统会在下次打开升级页时尝试自动恢复。': '升級請求中斷。若升級期間連線中斷，系統會在下次開啟升級頁時嘗試自動還原。',
+      '搜索后台菜单（名称 / 地址）': '搜尋後台選單（名稱 / 位址）', '没有找到相关菜单': '找不到相關選單',
+      '确认注销登录吗?': '確定要登出嗎？', '警告': '警告', '本地便签': '本機便箋', '请输入管理员密码': '請輸入管理員密碼',
+      '解锁成功': '解鎖成功', '密码不正确': '密碼不正確', '请求失败，请重试': '請求失敗，請重試',
+      '水墨国风': '水墨國風', '极夜科技': '極夜科技', '商务蓝': '商務藍', '清新扁平': '清新扁平', '切换登录风格': '切換登入風格', '点击重新盖印': '點擊重新蓋印',
+      '欢迎回来': '歡迎回來', '登录到管理系统，继续你的工作流。': '登入管理系統，繼續您的工作流程。',
+      '用户名': '使用者名稱', '密码': '密碼', '验证码': '驗證碼', '请输入用户名': '請輸入使用者名稱', '请输入密码': '請輸入密碼',
+      '输入右侧字符': '輸入右側字元', '刷新验证码': '重新整理驗證碼', '点击刷新验证码': '點擊重新整理驗證碼',
+      '记住账号': '記住帳號', '记住我': '記住我', '保持登录': '保持登入', '忘记密码?': '忘記密碼？', '登 录': '登 入',
+      '立即登录': '立即登入', '登录中...': '登入中…', '请填写完整的登录信息': '請填寫完整的登入資訊',
+      '登录成功，正在跳转...': '登入成功，正在跳轉…', '登录失败，请重试': '登入失敗，請重試', '操作失败，请联系管理员': '操作失敗，請聯絡管理員',
+      'MIUCMS 内容管理系统': 'MIUCMS 內容管理系統', '统一登录入口': '統一登入入口', '账号登录': '帳號登入',
+      '请使用管理员分配的账号信息登录': '請使用管理員分配的帳號資訊登入', '效率办公，': '高效辦公，', '从一次登录开始': '從一次登入開始',
+      '聚合内容、用户与数据分析，一站式管理你的站点生态。': '整合內容、使用者與數據分析，一站式管理您的網站。',
+      '数据安全加密传输': '資料安全加密傳輸', '全链路操作审计': '全流程操作稽核', '全站内容智能编排': '全站內容智慧編排',
+      '欢迎回来，请登录你的工作台': '歡迎回來，請登入您的工作台', '建议使用 Chrome / Edge 访问': '建議使用 Chrome / Edge 瀏覽',
+      '米柚 CMS': '米柚 CMS', '米柚内容管理系统': '米柚內容管理系統', '帐号登录 · 欢迎归来': '帳號登入 · 歡迎回來',
+      '登录成功': '登入成功', '显示密码': '顯示密碼', '确定': '確定', '取消': '取消', '搜索': '搜尋', '查询': '查詢', '重置': '重設',
+      '添加': '新增', '新增': '新增', '编辑': '編輯', '删除': '刪除', '保存': '儲存', '提交': '提交', '返回': '返回',
+      '保存配置': '儲存設定', '保存并新增': '儲存並新增', '添加文档': '新增文件', '编辑文档': '編輯文件', '发布文档': '發布文件',
+      '文档管理': '文件管理', '栏目管理': '欄目管理', '关键词管理': '關鍵字管理', '插件管理': '外掛管理', '系统设置': '系統設定',
+      '网站配置': '網站設定', '基础配置': '基本設定', '全选': '全選', '批量删除': '批次刪除', '批量操作': '批次操作',
+      '查看': '查看', '复制': '複製', '清空': '清空', '筛选': '篩選', '发布时间': '發布時間', '更新时间': '更新時間',
+      '文档标题': '文件標題', '关键词': '關鍵字', '标签': '標籤', '缩略图': '縮圖', '内容详情': '內容詳情', '返回列表': '返回清單',
+      '请选择栏目': '請選擇欄目', '请选择分类': '請選擇分類', '请输入': '請輸入', '上传图片': '上傳圖片', '选择文件': '選擇檔案',
+      '基本设置': '基本設定', '基本配置': '基本設定', '高级设置': '進階設定', '站点信息': '網站資訊', '核心配置': '核心設定', '邮箱配置': '電郵設定', '微信配置': '微信設定', '附件管理': '附件管理',
+      '网站首页': '網站首頁', '后台首页': '後台首頁', '登录后台': '登入後台', '管理员': '管理員', '用户管理': '使用者管理',
+      '角色管理': '角色管理', '权限管理': '權限管理', '文档列表': '文件清單', '文章列表': '文章清單', '内容分类': '內容分類',
+      '标签管理': '標籤管理', '标签分组': '標籤分組', '数据统计': '數據統計', '模板管理': '版型管理', '文件管理': '檔案管理',
+      '访问统计': '訪問統計', '近一年访问统计': '近一年瀏覽統計', '请启用网站统计插件后才会显示': '請啟用網站統計外掛後才會顯示',
+      '操作成功': '操作成功', '保存成功': '儲存成功', '添加成功': '新增成功', '删除成功': '刪除成功', '更新成功': '更新成功',
+      '请选择要操作的数据': '請選擇要操作的資料', '请选择要删除的数据': '請選擇要刪除的資料', '确定删除吗？': '確定要刪除嗎？', '确定删除选中的数据吗？': '確定要刪除選取的資料嗎？',
+      '请输入名称': '請輸入名稱', '请输入标题': '請輸入標題', '请输入关键词': '請輸入關鍵字', '请输入内容': '請輸入內容', '请选择状态': '請選擇狀態',
+      '网站名称': '網站名稱', '网站标题': '網站標題', '网站域名': '網站網域', '创建时间': '建立時間', '排序': '排序', '排序值': '排序值',
+      '请选择': '請選擇', '请选择日期': '請選擇日期', '开始时间': '開始時間', '结束时间': '結束時間', '暂无数据': '暫無資料',
+      '上一页': '上一頁', '下一页': '下一頁', '首页': '首頁', '尾页': '末頁', '共': '共', '条/页': '筆／頁',
+      '启用': '啟用', '禁用': '停用', '是': '是', '否': '否', '状态': '狀態', '名称': '名稱', '标题': '標題',
+      '内容': '內容', '类型': '類型', '分类': '分類', '分组': '分組', '时间': '時間', '操作': '操作', '备注': '備註', '说明': '說明',
+      '文件': '檔案', '图片': '圖片', '视频': '影片', '音频': '音訊', '上传': '上傳', '下载': '下載', '预览': '預覽',
+      '关闭当前页面': '關閉目前頁面', '关闭其他页面': '關閉其他頁面', '关闭所有页面': '關閉所有頁面',
+      '更多': '更多', '设置': '設定', '示例': '範例', '待安装': '待安裝', '恢复': '還原', '浏览': '瀏覽', '重载': '重新載入', '上一级': '上一層',
+      '开启回复': '開啟回覆', '开启审核': '開啟審核', '关闭方式': '關閉方式', '开启': '開啟', '必填': '必填', '选填': '選填', '显示': '顯示', '隐藏': '隱藏',
+      '正常': '正常', '待审核': '待審核', '不通过': '未通過', '通过': '通過', '已启用': '已啟用', '已禁用': '已停用', '男': '男', '女': '女', '未分组': '未分組', '不关联': '不關聯',
+      '备注信息': '備註資訊', '变量类型': '變數類型', '变量值': '變數值', '编辑管理员': '編輯管理員', '编辑用户信息': '編輯使用者資訊', '单页内容': '單頁內容', '内容详情': '內容詳情',
+      '插件标识': '外掛識別碼', '插件名称': '外掛名稱', '插件描述': '外掛描述', '插件图标': '外掛圖示', '插件类里写的方法名': '外掛類別中定義的方法名稱', '触发时机': '觸發時機', '钩子名': '掛鉤名稱',
+      '作者官网': '作者網站', '版本号': '版本號', '版权信息': '版權資訊', '帮助说明': '說明文件', '测试结果': '測試結果', '查看更多日志': '查看更多記錄', '操作系统分布 近 7 天': '作業系統分布（近 7 天）',
+      '步骤 1：建目录和主类（必须）': '步驟 1：建立目錄和主類別（必要）', '步骤 2：加配置项（可选）': '步驟 2：新增設定項目（選填）', '步骤 3：加后台菜单和页面（可选）': '步驟 3：新增後台選單和頁面（選填）',
+      '步骤 4：加前台页面（可选）': '步驟 4：新增前台頁面（選填）', '步骤 5：加模板标签（可选）': '步驟 5：新增模板標籤（選填）', '步骤 6：监听钩子（可选）': '步驟 6：監聽掛鉤（選填）',
+      '步骤 7：建自己的数据表（可选）': '步驟 7：建立自己的資料表（選填）', '步骤 8：安装并测试': '步驟 8：安裝並測試', '一、最快上手': '一、快速入門', '二、从零手写一个插件（8 步）': '二、從零開始手寫外掛（8 個步驟）',
+      '三、钩子清单（共 个）': '三、掛鉤清單（共 個）', '四、常用 API 速查': '四、常用 API 速查', '五、命名与约定（必看）': '五、命名與規範（必讀）', '六、常见问题排错': '六、常見問題排除', '七、参考示例': '七、參考範例',
+      '百度推送': '百度推送', '百度推送token': '百度推送 Token', '百度搜索资源平台': '百度搜尋資源平台', '更新频率': '更新頻率', '优先级别': '優先級', '生成数量': '產生數量', '列表页': '列表頁', '内容页': '內容頁', '首页': '首頁',
+      '经常': '經常', '每小时': '每小時', '每天': '每天', '每周': '每週', '每月': '每月', '每年': '每年', '从不': '從不', '标签标题': '標籤標題', '标签页面路径': '標籤頁面路徑', '标题间连接符': '標題連接符',
+      '栏目标题': '欄目標題', '栏目别名': '欄目別名', '栏目模板': '欄目模板', '栏目图片': '欄目圖片', '栏目URL': '欄目 URL', '栏目页面路径': '欄目頁面路徑', '内容标题': '內容標題', '内容模板': '內容模板', '内容模型': '內容模型', '内容摘要': '內容摘要', '文档页面路径': '文件頁面路徑', '文档URL': '文件 URL', '文档属性': '文件屬性',
+      '表单名称': '表單名稱', '表单说明': '表單說明', '字段名称': '欄位名稱', '字段标识': '欄位識別碼', '字段类型': '欄位類型', '可选值列表': '可選值清單', '是否必填': '是否必填', '提示文字': '提示文字', '验证格式': '驗證格式', '默认值': '預設值', '默认单位': '預設單位', '最大长度': '最大長度', '列表显示': '顯示於列表',
+      '生成栏目页': '產生欄目頁', '生成文档页': '產生文件頁', '生成tag页': '產生標籤頁', '生成首页': '產生首頁', '生成Sitemap': '產生 Sitemap', '一键生成': '一鍵產生', '地图类型': '地圖類型', '手工更新': '手動更新', '自动更新': '自動更新', '过滤规则': '過濾規則', '过滤外部链接': '過濾外部連結', '过滤隐藏栏目': '過濾隱藏欄目',
+      '登录超时时间': '登入逾時時間', '登录回调地址': '登入回呼網址', '登录账号': '登入帳號', '登录密码': '登入密碼', '确认密码': '確認密碼', '重复密码': '再次輸入密碼', '个人简介': '個人簡介', '手机号码': '手機號碼', '电子邮箱': '電子郵件', '真实姓名': '真實姓名', '用户昵称': '使用者暱稱', '用户等级': '使用者等級', '用户角色': '使用者角色', '用户状态': '使用者狀態', '注册开始时间': '註冊開始時間', '注册结束时间': '註冊結束時間', '截止时间': '截止時間',
+      '公安备案号': '公安備案號', 'ICP备案号': 'ICP 備案號', '网站图标': '網站圖示', '网站LOGO': '網站 Logo', '系统版本号': '系統版本號', '系统名称': '系統名稱', '系统文本编辑器': '系統文字編輯器','缓存方式': '快取方式', '文件缓存': '檔案快取', 'Redis 缓存': 'Redis 快取', '回收站开关': '回收站開關', '是否删除非站内链接': '是否刪除站外連結', '远程图片本地化': '遠端圖片本機化', '域名白名单': '網域白名單',
+      '首页SEO标题': '首頁 SEO 標題', '首页SEO关键词': '首頁 SEO 關鍵字', '首页SEO描述': '首頁 SEO 描述', 'SEO标题': 'SEO 標題', 'SEO关键词': 'SEO 關鍵字', 'SEO关键字': 'SEO 關鍵字', 'SEO描述': 'SEO 描述', '动态URL': '動態 URL', '伪静态化': '偽靜態化', '去除index.php': '移除 index.php',
+      'Api测试登录': 'API 測試登入', 'Api测试注册': 'API 測試註冊', 'Token测试': 'Token 測試', 'Token过期时间': 'Token 到期時間', 'Token签发组织': 'Token 簽發組織', 'Token签发作者': 'Token 簽發者', '公众号appid': '公眾號 AppID', '公众号appsecret': '公眾號 AppSecret', '小程序appid': '小程式 AppID', '小程序appsecret': '小程式 AppSecret',
+      '请输入版本号': '請輸入版本號', '请输入版权信息': '請輸入版權資訊', '请输入百度推送 token': '請輸入百度推送 Token', '请输入登录账号': '請輸入登入帳號', '请输入密码': '請輸入密碼', '请再次输入密码': '請再次輸入密碼', '请输入角色名称': '請輸入角色名稱', '请输入操作日志名称': '請輸入操作記錄名稱', '请输入过期时间': '請輸入到期時間', '请输入手机': '請輸入手機號碼', '请输入电子邮箱': '請輸入電子郵件', '请输入个人简介': '請輸入個人簡介', '请输入用户昵称': '請輸入使用者暱稱', '请输入真实姓名': '請輸入真實姓名',
+      '请输入关键字': '請輸入關鍵字', '请输入关键字名称': '請輸入關鍵字名稱', '请输入分组名称': '請輸入分組名稱', '请输入栏目标题': '請輸入欄目標題', '请输入模型标识': '請輸入模型識別碼', '请输入模型名称': '請輸入模型名稱', '请输入排序，数字': '請輸入排序數值', '请输入排序，数字，越大越靠前': '請輸入排序數值，數字越大越靠前', '请输入字段标识': '請輸入欄位識別碼', '请输入字段名称': '請輸入欄位名稱', '请输入整数': '請輸入整數', '请输入内容': '請輸入內容', '请选择标签': '請選擇標籤',
+      '必须是拼音或数字，以字母开头。留空则系统根据栏目标题拼音生成': '只能填寫拼音或數字，且以字母開頭。留空時系統會依欄目標題的拼音產生。', '必须以 http:// 或 https:// 开头': '必須以 http:// 或 https:// 開頭', '仅支持字母、数字和下划线，不能重复': '僅支援字母、數字和底線，且不可重複', '一行代表一个可选值': '每行代表一個可選值', '留空就是没有变量值': '留空表示沒有變數值', '留空默认根目录': '留空時預設為根目錄', '留空则使用默认入口': '留空時使用預設入口', '一般不超过200个字': '通常不超過 200 個字', '建议100个字以内': '建議不超過 100 個字', '建议80个字以内': '建議不超過 80 個字',
+      '输入右侧字符': '輸入右側字元', '点击刷新验证码': '點擊重新整理驗證碼', '点击重新盖印': '點擊重新蓋印', '请输入登录账户/用户名/手机号码': '請輸入登入帳號／使用者名稱／手機號碼', '按留言内容搜索': '依留言內容搜尋', 'ID/标题/标识/备注': 'ID／標題／識別碼／備註', 'ID/名称': 'ID／名稱', '昵称/操作数据id/操作描述': '暱稱／操作資料 ID／操作描述', '昵称/真实姓名/手机号': '暱稱／真實姓名／手機號碼', '名称/备注': '名稱／備註', '字段标识 / 字段名称': '欄位識別碼／欄位名稱', '登录账户/用户名/手机号码': '登入帳號／使用者名稱／手機號碼', '昵称/操作数据id/操作描述': '暱稱／操作資料 ID／操作描述',
+      '百度推送 开启后，发布或编辑文档时会自动将文档地址推送到百度搜索资源平台；请填写下方 token，未配置时会跳过推送。': '啟用後，發布或編輯文件時會自動將網址推送至百度搜尋資源平台。請填寫下方 Token；未設定時會略過推送。',
+      '百度推送token 在 百度搜索资源平台 获取 token 并填入；也可以执行 php think baidu-push 手动或定时推送。': '請在百度搜尋資源平台取得 Token 後填入；也可以執行 php think baidu-push 手動或定時推送。',
+      '帮助说明 选填，支持 Markdown；生成后会显示在插件配置页的帮助说明中。': '說明文件為選填，支援 Markdown；建立後會顯示在外掛設定頁。',
+      '点「选择图片」打开文件管理器，可一次选多张；按住图片下方的「按住拖动排序」可以调换顺序，顺序就是轮播顺序': '點選「選擇圖片」開啟檔案管理器，可一次選取多張。按住圖片下方的「按住拖動排序」可調整順序，順序即為輪播順序。',
+      '安装/卸载 SQL': '安裝／卸載 SQL', '备份删除': '刪除備份', '分隔符': '分隔符號', '分卷总数': '分卷總數', '文件格式': '檔案格式', '文件名称': '檔案名稱', '文件总大小': '檔案總大小', '下载备份(分卷 )': '下載備份（分卷）', '清除不完整的备份': '清除不完整的備份', '数据还原': '還原資料',
+      '选择文件': '選擇檔案', '选择上传': '選擇上傳', '点击查看': '點擊查看', '点击上传或输入附件地址': '點擊上傳或輸入附件網址', '点击上传或输入视频/音频地址': '點擊上傳或輸入影片／音訊網址', '点击上传或输入图片地址': '點擊上傳或輸入圖片網址', '点击上传或输入ico地址': '點擊上傳或輸入 ICO 網址', '点右侧按钮选择图标': '點擊右側按鈕選擇圖示', '可空，点右侧按钮选择': '可留空，點擊右側按鈕選擇', '标题颜色': '標題顏色', '当前域名，不可编辑': '目前網域，不可編輯',
+      '点击确定按钮将立即卸载插件，以及清除插件数据！': '點擊確定後會立即卸載外掛並清除外掛資料！', '插件文件已经丢失，只会删掉数据库记录和它注册的后台菜单。': '外掛檔案已遺失，只會刪除資料庫記錄及其註冊的後台選單。', '回收站里的全部栏目都会被彻底删除，此操作不可恢复！': '回收站中的所有欄目都會永久刪除，且無法復原！', '回收站里的全部文档都会被彻底删除，此操作不可恢复！': '回收站中的所有文件都會永久刪除，且無法復原！', '该备份不是完整备份，请删除重新备份': '此備份不完整，請刪除後重新備份', '在': '在', '获取 token 并填入；也可以执行': '取得 Token 並填入；也可以執行', '手动或定时推送。': '手動或定時推送。',
+      '请输入完整的URL网址（包含http或https），设置后访问该条信息将直接跳转到设置的链接': '請輸入完整網址（包含 http 或 https）；設定後，造訪此項目時會直接跳轉至該連結。', '一般不超过200个字，不填写时系统自动提取正文的前200个字符': '通常不超過 200 個字；留空時，系統會自動擷取正文前 200 個字。', '建议80个字以内，不填写则使用 内容标题_栏目名称_网站名称 在前端展示': '建議不超過 80 個字；留空時，前台會使用「內容標題_欄目名稱_網站名稱」顯示。', '建议100个字以内，多个关键词请用英文逗号（,）隔开，建议3到5个关键词。': '建議不超過 100 個字；多個關鍵字以英文逗號（,）分隔，建議填寫 3 至 5 個。', '留空时前台显示默认名称（当前管理员昵称）。点击设置可修改默认名称': '留空時前台會顯示預設名稱（目前管理員暱稱）。點擊「設定」可修改預設名稱。', '转载自哪里。点击设置可修改默认名称': '填寫轉載來源。點擊「設定」可修改預設名稱。', '转载出处链接。可留空': '填寫轉載來源連結，可留空。', '文章点击数，发布文档时随机。可在后台-基础-核心配置里关闭': '文章點擊數會在發布時隨機產生，可至「後台－基礎－核心設定」關閉。', '留空系统获取当前时间': '留空時系統會使用目前時間。',
+      '新增/修改文档/栏目时，地图会同步更新': '新增或修改文件／欄目時，網站地圖會同步更新。', 'xml地图文件使用，你输入的网站的网页内容更新的频率。': 'XML 網站地圖使用此設定，表示網站內容的更新頻率。', 'xml地图文件使用，所抓取页面在您网站的重要性，告诉搜索引擎抓取的优先级。数值越大，优先级越高。': 'XML 網站地圖使用此設定，表示頁面對網站的重要程度及搜尋引擎的抓取優先順序。數值越大，優先級越高。', '文档加TAG数量不能超过5000条；数值大对更新文档速度有影响': '文件與標籤總數不可超過 5000 筆；數值越大，更新地圖所需時間越長。', '标签页标题可在下方单独设置「标签标题」规则。': '標籤頁標題可在下方另外設定「標籤標題」規則。', '标题名称会带「标签：」前缀；第1页不显示页码。': '標題會加上「標籤：」前綴；第 1 頁不顯示頁碼。', '填写需要生成静态页面的文件夹名称，不能包含特殊字符，不能和根目录系统文件夹重名': '請填寫靜態頁面的輸出資料夾名稱。不可包含特殊字元，也不可與根目錄中的系統資料夾同名。', '页面将保存在': '頁面將儲存在', '全站会生成首页、全部栏目页、文档页和 tag 页；今天或一周内按文档发布时间筛选，更新首页、相关栏目页、命中文档页及关联 tag 页（一周内含今天和之前 6 天）。': '全站會產生首頁、所有欄目頁、文件頁與標籤頁；「今天」或「一週內」會依發布時間篩選文件，並更新首頁、相關欄目頁、符合條件的文件頁及關聯標籤頁（一週內包含今天及之前 6 天）。', '不选择栏目时生成全部栏目；勾选栏目后，只生成所选栏目及其子栏目。': '不選擇欄目時會產生所有欄目；勾選欄目後，只產生所選欄目及其子欄目。', '生成到站点根目录：sitemap.xml / sitemap.txt / sitemap.html': '產生於網站根目錄：sitemap.xml / sitemap.txt / sitemap.html',
+      '字母开头，只含字母/数字/下划线；会生成目录 plugins/标识/，也是插件的唯一标识。不能用系统保留词（PHP 关键字如 list/class/array、框架目录名、应用名等）': '以字母開頭，只能使用字母、數字和底線。系統會建立 plugins/識別碼/ 目錄，並以此作為外掛唯一識別碼。不可使用系統保留字（例如 PHP 關鍵字 list/class/array、框架目錄名稱或應用程式名稱）。', '后台插件列表里显示的名称': '顯示於後台外掛清單中的名稱。', '插件版本号，自己维护': '外掛版本號，由開發者自行維護。', '选填；需填写完整的 http:// 或 https:// 网址，生成后写入 Plugin.php 的 $authorUrl 属性': '選填；請填寫完整的 http:// 或 https:// 網址，建立後會寫入 Plugin.php 的 $authorUrl 屬性。', '加后台菜单时用这个图标；只能点「选择图标」挑，不能手填': '新增後台選單時使用此圖示；請點擊「選擇圖示」選取，無法手動輸入。', '勾选要一起生成的文件；生成完去「插件管理」列表点「安装」': '勾選要一併建立的檔案；完成後到「外掛管理」清單點擊「安裝」。',
+      '百度推送 开启后，发布或编辑文档时会自动将文档地址推送到百度搜索资源平台；请填写下方 token，未配置时会跳过推送。': '啟用後，發布或編輯文件時會自動將網址推送至百度搜尋資源平台。請填寫下方 Token；未設定時會略過推送。',
+      '网站关闭时跳转的目标网址，必须以 http:// 或 https:// 开头。': '網站關閉時要跳轉的網址，必須以 http:// 或 https:// 開頭。', '网站关闭时显示的提示文字。': '網站關閉時顯示的提示文字。','请输入网站平台名称': '請輸入網站平台名稱', '请输入网站描述': '請輸入網站描述', '请输入网站链接': '請輸入網站連結', '请输入网站名称': '請輸入網站名稱', '请输入签发组织': '請輸入簽發組織', '请输入签发作者': '請輸入簽發者', '请输入上传附件限制': '請輸入附件上傳限制', '请输入ICP备案号': '請輸入 ICP 備案號', '请输入appID': '請輸入 AppID', '请输入secrect': '請輸入 Secret', '请输入secretey': '請輸入 Secret Key', '请输入SEO标题': '請輸入 SEO 標題', '请输入SMTP服务器地址': '請輸入 SMTP 伺服器位址', '请输入Token': '請輸入 Token', '请输入小程序appid': '請輸入小程式 AppID', '请输入小程序appsecret': '請輸入小程式 AppSecret', '请输入微信登录回调地址': '請輸入微信登入回呼網址', '请输入微信支付回调地址': '請輸入微信支付回呼網址', '请输入微信支付商户号': '請輸入微信支付商戶號', '请输入微信支付证书路径': '請輸入微信支付憑證路徑', '请输入微信支付API密钥': '請輸入微信支付 API 金鑰', '请输入邮箱授权码': '請輸入電子郵件授權碼', '请输入邮箱用户名': '請輸入電子郵件帳號', '请输入要显示的发送者': '請輸入寄件者顯示名稱', '请输入要显示的发送者邮箱': '請輸入寄件者電子郵件', '请输入微信支付回调地址': '請輸入微信支付回呼網址',
+      '按留言内容搜索': '依留言內容搜尋', '多个关键词用“,”隔开': '多個關鍵字請以「,」分隔', '昵称/真实姓名/手机号': '暱稱／真實姓名／手機號碼', '登录账户/用户名/手机号码': '登入帳號／使用者名稱／手機號碼', '如 我的插件': '例如：我的外掛', '如 myplugin': '例如：myplugin', '选填，例如 https://example.com': '選填，例如 https://example.com', '后台显示用的名字，例如 客服QQ': '後台顯示名稱，例如：客服 QQ', '填这个变量时的说明，会显示成问号提示': '填寫此變數時的說明，會以問號提示顯示', '这个表单是干什么用的，方便自己以后认（前台不显示）': '填寫表單用途，方便日後辨識（前台不會顯示）', '例如：您的姓名、手机号码': '例如：姓名、手機號碼', '例如：预约参观、联系我们': '例如：預約參觀、聯絡我們', '比如：元、个、件等等': '例如：元、個、件等', '留空默认根目录': '留空時預設為根目錄', '留空则使用默认入口': '留空時使用預設入口', '动态URL': '動態 URL', '前台模板': '前台版型', '前台模板 ( )': '前台版型（ ）', '模板根目录': '模板根目錄', '模板页面': '模板頁面', '页面保存目录': '頁面儲存目錄', '模板里靠它调广告，如 INDEX_SLIDE': '模板中使用此標識呼叫廣告，例如 INDEX_SLIDE', '模板标签': '模板標籤', '前台调用': '前台呼叫', '后台管理路径': '後台管理路徑', '系统文本编辑器': '系統文字編輯器', '富文本编辑器(TinyMCE)': '富文字編輯器（TinyMCE）', 'MarkDown编辑器': 'Markdown 編輯器', '缓存方式': '快取方式',
+      '快捷导航': '快速導覽', '统计': '統計', '开发文档': '開發文件', '快捷键': '快速鍵', '保存所有': '全部儲存', '全部保存': '全部儲存', '立即提交': '立即提交', '编辑删除': '編輯／刪除', '标签名称': '標籤名稱', '标签标题 标签名称': '標籤標題（標籤名稱）', '生成静态路径设置': '產生靜態路徑設定', '伪静态URL设置': '偽靜態 URL 設定', '标题规则设置': '標題規則設定', '今天': '今天', '今日': '今日', '一周内': '一週內',
+      '广告': '廣告', '广告类型': '廣告類型', '广告内容': '廣告內容', '轮播图': '輪播圖', '轮播图片': '輪播圖片', '媒体地址': '媒體網址', '多媒体': '多媒體', '大小': '大小', '短标题': '短標題', '点击数': '點擊數', '文章来源': '文章來源', '来源链接': '來源連結', '外链地址': '外部連結網址', '跳转链接': '跳轉連結', '随机数范围': '隨機數範圍', '提取码': '提取碼', '下载链接': '下載連結', '下载按钮名称': '下載按鈕名稱', '图片名称': '圖片名稱', '头像': '頭像', '阅读权限': '閱讀權限', '关键字': '關鍵字', '关键字名称': '關鍵字名稱', '关联栏目': '關聯欄目', '栏目名称': '欄目名稱', '表单名称': '表單名稱', '字段类型': '欄位類型', '字段名称': '欄位名稱', '字段标识': '欄位識別碼', '用途': '用途', '写法': '寫法', '生成内容': '產生內容', '新建/编辑模型': '新增／編輯模型', '增加节点': '新增節點', '添加/编辑字段': '新增／編輯欄位', '新增管理员': '新增管理員', '确认提交': '確認提交', '确认密码': '確認密碼', '确认密码 *': '確認密碼 *', '立即提交': '立即提交', 'SEO优化': 'SEO 最佳化', '更多参数': '更多參數', '常规选项': '一般選項', '高级选项': '進階選項', '保存所有': '全部儲存', '全部保存': '全部儲存', '快捷导航': '快速導覽', '后台日志 更多': '後台記錄（更多）', '留言详情 ·': '留言詳情 ·',   '首页 SEO 标题': '首頁 SEO 標題', '首页SEO标题 *': '首頁 SEO 標題 *', '首页SEO关键词': '首頁 SEO 關鍵字', '首页SEO描述': '首頁 SEO 描述', '列表页 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0': '列表頁 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0', '内容页 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0': '內容頁 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0', '优先级别 首页 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0': '優先級 首頁 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0',
+      '请填写完整的登录信息': '請填寫完整的登入資訊', '请填写完整的登录信息后再提交': '請先填寫完整的登入資訊再提交', '保存并新增': '儲存並新增', '编辑管理员': '編輯管理員', '添加字段': '新增欄位', '管理字段': '管理欄位', '字段管理': '欄位管理', '插件配置': '外掛設定', '配置': '設定', '此插件没有配置项': '此外掛沒有設定項目', '配置 此插件没有配置项': '設定：此外掛沒有設定項目', '变量类型 *': '變數類型 *', '标识 *': '識別碼 *', '标题 *': '標題 *', '表单名称 *': '表單名稱 *', '插件标识 *': '外掛識別碼 *', '插件名称 *': '外掛名稱 *', '登录回调地址 *': '登入回呼網址 *', '登录密码 *': '登入密碼 *', '登录账号 *': '登入帳號 *', '分组名称 *': '分組名稱 *', '父级栏目 *': '上層欄目 *', '发送人 *': '寄件者 *', '关键字名称 *': '關鍵字名稱 *', '广告类型 *': '廣告類型 *', '栏目 *': '欄目 *', '栏目标题 *': '欄目標題 *', '模型标识 *': '模型識別碼 *', '模型名称 *': '模型名稱 *', '内容模型 *': '內容模型 *', '用户角色 *': '使用者角色 *', '用户名 *': '使用者名稱 *', '用户昵称 *': '使用者暱稱 *', '用户等级 *': '使用者等級 *', '用户状态 *': '使用者狀態 *', '手机号码 *': '手機號碼 *', '状态 *': '狀態 *', '字段标识 *': '欄位識別碼 *', '字段类型 *': '欄位類型 *', '字段名称 *': '欄位名稱 *', '上传附件限制(MB) *': '附件上傳限制（MB）*', '系统名称 *': '系統名稱 *', '系统版本号 *': '系統版本號 *', '网站名称 *': '網站名稱 *', '网站域名 *': '網站網域 *', '邮箱账户 *': '電子郵件帳號 *', '邮箱授权码 *': '電子郵件授權碼 *', '公众号appid *': '公眾號 AppID *', '公众号appsecret *': '公眾號 AppSecret *', '小程序appid *': '小程式 AppID *', '小程序appsecret *': '小程式 AppSecret *', 'SMTP地址 *': 'SMTP 位址 *', '协议端口号 *': '協定連接埠 *', '首页SEO标题 *': '首頁 SEO 標題 *',
+      '新增/修改文档/栏目时，地图会同步更新': '新增或修改文件／欄目時，網站地圖會同步更新。', 'xml地图文件使用，你输入的网站的网页内容更新的频率。': 'XML 網站地圖使用此設定，表示網站內容的更新頻率。', 'xml地图文件使用，所抓取页面在您网站的重要性，告诉搜索引擎抓取的优先级。数值越大，优先级越高。': 'XML 網站地圖使用此設定，表示頁面對網站的重要程度及搜尋引擎的抓取優先順序。數值越大，優先級越高。', '文档加TAG数量不能超过5000条；数值大对更新文档速度有影响': '文件與標籤總數不可超過 5000 筆；數值越大，更新地圖所需時間越長。', '标签页标题可在下方单独设置「标签标题」规则。': '標籤頁標題可在下方另外設定「標籤標題」規則。', '标题名称会带「标签：」前缀；第1页不显示页码。': '標題會加上「標籤：」前綴；第 1 頁不顯示頁碼。', '填写需要生成静态页面的文件夹名称，不能包含特殊字符，不能和根目录系统文件夹重名': '請填寫靜態頁面的輸出資料夾名稱。不可包含特殊字元，也不可與根目錄中的系統資料夾同名。', '页面将保存在': '頁面將儲存在', '全站会生成首页、全部栏目页、文档页和 tag 页；今天或一周内按文档发布时间筛选，更新首页、相关栏目页、命中文档页及关联 tag 页（一周内含今天和之前 6 天）。': '全站會產生首頁、所有欄目頁、文件頁與標籤頁；「今天」或「一週內」會依發布時間篩選文件，並更新首頁、相關欄目頁、符合條件的文件頁及關聯標籤頁（一週內包含今天及之前 6 天）。', '不选择栏目时生成全部栏目；勾选栏目后，只生成所选栏目及其子栏目。': '不選擇欄目時會產生所有欄目；勾選欄目後，只產生所選欄目及其子欄目。', '生成到站点根目录：sitemap.xml / sitemap.txt / sitemap.html': '產生於網站根目錄：sitemap.xml / sitemap.txt / sitemap.html',
+      '顶级目录名称/list_ID.html（': '頂層目錄名稱/list_ID.html（', '父级目录名称/子目录名称/（': '上層目錄名稱／子目錄名稱／（', '子目录名称/（': '子目錄名稱／（', '顶级目录名称/ID.html（': '頂層目錄名稱/ID.html（', '父级目录名称/子目录名称/ID.html（': '上層目錄名稱／子目錄名稱／ID.html（', '子目录名称/ID.html（': '子目錄名稱/ID.html（', 'tag/标签ID.html（': 'tag/標籤ID.html（', 'tag/标签ID/（': 'tag/標籤ID/（', '目录名称（': '目錄名稱（', '模型标识（': '模型識別碼（', '父目录（': '上層目錄（', '当前目录（': '目前目錄（', '父目录/当前目录/（': '上層目錄／目前目錄／（', '第N页': '第 N 頁', '，第2页：tag/92_p2.html': '，第 2 頁：tag/92_p2.html', '，第2页：tag/92/p2.html': '，第 2 頁：tag/92/p2.html', '：在【栏目管理】新增/编辑栏目可以自定义文件保存目录和列表命名规则': '：可在「欄目管理」新增或編輯欄目，自訂檔案儲存目錄及列表命名規則', '：在【栏目管理】新增/编辑栏目可以自定义文件保存目录和文档命名规则': '：可在「欄目管理」新增或編輯欄目，自訂檔案儲存目錄及文件命名規則',
+      '1、如果定义字段类型为下拉框、单选项、多选项时，默认值为必填项，多个值用竖线': '1、欄位類型為下拉選單、單選或多選時，預設值必填；多個值請以直線符號', '隔开。如:': '分隔。例如：', '2、特殊符号会被过滤掉，比如：': '2、特殊符號會被過濾，例如：', '3、定义字段类型为多选项时，默认值最多为64项，超出则截取前64项': '3、欄位類型為多選時，預設值最多 64 項，超出部分會截斷。', '显示在发布页字段右侧的提示说明文字': '顯示於發布頁欄位右側的提示說明文字',
+      '关闭': '關閉', '1、如果定义字段类型为下拉框、单选项、多选项时，默认值为必填项，多个值用竖线 |': '1、欄位類型為下拉選單、單選或多選時，預設值必填；多個值請以直線符號 | 分隔。',
+      '单位：秒': '單位：秒', '点击跳转链接': '點擊跳轉連結', '分组名称': '分組名稱', '简短标题': '簡短標題', '截止日期': '截止日期', '开始日期': '開始日期', '扩展内容（支持 HTML 代码）': '擴充內容（支援 HTML 程式碼）', '媒体地址（视频/音频）': '媒體網址（影片／音訊）', '起始时间': '開始時間', '请输入备注': '請輸入備註', '请输入菜单/节点名称': '請輸入選單／節點名稱', '请输入菜单/节点URL，可空': '請輸入選單／節點 URL，可留空', '请输入等级描述，100字以内': '請輸入等級說明，100 字以內', '请输入端口': '請輸入連接埠', '请输入公安备案号': '請輸入公安備案號', '请输入节点标识': '請輸入節點識別碼', '请输入节点名称': '請輸入節點名稱', '请输入模块名称': '請輸入模組名稱', '请输入数字，越小越靠前': '請輸入數字，數值越小越靠前', '请输入文档标题': '請輸入文件標題', '请输入系统名称': '請輸入系統名稱', '输入关键字筛选，例如 home、user、set': '輸入關鍵字篩選，例如 home、user、set', '数字越大越靠前': '數字越大越靠前', '数字越小越靠前': '數字越小越靠前', '图片标题': '圖片標題', '网盘链接提取码': '網盤連結提取碼', '网站暂时关闭，维护中……': '網站暫時關閉，維護中……', '英文标识，取值时用它，例如 kefu_qq': '英文識別碼，讀取時使用，例如 kefu_qq', '直接粘贴 HTML 代码': '直接貼上 HTML 程式碼'
+    },
+    en: {
+      '基础内容': 'Basic content', '多语言': 'Languages',
+      '清缓存': 'Clear cache', '刷新': 'Refresh', '功能搜索': 'Search features', '全屏': 'Fullscreen',
+      '便签': 'Notes', '锁屏': 'Lock screen', '主题': 'Theme', '消息中心': 'Messages', '前台首页': 'Site homepage',
+      '基本资料': 'Profile', '修改密码': 'Change password', '退出': 'Log out', '概览': 'Overview', '菜单': 'Menu',
+      '系统': 'System', '工具': 'Tools', '基础': 'Basic', '会员': 'Members', '栏目': 'Categories', 'SEO': 'SEO', '留言': 'Messages', '插件': 'Plugins',
+      '备份数据': 'Back up data', '表单管理': 'Form management', '操作日志': 'Activity log',
+      '功能节点': 'Feature nodes', '钩子管理': 'Hook management', '广告/轮播': 'Ads / carousel', '还原数据': 'Restore data', '后台日志': 'Admin logs',
+      '留言管理': 'Message management', '模型管理': 'Model management', '权限角色': 'Roles',
+      '数据库备份': 'Database backup', '搜索关键字': 'Search keywords', '页面生成': 'Page generation', '用户等级': 'User levels', '友情链接': 'Friend links',
+      '自定义变量': 'Custom variables', 'AI创作': 'AI Writing', 'AI创作基础配置': 'AI Writing - Basic settings', 'AI创作模型配置': 'AI Writing - Model settings', 'AI创作首页': 'AI Writing - Home', 'URL配置': 'URL settings',
+      '关闭当前': 'Close current', '关闭其它': 'Close others', '关闭全部': 'Close all', '关闭': 'Close', '全部关闭': 'Close all', '切换语言': 'Change language',
+      '系统通知': 'System notifications', '您有未读留言': 'You have unread messages', '有 ': 'There are ', ' 个留言未处理': ' unprocessed messages', '暂无新通知': 'No new notifications',
+      '系统升级': 'System update', '发现系统新版本': 'A new version is available', '可升级到': 'Available version:', '点击查看并升级': 'Click to review and update', '，点击查看并升级': ', click to review and update',
+      'MiuCMS 版本升级': 'MiuCMS updates', '当前版本：': 'Current version:', '最新版本：': 'Latest version:', '发现可用增量升级：': 'Incremental update available:',
+      '升级包使用 RSA-SHA256 数字签名和 SHA-256 校验。每次只升级一个连续版本；执行前自动备份数据库和将要变更的程序文件，升级失败时尝试自动恢复。': 'Packages are verified with RSA-SHA256 signatures and SHA-256 hashes. Updates apply one consecutive version at a time. The database and affected files are backed up first, and recovery is attempted if an update fails.',
+      '当前没有可直接应用的下一版本升级包。': 'No next-step update is available for the current version.', '重新检查': 'Check again', '立即检查': 'Check now',
+      '确认系统升级': 'Confirm system update', '开始升级': 'Start update', '升级完成：': 'Update complete: ', '。备份保存在 ': '. Backup saved at ', '升级会短暂暂停前台、后台和接口请求，并自动备份数据库及将要替换的程序文件。确认开始升级吗？': 'The site, admin, and API will be briefly paused. The database and affected files will be backed up first. Start the update?',
+      '正在下载、验签并应用增量升级包，请勿关闭页面…': 'Downloading, verifying, and applying the update. Keep this page open…', '检查完成，正在刷新结果': 'Check complete. Refreshing results',
+      '检查失败，请稍后重试': 'Update check failed. Try again later', '检查请求失败，请稍后重试': 'Update check request failed. Try again later', '升级失败': 'Update failed',
+      '升级请求中断。若升级期间连接断开，系统会在下次打开升级页时尝试自动恢复。': 'The update request was interrupted. If the connection dropped during the update, recovery will be attempted the next time you open the update page.',
+      '搜索后台菜单（名称 / 地址）': 'Search admin menu (name / URL)', '没有找到相关菜单': 'No matching menu found',
+      '确认注销登录吗?': 'Are you sure you want to log out?', '警告': 'Warning', '本地便签': 'Local notes', '请输入管理员密码': 'Enter the administrator password',
+      '解锁成功': 'Unlocked', '密码不正确': 'Incorrect password', '请求失败，请重试': 'Request failed. Please try again.',
+      '水墨国风': 'Ink wash', '极夜科技': 'Midnight tech', '商务蓝': 'Business blue', '清新扁平': 'Fresh flat', '切换登录风格': 'Change login theme', '点击重新盖印': 'Click to stamp again',
+      '欢迎回来': 'Welcome back', '登录到管理系统，继续你的工作流。': 'Sign in to the admin console to continue.',
+      '用户名': 'Username', '密码': 'Password', '验证码': 'Verification code', '请输入用户名': 'Enter your username', '请输入密码': 'Enter your password',
+      '输入右侧字符': 'Enter the characters shown', '刷新验证码': 'Refresh verification code', '点击刷新验证码': 'Click to refresh the code',
+      '记住账号': 'Remember account', '记住我': 'Remember me', '保持登录': 'Keep me signed in', '忘记密码?': 'Forgot password?', '登 录': 'Sign in',
+      '立即登录': 'Sign in', '登录中...': 'Signing in...', '请填写完整的登录信息': 'Complete all sign-in fields.',
+      '登录成功，正在跳转...': 'Signed in. Redirecting...', '登录失败，请重试': 'Sign-in failed. Please try again.', '操作失败，请联系管理员': 'Operation failed. Contact the administrator.',
+      'MIUCMS 内容管理系统': 'MIUCMS Content Management System', '统一登录入口': 'Admin sign-in', '账号登录': 'Sign in',
+      '请使用管理员分配的账号信息登录': 'Use the account details provided by your administrator.', '效率办公，': 'Work efficiently, ', '从一次登录开始': 'starting with one sign-in',
+      '聚合内容、用户与数据分析，一站式管理你的站点生态。': 'Manage content, users, and analytics for your site in one place.',
+      '数据安全加密传输': 'Encrypted data transfer', '全链路操作审计': 'End-to-end activity auditing', '全站内容智能编排': 'Smart site-wide content management',
+      '欢迎回来，请登录你的工作台': 'Welcome back. Sign in to your workspace.', '建议使用 Chrome / Edge 访问': 'Chrome or Edge is recommended',
+      '米柚 CMS': 'MIUCMS', '米柚内容管理系统': 'MIUCMS Content Management System', '帐号登录 · 欢迎归来': 'Sign in · Welcome back',
+      '登录成功': 'Signed in', '显示密码': 'Show password', '确定': 'Confirm', '取消': 'Cancel', '搜索': 'Search', '查询': 'Search', '重置': 'Reset',
+      '添加': 'Add', '新增': 'Add', '编辑': 'Edit', '删除': 'Delete', '保存': 'Save', '提交': 'Submit', '返回': 'Back',
+      '保存配置': 'Save settings', '保存并新增': 'Save and add another', '添加文档': 'Add document', '编辑文档': 'Edit document', '发布文档': 'Publish document',
+      '文档管理': 'Document management', '栏目管理': 'Category management', '关键词管理': 'Keyword management', '插件管理': 'Plugin management', '系统设置': 'System settings',
+      '网站配置': 'Website settings', '基础配置': 'Basic settings', '全选': 'Select all', '批量删除': 'Delete selected', '批量操作': 'Bulk actions',
+      '查看': 'View', '复制': 'Copy', '清空': 'Clear', '筛选': 'Filter', '发布时间': 'Published at', '更新时间': 'Updated at',
+      '文档标题': 'Document title', '关键词': 'Keywords', '标签': 'Tags', '缩略图': 'Thumbnail', '内容详情': 'Content details', '返回列表': 'Back to list',
+      '请选择栏目': 'Select a category', '请选择分类': 'Select a category', '请输入': 'Please enter', '上传图片': 'Upload image', '选择文件': 'Choose file',
+      '基本设置': 'Basic settings', '基本配置': 'Basic settings', '高级设置': 'Advanced settings', '站点信息': 'Site information', '核心配置': 'Core settings', '邮箱配置': 'Email settings', '微信配置': 'WeChat settings', '附件管理': 'File management',
+      '网站首页': 'Website home', '后台首页': 'Admin home', '登录后台': 'Admin sign-in', '管理员': 'Administrator', '用户管理': 'User management',
+      '角色管理': 'Role management', '权限管理': 'Permission management', '文档列表': 'Documents', '文章列表': 'Articles', '内容分类': 'Content categories',
+      '标签管理': 'Tag management', '标签分组': 'Tag groups', '数据统计': 'Statistics', '模板管理': 'Template management', '文件管理': 'File management',
+      '访问统计': 'Traffic statistics', '近一年访问统计': 'Visits in the past year', '请启用网站统计插件后才会显示': 'Enable the Website Statistics plugin to see traffic data.',
+      '操作成功': 'Operation completed', '保存成功': 'Saved successfully', '添加成功': 'Added successfully', '删除成功': 'Deleted successfully', '更新成功': 'Updated successfully',
+      '请选择要操作的数据': 'Select the data to process', '请选择要删除的数据': 'Select the data to delete', '确定删除吗？': 'Are you sure you want to delete this?', '确定删除选中的数据吗？': 'Delete the selected data?',
+      '请输入名称': 'Enter a name', '请输入标题': 'Enter a title', '请输入关键词': 'Enter keywords', '请输入内容': 'Enter content', '请选择状态': 'Select a status',
+      '网站名称': 'Website name', '网站标题': 'Website title', '网站域名': 'Website domain', '创建时间': 'Created at', '排序': 'Order', '排序值': 'Sort order',
+      '请选择': 'Please select', '请选择日期': 'Select a date', '开始时间': 'Start time', '结束时间': 'End time', '暂无数据': 'No data',
+      '上一页': 'Previous', '下一页': 'Next', '首页': 'Home', '尾页': 'Last page', '共': 'Total', '条/页': 'per page',
+      '启用': 'Enabled', '禁用': 'Disabled', '是': 'Yes', '否': 'No', '状态': 'Status', '名称': 'Name', '标题': 'Title',
+      '内容': 'Content', '类型': 'Type', '分类': 'Category', '分组': 'Group', '时间': 'Time', '操作': 'Actions', '备注': 'Notes', '说明': 'Description',
+      '文件': 'File', '图片': 'Image', '视频': 'Video', '音频': 'Audio', '上传': 'Upload', '下载': 'Download', '预览': 'Preview',
+      '关闭当前页面': 'Close current tab', '关闭其他页面': 'Close other tabs', '关闭所有页面': 'Close all tabs',
+      '更多': 'More', '设置': 'Settings', '示例': 'Example', '待安装': 'Pending installation', '恢复': 'Restore', '浏览': 'Browse', '重载': 'Reload', '上一级': 'Parent folder',
+      '开启回复': 'Enable replies', '开启审核': 'Enable review', '关闭方式': 'Closure action', '开启': 'On', '必填': 'Required', '选填': 'Optional', '显示': 'Show', '隐藏': 'Hide',
+      '正常': 'Active', '待审核': 'Pending review', '不通过': 'Rejected', '通过': 'Approved', '已启用': 'Enabled', '已禁用': 'Disabled', '男': 'Male', '女': 'Female', '未分组': 'Ungrouped', '不关联': 'Not linked',
+      '备注信息': 'Notes', '变量类型': 'Variable type', '变量值': 'Variable value', '编辑管理员': 'Edit administrator', '编辑用户信息': 'Edit user information', '单页内容': 'Single-page content', '内容详情': 'Content details',
+      '插件标识': 'Plugin ID', '插件名称': 'Plugin name', '插件描述': 'Plugin description', '插件图标': 'Plugin icon', '插件类里写的方法名': 'Method name defined in the plugin class', '触发时机': 'Trigger', '钩子名': 'Hook name',
+      '作者官网': 'Author website', '版本号': 'Version', '版权信息': 'Copyright', '帮助说明': 'Help', '测试结果': 'Test results', '查看更多日志': 'View more logs', '操作系统分布 近 7 天': 'Operating systems (last 7 days)',
+      '步骤 1：建目录和主类（必须）': 'Step 1: Create the directory and main class (required)', '步骤 2：加配置项（可选）': 'Step 2: Add configuration fields (optional)', '步骤 3：加后台菜单和页面（可选）': 'Step 3: Add admin menus and pages (optional)',
+      '步骤 4：加前台页面（可选）': 'Step 4: Add frontend pages (optional)', '步骤 5：加模板标签（可选）': 'Step 5: Add template tags (optional)', '步骤 6：监听钩子（可选）': 'Step 6: Listen for hooks (optional)',
+      '步骤 7：建自己的数据表（可选）': 'Step 7: Create plugin tables (optional)', '步骤 8：安装并测试': 'Step 8: Install and test', '一、最快上手': '1. Quick start', '二、从零手写一个插件（8 步）': '2. Build a plugin from scratch (8 steps)',
+      '三、钩子清单（共 个）': '3. Hook list ( total)', '四、常用 API 速查': '4. Common API reference', '五、命名与约定（必看）': '5. Naming conventions (read first)', '六、常见问题排错': '6. Troubleshooting', '七、参考示例': '7. Examples',
+      '百度推送': 'Baidu push', '百度推送token': 'Baidu push token', '百度搜索资源平台': 'Baidu Search Resource Platform', '更新频率': 'Update frequency', '优先级别': 'Priority', '生成数量': 'Items per batch', '列表页': 'List pages', '内容页': 'Content pages', '首页': 'Homepage',
+      '经常': 'Always', '每小时': 'Hourly', '每天': 'Daily', '每周': 'Weekly', '每月': 'Monthly', '每年': 'Yearly', '从不': 'Never', '标签标题': 'Tag title', '标签页面路径': 'Tag page path', '标题间连接符': 'Title separator',
+      '栏目标题': 'Category title', '栏目别名': 'Category alias', '栏目模板': 'Category template', '栏目图片': 'Category image', '栏目URL': 'Category URL', '栏目页面路径': 'Category page path', '内容标题': 'Content title', '内容模板': 'Content template', '内容模型': 'Content model', '内容摘要': 'Content summary', '文档页面路径': 'Document page path', '文档URL': 'Document URL', '文档属性': 'Document attributes',
+      '表单名称': 'Form name', '表单说明': 'Form description', '字段名称': 'Field name', '字段标识': 'Field ID', '字段类型': 'Field type', '可选值列表': 'Options', '是否必填': 'Required', '提示文字': 'Hint text', '验证格式': 'Validation format', '默认值': 'Default value', '默认单位': 'Default unit', '最大长度': 'Maximum length', '列表显示': 'Show in list',
+      '生成栏目页': 'Generate category pages', '生成文档页': 'Generate document pages', '生成tag页': 'Generate tag pages', '生成首页': 'Generate homepage', '生成Sitemap': 'Generate Sitemap', '一键生成': 'Generate all', '地图类型': 'Sitemap types', '手工更新': 'Update manually', '自动更新': 'Automatic updates', '过滤规则': 'Filter rules', '过滤外部链接': 'Exclude external links', '过滤隐藏栏目': 'Exclude hidden categories',
+      '登录超时时间': 'Login timeout', '登录回调地址': 'Login callback URL', '登录账号': 'Login account', '登录密码': 'Login password', '确认密码': 'Confirm password', '重复密码': 'Repeat password', '个人简介': 'Profile', '手机号码': 'Mobile number', '电子邮箱': 'Email address', '真实姓名': 'Full name', '用户昵称': 'Nickname', '用户等级': 'User level', '用户角色': 'User role', '用户状态': 'User status', '注册开始时间': 'Registration start', '注册结束时间': 'Registration end', '截止时间': 'End date',
+      '公安备案号': 'Public security registration number', 'ICP备案号': 'ICP filing number', '网站图标': 'Favicon', '网站LOGO': 'Website logo', '系统版本号': 'System version', '系统名称': 'System name', '系统文本编辑器': 'System text editor','缓存方式': 'Cache method', '文件缓存': 'File cache', 'Redis 缓存': 'Redis cache', '回收站开关': 'Recycle bin', '是否删除非站内链接': 'Remove external links', '远程图片本地化': 'Localize remote images', '域名白名单': 'Domain allowlist',
+      '首页SEO标题': 'Homepage SEO title', '首页SEO关键词': 'Homepage SEO keywords', '首页SEO描述': 'Homepage SEO description', 'SEO标题': 'SEO title', 'SEO关键词': 'SEO keywords', 'SEO关键字': 'SEO keywords', 'SEO描述': 'SEO description', '动态URL': 'Dynamic URL', '伪静态化': 'Pretty URLs', '去除index.php': 'Remove index.php',
+      'Api测试登录': 'API test login', 'Api测试注册': 'API test registration', 'Token测试': 'Token test', 'Token过期时间': 'Token expiration', 'Token签发组织': 'Token issuer organization', 'Token签发作者': 'Token issuer', '公众号appid': 'Official account AppID', '公众号appsecret': 'Official account AppSecret', '小程序appid': 'Mini Program AppID', '小程序appsecret': 'Mini Program AppSecret',
+      '请输入版本号': 'Enter a version', '请输入版权信息': 'Enter copyright information', '请输入百度推送 token': 'Enter the Baidu push token', '请输入登录账号': 'Enter a login account', '请输入密码': 'Enter a password', '请再次输入密码': 'Re-enter the password', '请输入角色名称': 'Enter a role name', '请输入操作日志名称': 'Enter an activity name', '请输入过期时间': 'Enter an expiration date', '请输入手机': 'Enter a mobile number', '请输入电子邮箱': 'Enter an email address', '请输入个人简介': 'Enter a profile', '请输入用户昵称': 'Enter a nickname', '请输入真实姓名': 'Enter a full name',
+      '请输入关键字': 'Enter a keyword', '请输入关键字名称': 'Enter a keyword name', '请输入分组名称': 'Enter a group name', '请输入栏目标题': 'Enter a category title', '请输入模型标识': 'Enter a model ID', '请输入模型名称': 'Enter a model name', '请输入排序，数字': 'Enter a sort order', '请输入排序，数字，越大越靠前': 'Enter a sort order; larger numbers appear first', '请输入字段标识': 'Enter a field ID', '请输入字段名称': 'Enter a field name', '请输入整数': 'Enter an integer', '请输入内容': 'Enter content', '请选择标签': 'Select tags',
+      '必须是拼音或数字，以字母开头。留空则系统根据栏目标题拼音生成': 'Use pinyin or numbers and start with a letter. Leave blank to generate it from the category title.', '必须以 http:// 或 https:// 开头': 'Must start with http:// or https://', '仅支持字母、数字和下划线，不能重复': 'Use letters, numbers, and underscores; value must be unique', '一行代表一个可选值': 'Enter one option per line', '留空就是没有变量值': 'Leave blank for no variable value', '留空默认根目录': 'Leave blank to use the root directory', '留空则使用默认入口': 'Leave blank to use the default entry point', '一般不超过200个字': 'Usually no more than 200 characters', '建议100个字以内': 'Recommended: 100 characters or fewer', '建议80个字以内': 'Recommended: 80 characters or fewer',
+      '输入右侧字符': 'Enter the characters on the right', '点击刷新验证码': 'Click to refresh the verification code', '点击重新盖印': 'Click to stamp again', '按留言内容搜索': 'Search message content', 'ID/标题/标识/备注': 'ID / title / identifier / notes', 'ID/名称': 'ID / name', '昵称/操作数据id/操作描述': 'Nickname / record ID / action description', '昵称/真实姓名/手机号': 'Nickname / full name / mobile', '名称/备注': 'Name / notes', '字段标识 / 字段名称': 'Field ID / field name', '登录账户/用户名/手机号码': 'Account / username / mobile number',
+      '百度推送 开启后，发布或编辑文档时会自动将文档地址推送到百度搜索资源平台；请填写下方 token，未配置时会跳过推送。': 'When enabled, document URLs are sent to Baidu Search Resource Platform after publishing or editing. Enter the token below; pushing is skipped when it is not configured.',
+      '百度推送token 在 百度搜索资源平台 获取 token 并填入；也可以执行 php think baidu-push 手动或定时推送。': 'Get a token from Baidu Search Resource Platform and enter it here. You can also run php think baidu-push for manual or scheduled pushes.',
+      '帮助说明 选填，支持 Markdown；生成后会显示在插件配置页的帮助说明中。': 'Optional. Markdown is supported. The help text appears on the plugin configuration page after creation.',
+      '点「选择图片」打开文件管理器，可一次选多张；按住图片下方的「按住拖动排序」可以调换顺序，顺序就是轮播顺序': 'Click “Choose images” to open the file manager and select multiple images. Drag an image by its “Drag to reorder” label to change the carousel order.',
+      '安装/卸载 SQL': 'Install / uninstall SQL', '备份删除': 'Delete backup', '分隔符': 'Delimiter', '分卷总数': 'Number of volumes', '文件格式': 'File format', '文件名称': 'File name', '文件总大小': 'Total file size', '下载备份(分卷 )': 'Download backup (volumes)', '清除不完整的备份': 'Remove incomplete backups', '数据还原': 'Restore data',
+      '选择文件': 'Choose file', '选择上传': 'Upload', '点击查看': 'Click to view', '点击上传或输入附件地址': 'Click to upload or enter an attachment URL', '点击上传或输入视频/音频地址': 'Click to upload or enter a video/audio URL', '点击上传或输入图片地址': 'Click to upload or enter an image URL', '点击上传或输入ico地址': 'Click to upload or enter an ICO URL', '点右侧按钮选择图标': 'Click the button on the right to choose an icon', '可空，点右侧按钮选择': 'Optional. Click the button on the right to choose', '标题颜色': 'Title color', '当前域名，不可编辑': 'Current domain; cannot be edited',
+      '点击确定按钮将立即卸载插件，以及清除插件数据！': 'Confirming will immediately uninstall the plugin and clear its data.', '插件文件已经丢失，只会删掉数据库记录和它注册的后台菜单。': 'The plugin files are missing. Only its database record and registered admin menus will be removed.', '回收站里的全部栏目都会被彻底删除，此操作不可恢复！': 'All categories in the recycle bin will be permanently deleted. This cannot be undone.', '回收站里的全部文档都会被彻底删除，此操作不可恢复！': 'All documents in the recycle bin will be permanently deleted. This cannot be undone.', '该备份不是完整备份，请删除重新备份': 'This backup is incomplete. Delete it and create a new backup.', '在': 'Visit ', '获取 token 并填入；也可以执行': ' to get a token and enter it here. You can also run', '手动或定时推送。': 'for manual or scheduled pushes.',
+      '新增/修改文档/栏目时，地图会同步更新': 'The sitemap updates when documents or categories are added or edited.', 'xml地图文件使用，你输入的网站的网页内容更新的频率。': 'For XML sitemaps: how often the pages on your site are updated.', 'xml地图文件使用，所抓取页面在您网站的重要性，告诉搜索引擎抓取的优先级。数值越大，优先级越高。': 'For XML sitemaps: page importance and crawl priority. Higher values indicate higher priority.', '文档加TAG数量不能超过5000条；数值大对更新文档速度有影响': 'Documents and tags cannot exceed 5,000 items. Higher values slow down updates.', '标签页标题可在下方单独设置「标签标题」规则。': 'Configure the tag page title rule separately below.', '标题名称会带「标签：」前缀；第1页不显示页码。': 'Titles use the “Tag:” prefix. The first page has no page number.', '填写需要生成静态页面的文件夹名称，不能包含特殊字符，不能和根目录系统文件夹重名': 'Enter the folder for generated pages. Do not use special characters or a system folder name.', '页面将保存在': 'Pages will be saved in', '全站会生成首页、全部栏目页、文档页和 tag 页；今天或一周内按文档发布时间筛选，更新首页、相关栏目页、命中文档页及关联 tag 页（一周内含今天和之前 6 天）。': 'Generates the homepage, all category, document, and tag pages. “Today” and “Past week” filter by publish date and update the homepage, related categories, matching documents, and linked tags. Past week includes today and the previous six days.', '不选择栏目时生成全部栏目；勾选栏目后，只生成所选栏目及其子栏目。': 'With no category selected, all categories are generated. Otherwise, only selected categories and their children are generated.', '生成到站点根目录：sitemap.xml / sitemap.txt / sitemap.html': 'Generated in the site root: sitemap.xml / sitemap.txt / sitemap.html',
+      '请输入完整的URL网址（包含http或https），设置后访问该条信息将直接跳转到设置的链接': 'Enter a complete URL including http or https. Visitors will be redirected to this URL when they open this item.', '一般不超过200个字，不填写时系统自动提取正文的前200个字符': 'Usually no more than 200 characters. Leave blank to use the first 200 characters of the content.', '建议80个字以内，不填写则使用 内容标题_栏目名称_网站名称 在前端展示': 'Recommended: 80 characters or fewer. Leave blank to show Content title_Category name_Site name on the frontend.', '建议100个字以内，多个关键词请用英文逗号（,）隔开，建议3到5个关键词。': 'Recommended: 100 characters or fewer. Separate 3 to 5 keywords with English commas.', '留空时前台显示默认名称（当前管理员昵称）。点击设置可修改默认名称': 'Leave blank to show the default name (the current administrator nickname). Click Settings to change it.', '转载自哪里。点击设置可修改默认名称': 'Enter the original source. Click Settings to change the default name.', '转载出处链接。可留空': 'Enter the source URL, or leave blank.', '文章点击数，发布文档时随机。可在后台-基础-核心配置里关闭': 'Article views are randomized when a document is published. Disable this under Admin > Basic > Core settings.', '留空系统获取当前时间': 'Leave blank to use the current time.',
+      '新增/修改文档/栏目时，地图会同步更新': 'The sitemap updates automatically when a document or category is added or changed.', 'xml地图文件使用，你输入的网站的网页内容更新的频率。': 'Used by the XML sitemap to describe how often your site content changes.', 'xml地图文件使用，所抓取页面在您网站的重要性，告诉搜索引擎抓取的优先级。数值越大，优先级越高。': 'Used by the XML sitemap to indicate page importance and crawl priority. Higher values mean higher priority.', '文档加TAG数量不能超过5000条；数值大对更新文档速度有影响': 'Documents and tags must total no more than 5,000. Larger values make sitemap updates slower.', '标签页标题可在下方单独设置「标签标题」规则。': 'Set the tag page title rule separately below.', '标题名称会带「标签：」前缀；第1页不显示页码。': 'Titles use the “Tag:” prefix. The first page does not show a page number.', '填写需要生成静态页面的文件夹名称，不能包含特殊字符，不能和根目录系统文件夹重名': 'Enter the folder name for generated pages. Do not use special characters or a system folder name from the site root.', '页面将保存在': 'Pages will be saved in', '全站会生成首页、全部栏目页、文档页和 tag 页；今天或一周内按文档发布时间筛选，更新首页、相关栏目页、命中文档页及关联 tag 页（一周内含今天和之前 6 天）。': 'Generates the homepage, all category pages, document pages, and tag pages. “Today” or “Past week” filters by publish date and updates the homepage, related categories, matching documents, and linked tags. The past week includes today and the previous six days.', '不选择栏目时生成全部栏目；勾选栏目后，只生成所选栏目及其子栏目。': 'If no category is selected, all categories are generated. Otherwise, only the selected categories and their children are generated.', '生成到站点根目录：sitemap.xml / sitemap.txt / sitemap.html': 'Generated in the site root: sitemap.xml / sitemap.txt / sitemap.html',
+      '字母开头，只含字母/数字/下划线；会生成目录 plugins/标识/，也是插件的唯一标识。不能用系统保留词（PHP 关键字如 list/class/array、框架目录名、应用名等）': 'Start with a letter and use only letters, numbers, or underscores. This becomes the unique plugin ID and the plugins/ID/ directory. Do not use reserved names such as PHP keywords (list/class/array), framework directories, or application names.', '后台插件列表里显示的名称': 'Name displayed in the admin plugin list.', '插件版本号，自己维护': 'Plugin version, maintained by the developer.', '选填；需填写完整的 http:// 或 https:// 网址，生成后写入 Plugin.php 的 $authorUrl 属性': 'Optional. Enter a complete http:// or https:// URL. It is written to the $authorUrl property in Plugin.php.', '加后台菜单时用这个图标；只能点「选择图标」挑，不能手填': 'Used for the admin menu. Choose an icon with “Choose icon”; manual entry is not supported.', '勾选要一起生成的文件；生成完去「插件管理」列表点「安装」': 'Select the files to generate. Then open the plugin list and click Install.',
+      '百度推送 开启后，发布或编辑文档时会自动将文档地址推送到百度搜索资源平台；请填写下方 token，未配置时会跳过推送。': 'When enabled, document URLs are sent to Baidu Search Resource Platform after publishing or editing. Enter the token below; pushing is skipped when it is not configured.',
+      '网站关闭时跳转的目标网址，必须以 http:// 或 https:// 开头。': 'The redirect URL shown while the site is closed. It must start with http:// or https://.', '网站关闭时显示的提示文字。': 'The message shown while the site is closed.','请输入网站平台名称': 'Enter the site platform name', '请输入网站描述': 'Enter a site description', '请输入网站链接': 'Enter a website URL', '请输入网站名称': 'Enter a site name', '请输入签发组织': 'Enter the issuer organization', '请输入签发作者': 'Enter the issuer', '请输入上传附件限制': 'Enter the upload size limit', '请输入ICP备案号': 'Enter the ICP filing number', '请输入appID': 'Enter the AppID', '请输入secrect': 'Enter the secret', '请输入secretey': 'Enter the secret key', '请输入SEO标题': 'Enter the SEO title', '请输入SMTP服务器地址': 'Enter the SMTP server address', '请输入Token': 'Enter the token', '请输入小程序appid': 'Enter the Mini Program AppID', '请输入小程序appsecret': 'Enter the Mini Program AppSecret', '请输入微信登录回调地址': 'Enter the WeChat login callback URL', '请输入微信支付回调地址': 'Enter the WeChat Pay callback URL', '请输入微信支付商户号': 'Enter the WeChat Pay merchant ID', '请输入微信支付证书路径': 'Enter the WeChat Pay certificate path', '请输入微信支付API密钥': 'Enter the WeChat Pay API key', '请输入邮箱授权码': 'Enter the email authorization code', '请输入邮箱用户名': 'Enter the email account', '请输入要显示的发送者': 'Enter the sender display name', '请输入要显示的发送者邮箱': 'Enter the sender email address',
+      '按留言内容搜索': 'Search message content', '多个关键词用“,”隔开': 'Separate multiple keywords with commas', '如 我的插件': 'For example: MyPlugin', '如 myplugin': 'For example: myplugin', '选填，例如 https://example.com': 'Optional, e.g. https://example.com', '后台显示用的名字，例如 客服QQ': 'Name shown in the admin area, e.g. Support QQ', '填这个变量时的说明，会显示成问号提示': 'Help text shown in a tooltip when filling in this variable', '这个表单是干什么用的，方便自己以后认（前台不显示）': 'Describe this form for your reference. This is not shown on the frontend.', '例如：您的姓名、手机号码': 'For example: name, mobile number', '例如：预约参观、联系我们': 'For example: book a visit, contact us', '比如：元、个、件等等': 'For example: yuan, pieces, items', '前台模板': 'Frontend template', '前台模板 ( )': 'Frontend template ( )', '模板根目录': 'Template root directory', '模板页面': 'Template page', '页面保存目录': 'Page output directory', '模板里靠它调广告，如 INDEX_SLIDE': 'Use this identifier to call ads in templates, e.g. INDEX_SLIDE', '模板标签': 'Template tags', '前台调用': 'Frontend usage', '后台管理路径': 'Admin path', '富文本编辑器(TinyMCE)': 'Rich text editor (TinyMCE)', 'MarkDown编辑器': 'Markdown editor',
+      '快捷导航': 'Quick links', '统计': 'Statistics', '开发文档': 'Developer guide', '快捷键': 'Keyboard shortcuts', '保存所有': 'Save all', '全部保存': 'Save all', '立即提交': 'Submit now', '编辑删除': 'Edit / delete', '标签名称': 'Tag name', '标签标题 标签名称': 'Tag title (tag name)', '生成静态路径设置': 'Static path settings', '伪静态URL设置': 'Pretty URL settings', '标题规则设置': 'Title rules', '今天': 'Today', '今日': 'Today', '一周内': 'Past week',
+      '广告': 'Ads', '广告类型': 'Ad type', '广告内容': 'Ad content', '轮播图': 'Carousel', '轮播图片': 'Carousel images', '媒体地址': 'Media URL', '多媒体': 'Media', '大小': 'Size', '短标题': 'Short title', '点击数': 'Views', '文章来源': 'Article source', '来源链接': 'Source URL', '外链地址': 'External URL', '跳转链接': 'Redirect URL', '随机数范围': 'Random number range', '提取码': 'Extraction code', '下载链接': 'Download URL', '下载按钮名称': 'Download button label', '图片名称': 'Image name', '头像': 'Avatar', '阅读权限': 'Reading access', '关键字': 'Keyword', '关键字名称': 'Keyword name', '关联栏目': 'Linked category', '栏目名称': 'Category name', '表单名称': 'Form name', '字段类型': 'Field type', '字段名称': 'Field name', '字段标识': 'Field ID', '用途': 'Purpose', '写法': 'Syntax', '生成内容': 'Generated content', '新建/编辑模型': 'Add / edit model', '增加节点': 'Add node', '添加/编辑字段': 'Add / edit field', '新增管理员': 'Add administrator', '确认提交': 'Confirm submission', '确认密码': 'Confirm password', '确认密码 *': 'Confirm password *', 'SEO优化': 'SEO', '更多参数': 'More options', '常规选项': 'General options', '高级选项': 'Advanced options', '后台日志 更多': 'Admin logs (more)', '留言详情 ·': 'Message details ·',   '首页 SEO 标题': 'Homepage SEO title', '首页SEO标题 *': 'Homepage SEO title *', '首页SEO关键词': 'Homepage SEO keywords', '首页SEO描述': 'Homepage SEO description', '列表页 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0': 'List pages 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0', '内容页 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0': 'Content pages 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0', '优先级别 首页 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0': 'Priority: homepage 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0',
+      '请填写完整的登录信息': 'Complete all sign-in fields', '请填写完整的登录信息后再提交': 'Complete all sign-in fields before submitting', '保存并新增': 'Save and add another', '编辑管理员': 'Edit administrator', '添加字段': 'Add field', '管理字段': 'Manage fields', '字段管理': 'Field management', '插件配置': 'Plugin settings', '配置': 'Settings', '此插件没有配置项': 'This plugin has no settings', '配置 此插件没有配置项': 'Settings: this plugin has no options', '变量类型 *': 'Variable type *', '标识 *': 'Identifier *', '标题 *': 'Title *', '表单名称 *': 'Form name *', '插件标识 *': 'Plugin ID *', '插件名称 *': 'Plugin name *', '登录回调地址 *': 'Login callback URL *', '登录密码 *': 'Login password *', '登录账号 *': 'Login account *', '分组名称 *': 'Group name *', '父级栏目 *': 'Parent category *', '发送人 *': 'Sender *', '关键字名称 *': 'Keyword name *', '广告类型 *': 'Ad type *', '栏目 *': 'Category *', '栏目标题 *': 'Category title *', '模型标识 *': 'Model ID *', '模型名称 *': 'Model name *', '内容模型 *': 'Content model *', '用户角色 *': 'User role *', '用户名 *': 'Username *', '用户昵称 *': 'Nickname *', '用户等级 *': 'User level *', '用户状态 *': 'User status *', '手机号码 *': 'Mobile number *', '状态 *': 'Status *', '字段标识 *': 'Field ID *', '字段类型 *': 'Field type *', '字段名称 *': 'Field name *', '上传附件限制(MB) *': 'Upload size limit (MB) *', '系统名称 *': 'System name *', '系统版本号 *': 'System version *', '网站名称 *': 'Website name *', '网站域名 *': 'Website domain *', '邮箱账户 *': 'Email account *', '邮箱授权码 *': 'Email authorization code *', '公众号appid *': 'Official account AppID *', '公众号appsecret *': 'Official account AppSecret *', '小程序appid *': 'Mini Program AppID *', '小程序appsecret *': 'Mini Program AppSecret *', 'SMTP地址 *': 'SMTP address *', '协议端口号 *': 'Protocol port *',
+      '新增/修改文档/栏目时，地图会同步更新': 'The sitemap updates automatically when a document or category is added or changed.', 'xml地图文件使用，你输入的网站的网页内容更新的频率。': 'Used by the XML sitemap to describe how often your site content changes.', 'xml地图文件使用，所抓取页面在您网站的重要性，告诉搜索引擎抓取的优先级。数值越大，优先级越高。': 'Used by the XML sitemap to indicate page importance and crawl priority. Higher values mean higher priority.', '文档加TAG数量不能超过5000条；数值大对更新文档速度有影响': 'Documents and tags must total no more than 5,000. Larger values make sitemap updates slower.', '标签页标题可在下方单独设置「标签标题」规则。': 'Set the tag page title rule separately below.', '标题名称会带「标签：」前缀；第1页不显示页码。': 'Titles use the “Tag:” prefix. The first page does not show a page number.', '填写需要生成静态页面的文件夹名称，不能包含特殊字符，不能和根目录系统文件夹重名': 'Enter the folder name for generated pages. Do not use special characters or a system folder name from the site root.', '页面将保存在': 'Pages will be saved in', '全站会生成首页、全部栏目页、文档页和 tag 页；今天或一周内按文档发布时间筛选，更新首页、相关栏目页、命中文档页及关联 tag 页（一周内含今天和之前 6 天）。': 'Generates the homepage, all category pages, document pages, and tag pages. “Today” or “Past week” filters by publish date and updates the homepage, related categories, matching documents, and linked tags. The past week includes today and the previous six days.', '不选择栏目时生成全部栏目；勾选栏目后，只生成所选栏目及其子栏目。': 'If no category is selected, all categories are generated. Otherwise, only the selected categories and their children are generated.', '生成到站点根目录：sitemap.xml / sitemap.txt / sitemap.html': 'Generated in the site root: sitemap.xml / sitemap.txt / sitemap.html',
+      '顶级目录名称/list_ID.html（': 'Top-level directory/list_ID.html (', '父级目录名称/子目录名称/（': 'Parent directory/child directory/ (', '子目录名称/（': 'Child directory/ (', '顶级目录名称/ID.html（': 'Top-level directory/ID.html (', '父级目录名称/子目录名称/ID.html（': 'Parent directory/child directory/ID.html (', '子目录名称/ID.html（': 'Child directory/ID.html (', 'tag/标签ID.html（': 'tag/tag ID.html (', 'tag/标签ID/（': 'tag/tag ID/ (', '目录名称（': 'Directory name (', '模型标识（': 'Model ID (', '父目录（': 'Parent directory (', '当前目录（': 'Current directory (', '父目录/当前目录/（': 'Parent/current directory (', '第N页': 'Page N', '，第2页：tag/92_p2.html': ', page 2: tag/92_p2.html', '，第2页：tag/92/p2.html': ', page 2: tag/92/p2.html', '：在【栏目管理】新增/编辑栏目可以自定义文件保存目录和列表命名规则': ': Use Category management to set a custom output directory and list naming rule when adding or editing a category.', '：在【栏目管理】新增/编辑栏目可以自定义文件保存目录和文档命名规则': ': Use Category management to set a custom output directory and document naming rule when adding or editing a category.',
+      '1、如果定义字段类型为下拉框、单选项、多选项时，默认值为必填项，多个值用竖线': '1. A default is required for dropdown, radio, and checkbox fields. Separate values with a vertical bar.', '隔开。如:': ' to separate them. For example: ', '2、特殊符号会被过滤掉，比如：': '2. Special characters are filtered, including: ', '3、定义字段类型为多选项时，默认值最多为64项，超出则截取前64项': '3. Checkbox defaults support up to 64 values; extra values are truncated.', '显示在发布页字段右侧的提示说明文字': 'Help text shown next to this field on the publishing page',
+      '1、如果定义字段类型为下拉框、单选项、多选项时，默认值为必填项，多个值用竖线 |': '1. A default is required for dropdown, radio, and checkbox fields. Separate multiple values with a vertical bar (|).',
+      '单位：秒': 'Unit: seconds', '点击跳转链接': 'Click to open the link', '分组名称': 'Group name', '简短标题': 'Short title', '截止日期': 'End date', '开始日期': 'Start date', '扩展内容（支持 HTML 代码）': 'Extended content (HTML supported)', '媒体地址（视频/音频）': 'Media URL (video/audio)', '起始时间': 'Start time', '请输入备注': 'Enter notes', '请输入菜单/节点名称': 'Enter a menu/node name', '请输入菜单/节点URL，可空': 'Enter a menu/node URL, or leave blank', '请输入等级描述，100字以内': 'Enter a level description, up to 100 characters', '请输入端口': 'Enter a port', '请输入公安备案号': 'Enter the public security registration number', '请输入节点标识': 'Enter a node ID', '请输入节点名称': 'Enter a node name', '请输入模块名称': 'Enter a module name', '请输入数字，越小越靠前': 'Enter a number; smaller values appear first', '请输入文档标题': 'Enter a document title', '请输入系统名称': 'Enter a system name', '输入关键字筛选，例如 home、user、set': 'Filter by keyword, e.g. home, user, or set', '数字越大越靠前': 'Larger numbers appear first', '数字越小越靠前': 'Smaller numbers appear first', '图片标题': 'Image title', '网盘链接提取码': 'Cloud drive extraction code', '网站暂时关闭，维护中……': 'The website is temporarily closed for maintenance.', '英文标识，取值时用它，例如 kefu_qq': 'Use this English identifier when retrieving the value, e.g. kefu_qq', '直接粘贴 HTML 代码': 'Paste HTML code directly'
+    }
+  };
+
+  // 快捷入口、系统信息及后台操作按钮用到的补充文案。
+  Object.assign(DICT['zh-HK'], {
+    '新增栏目': '新增欄目', '展开': '展開', '回收站': '回收站', 'SEO设置': 'SEO設定', '文件管理器': '檔案管理器',
+    '系统信息': '系統資訊', '提醒：': '提示：', '发现app目录下的install文件夹没删除，为了系统的安全,请手动去删除。': 'app 目錄下的 install 資料夾尚未刪除，為了系統安全，請手動刪除。',
+    '服务器系统': '伺服器系統', 'PHP版本': 'PHP 版本', '上传附件限制': '附件上傳限制', '执行超时时间': '執行逾時時間', '米柚CMS版本': '米柚 CMS 版本', 'ThinkPHP版本': 'ThinkPHP 版本', 'Layui版本': 'Layui 版本', 'BUG反馈': '錯誤回報', 'QQ交流群': 'QQ 交流群', '不允许上传附件': '不允許上傳附件',
+    '系统用户': '系統使用者', '前台用户': '前台使用者', '文档': '文件', '附件': '附件', '线索': '線索',
+    '+ 分组管理': '+ 管理分組', '+ 添加表单': '+ 新增表單', '+ 添加分组': '+ 新增分組', '+ 添加关键字': '+ 新增關鍵字', '+ 添加管理员': '+ 新增管理員', '+ 添加广告': '+ 新增廣告', '+ 添加权限组': '+ 新增權限組', '+ 添加用户等级': '+ 新增使用者等級', '+ 添加友情链接': '+ 新增友情連結', '+ 添加字段': '+ 新增欄位', '+ 添加自定义变量': '+ 新增自訂變數', '+ 新建模型': '+ 新增模型', '+ 选择文件': '+ 選擇檔案', '+ 远程链接': '+ 遠端連結',
+    '安装': '安裝', '标记已读': '標記為已讀', '插件开发': '外掛開發', '插件首页': '外掛首頁', '查找上一个': '尋找上一個', '查找下一个': '尋找下一個', '彻底删除': '永久刪除', '导出': '匯出', '调用标签': '呼叫標籤', '调用示例': '呼叫範例', '回复': '回覆', '计数': '計數', '批量彻底删除': '批次永久刪除', '批量恢复': '批次還原', '批量审核': '批次審核', '批量移动': '批次移動', '清除记录': '清除記錄', '清空回收站': '清空回收站',
+    '上传插件包': '上傳外掛套件', '上传文件': '上傳檔案', '生成骨架': '產生外掛骨架', '数据备份': '資料庫備份', '数据表修复': '修復資料表', '数据表优化': '最佳化資料表', '添加菜单/节点': '新增選單／節點', '添加分组': '新增分組', '添加子菜单/节点': '新增子選單／節點', '添加子栏目': '新增子欄目', '跳转行': '跳至行', '下载备份(分卷)': '下載備份（分卷）', '详情': '詳情', '卸载': '解除安裝', '新建目录': '新增資料夾', '新建文件': '新增檔案', '选择': '選擇', '选择图标': '選擇圖示', '选择文档': '選擇文件', '移除': '移除', '移动至': '移動至', '重命名': '重新命名', '自建模型': '自訂模型', '系统模型': '系統模型', '模式': '模式', '单行模式': '單行模式', '多行模式': '多行模式', '单行模式（默认）': '單行模式（預設）', '未审核': '未審核', '开放浏览': '公開瀏覽', '普通会员': '一般會員', '替换': '取代', '全部替换': '全部取代'
+  });
+  Object.assign(DICT.en, {
+    '新增栏目': 'Add category', '展开': 'Expand', '回收站': 'Recycle bin', 'SEO设置': 'SEO settings', '文件管理器': 'File manager',
+    '系统信息': 'System information', '提醒：': 'Notice:', '发现app目录下的install文件夹没删除，为了系统的安全,请手动去删除。': 'The install folder under the app directory has not been removed. For system security, delete it manually.',
+    '服务器系统': 'Server OS', 'PHP版本': 'PHP version', '上传附件限制': 'Upload size limit', '执行超时时间': 'Max execution time', '米柚CMS版本': 'MIUCMS version', 'ThinkPHP版本': 'ThinkPHP version', 'Layui版本': 'Layui version', 'BUG反馈': 'Bug reports', 'QQ交流群': 'QQ group', '不允许上传附件': 'Attachments are not allowed',
+    '系统用户': 'Admin users', '前台用户': 'Frontend users', '文档': 'Documents', '附件': 'Attachments', '线索': 'Leads',
+    '+ 分组管理': '+ Manage groups', '+ 添加表单': '+ Add form', '+ 添加分组': '+ Add group', '+ 添加关键字': '+ Add keyword', '+ 添加管理员': '+ Add administrator', '+ 添加广告': '+ Add ad', '+ 添加权限组': '+ Add role', '+ 添加用户等级': '+ Add user level', '+ 添加友情链接': '+ Add friend link', '+ 添加字段': '+ Add field', '+ 添加自定义变量': '+ Add custom variable', '+ 新建模型': '+ Create model', '+ 选择文件': '+ Choose file', '+ 远程链接': '+ Remote link',
+    '安装': 'Install', '标记已读': 'Mark as read', '插件开发': 'Plugin development', '插件首页': 'Plugin home', '查找上一个': 'Find previous', '查找下一个': 'Find next', '彻底删除': 'Delete permanently', '导出': 'Export', '调用标签': 'Tag usage', '调用示例': 'Usage example', '回复': 'Reply', '计数': 'Count', '批量彻底删除': 'Permanently delete selected', '批量恢复': 'Restore selected', '批量审核': 'Review selected', '批量移动': 'Move selected', '清除记录': 'Clear records', '清空回收站': 'Empty recycle bin',
+    '上传插件包': 'Upload plugin package', '上传文件': 'Upload file', '生成骨架': 'Generate scaffold', '数据备份': 'Database backup', '数据表修复': 'Repair database tables', '数据表优化': 'Optimize database tables', '添加菜单/节点': 'Add menu/node', '添加分组': 'Add group', '添加子菜单/节点': 'Add submenu/node', '添加子栏目': 'Add subcategory', '跳转行': 'Go to line', '下载备份(分卷)': 'Download backup (part)', '详情': 'Details', '卸载': 'Uninstall', '新建目录': 'New folder', '新建文件': 'New file', '选择': 'Select', '选择图标': 'Select icon', '选择文档': 'Select document', '移除': 'Remove', '移动至': 'Move to', '重命名': 'Rename', '自建模型': 'Custom model', '系统模型': 'System model', '模式': 'Mode', '单行模式': 'Single-line mode', '多行模式': 'Multi-line mode', '单行模式（默认）': 'Single-line mode (default)', '未审核': 'Pending review', '开放浏览': 'Public', '普通会员': 'Members', '替换': 'Replace', '全部替换': 'Replace all'
+  });
+
+  Object.assign(DICT["zh-HK"], {
+    "站点自定义代码": "網站自訂程式碼",
+    "请输入完整的自定义代码": "請輸入完整的自訂程式碼",
+    "用于保存需要通过模板输出的 HTML 或 JavaScript，例如客服代码和广告代码。": "用於儲存需要透過範本輸出的 HTML 或 JavaScript，例如客服程式碼和廣告程式碼。",
+    "近 7 天": "近 7 天",
+    "近 30 天": "近 30 天",
+    "近 90 天": "近 90 天",
+    "今天": "今天",
+    "全部": "全部",
+    "新增": "新增",
+    "数据加载失败": "資料載入失敗",
+    "页面标题": "頁面標題",
+    "页面网址": "頁面網址",
+    "浏览量": "瀏覽量",
+    "访问时间": "訪問時間",
+    "IP 数": "IP 數",
+    "请求状态": "請求狀態",
+    "未知浏览器": "未知瀏覽器",
+    "未知系统": "未知系統",
+    "秒": "秒",
+    "分": "分鐘",
+    "小时": "小時",
+    "搜索引擎": "搜尋引擎",
+    "外部链接": "外部連結",
+    "设备类型": "裝置類型",
+    "桌面": "桌面電腦",
+    "手机": "手機",
+    "平板": "平板",
+    "已验证": "已驗證",
+    "HTTP 状态码": "HTTP 狀態碼",
+    "来源页面": "來源頁面",
+    "汇总方式": "彙總方式"
+  });
+  Object.assign(DICT["en"], {
+    "站点自定义代码": "Custom site code",
+    "请输入完整的自定义代码": "Enter the full custom code",
+    "用于保存需要通过模板输出的 HTML 或 JavaScript，例如客服代码和广告代码。": "Store HTML or JavaScript for use in templates, such as support or advertising scripts.",
+    "近 7 天": "Last 7 days",
+    "近 30 天": "Last 30 days",
+    "近 90 天": "Last 90 days",
+    "今天": "Today",
+    "全部": "All time",
+    "新增": "New",
+    "数据加载失败": "Failed to load data",
+    "页面标题": "Page title",
+    "页面网址": "Page URL",
+    "浏览量": "Page views",
+    "访问时间": "Visit time",
+    "IP 数": "IPs",
+    "请求状态": "HTTP status",
+    "未知浏览器": "Unknown browser",
+    "未知系统": "Unknown operating system",
+    "秒": "sec",
+    "分": "min",
+    "小时": "hr",
+    "搜索引擎": "Search engine",
+    "外部链接": "External referral",
+    "设备类型": "Device type",
+    "桌面": "Desktop",
+    "手机": "Phone",
+    "平板": "Tablet",
+    "已验证": "Verified",
+    "HTTP 状态码": "HTTP status",
+    "来源页面": "Referring page",
+    "汇总方式": "Group by"
+  });
+
+  Object.assign(DICT['zh-HK'], { '解锁': '解鎖', '插入图片': '插入圖片', '插入视频': '插入影片' });
+  Object.assign(DICT.en, { '解锁': 'Unlock', '插入图片': 'Insert image', '插入视频': 'Insert video' });
+  Object.assign(DICT['zh-HK'], {
+    '最低 CMS 版本': '最低 CMS 版本', '不限': '不限', '版本不兼容': '版本不相容', 'CMS版本不兼容': 'CMS 版本不相容',
+    '当前 MiuCMS 版本过低，请升级后再安装。': '目前 MiuCMS 版本過低，請升級後再安裝。',
+    '插件声明的最低 CMS 版本格式无效，无法安装': '外掛宣告的最低 CMS 版本格式無效，無法安裝。',
+    '当前 MiuCMS 版本号无效，无法判断插件兼容性': '目前 MiuCMS 版本號無效，無法判斷外掛相容性。'
+  });
+  Object.assign(DICT.en, {
+    '最低 CMS 版本': 'Minimum CMS version', '不限': 'No minimum', '版本不兼容': 'Incompatible version', 'CMS版本不兼容': 'CMS version incompatible',
+    '当前 MiuCMS 版本过低，请升级后再安装。': 'The current MiuCMS version is too old. Upgrade it before installing this plugin.',
+    '插件声明的最低 CMS 版本格式无效，无法安装': 'The plugin declares an invalid minimum CMS version. Installation is blocked.',
+    '当前 MiuCMS 版本号无效，无法判断插件兼容性': 'The current MiuCMS version is invalid, so plugin compatibility cannot be checked.'
+  });
+
+  // 后台常见页面补充词条。
+  Object.assign(DICT['zh-HK'], {
+    '新窗口打开': '在新視窗開啟', '隐藏栏目': '隱藏欄目', '父级栏目': '上層欄目', '是否外部链接': '是否為外部連結',
+    '国际化': '國際化', '首页SEO信息': '首頁 SEO 資訊', '变量名称': '變數名稱',
+    '为当前模板': '為目前範本', '启用前台界面语言。勾选后会创建缺失的': '啟用前台介面語言。勾選後會建立缺少的',
+    '示例文件；已有语言文件不会覆盖。取消勾选只停用语言，不删除文件或翻译内容。简体中文固定为默认语言，始终勾选且不可修改。': '範例檔案；既有語言檔案不會覆寫。取消勾選只會停用語言，不會刪除檔案或翻譯內容。簡體中文固定為預設語言，永遠保持勾選且不可修改。',
+    '启用其他语言后，系统会使用一张通用内容翻译表；文档、栏目、标签编辑页的“多语言”页签用于填写翻译。未填写的字段回退到简体中文，停用语言不会删除已保存的翻译。': '啟用其他語言後，系統會使用一張共用內容翻譯表；文件、欄目、標籤編輯頁的「多語言」頁籤可用來填寫翻譯。未填寫的欄位會回退至簡體中文，停用語言不會刪除已儲存的翻譯。',
+    '提交时自动翻译': '送出時自動翻譯',
+    'AI翻译': 'AI 翻譯', '用于后台多语言自动翻译。': '用於後台多語言自動翻譯。', '插件帮助说明': '外掛說明',
+    '阿里云百炼 API Key': '阿里雲百煉 API Key', '业务空间 ID（北京地域）': '業務空間 ID（北京地域）', '模型调用': '模型呼叫',
+    '密钥不会回显；留空保存表示保留已有密钥，输入新值并保存会替换。': '密鑰不會回顯；留空儲存會保留現有密鑰，輸入新值並儲存會取代原密鑰。',
+    '请填写阿里云百炼 API Key': '請填寫阿里雲百煉 API Key', 'API Key 已配置，留空保存会保留原密钥': 'API Key 已設定，留空儲存會保留原密鑰',
+    '请输入阿里云百炼业务空间 ID': '請輸入阿里雲百煉業務空間 ID', 'Qwen-MT Flash 和 Qwen-MT-Uni 均通过该业务空间的北京地域接口调用。': 'Qwen-MT Flash 與 Qwen-MT-Uni 均透過此業務空間的北京地域介面呼叫。',
+    '普通文本、标题、SEO 和标签使用 Qwen-MT Flash；HTML/Markdown 正文及富文本自定义字段使用 Qwen-MT-Uni。': '一般文字、標題、SEO 與標籤使用 Qwen-MT Flash；HTML/Markdown 正文及富文字自訂欄位使用 Qwen-MT-Uni。',
+    '正在提交...': '正在送出...', '提交失败，请检查网络后重试。': '送出失敗，請檢查網路後重試。',
+    '提交等待超时，请先确认文档是否已保存，再决定是否重试。': '送出等待逾時，請先確認文件是否已儲存，再決定是否重試。',
+    '提交等待超时，请先确认内容是否已保存，再决定是否重试。': '送出等待逾時，請先確認內容是否已儲存，再決定是否重試。',
+    '开启自动翻译后，发布/编辑文档以及单页栏目“内容”提交时，会调用 AItranslation 插件翻译已启用语言中留空的字段，并保存到内容翻译表；已有译文和中文原文为空的字段会跳过。': '開啟自動翻譯後，發佈／編輯文件及單頁欄目「內容」送出時，會呼叫 AItranslation 外掛翻譯已啟用語言中的空白欄位，並儲存至內容翻譯表；已有譯文及簡體中文原文為空的欄位會略過。',
+    '需先安装并启用 AItranslation 插件，并在插件配置中填写阿里云百炼 API Key 和业务空间 ID。插件配置入口：后台“插件管理 → AItranslation → 配置”。': '請先安裝並啟用 AItranslation 外掛，並在外掛設定中填寫阿里雲百煉 API Key 與業務空間 ID。設定入口：後台「外掛管理 → AItranslation → 設定」。',
+    'AItranslation 尚未就绪；请安装、启用并完成插件配置后再开启此项。': 'AItranslation 尚未就緒；請先安裝、啟用並完成外掛設定，再開啟此選項。',
+    '请先安装并启用 AItranslation 插件，在插件配置中填写 API Key 和业务空间 ID，再开启自动翻译': '請先安裝並啟用 AItranslation 外掛，在外掛設定中填寫 API Key 與業務空間 ID，再開啟自動翻譯。',
+    '本页设置项请在网站上线前设置好，运营中尽量不要修改这些选项，避免影响SEO。': '本頁設定請在網站上線前完成；網站營運期間請盡量不要修改，以免影響 SEO。',
+    'URL模式': 'URL 模式', '动态URL': '動態 URL', '伪静态化': '偽靜態化', '生成静态模式': '產生靜態模式', '生成静态路径设置': '靜態頁面路徑設定',
+    '自动定时任务定时生成sitemap': '定時自動產生 Sitemap', '自动定时任务定时提交到百度搜索资源平台': '定時自動提交至百度搜尋資源平台',
+    'Sitemap设置': 'Sitemap 設定', 'xml地图': 'XML 地圖', 'txt地图': 'TXT 地圖', 'html地图': 'HTML 地圖',
+    '更新频率': '更新頻率', '优先级别': '優先級', '生成数量': '產生數量', '首页': '首頁', '列表页': '列表頁', '内容页': '內容頁',
+    '经常': '經常', '每小时': '每小時', '每天': '每天', '每周': '每週', '每月': '每月', '每年': '每年', '从不': '從不',
+    '文档': '文件', '篇': '篇', 'TAG': '標籤',
+    '当前「URL模式」是': '目前的「URL 模式」是', '生成静态': '產生靜態', '，不是「生成静态」，不能生成静态页面。请先到': '，不是「產生靜態」，無法產生靜態頁面。請先前往',
+    'SEO → URL配置': 'SEO → URL 設定', '把「URL模式」切换成「生成静态」再回来。': '將「URL 模式」切換為「產生靜態」後再返回。',
+    '生成的文件放在站点根目录（public/）：首页是 index.html，其余按「页面保存目录 + 页面地址」落盘。': '產生的檔案會放在網站根目錄（public/）：首頁為 index.html，其餘依「頁面儲存目錄 + 頁面網址」存放。',
+    '网站链接': '網站連結', '字段数': '欄位數', '留言数': '留言數', '未读': '未讀', 'ID号': 'ID 號', '所属表单': '所屬表單', '留言内容': '留言內容',
+    '用户列表': '使用者清單', '会员等级': '會員等級', '性别': '性別', '昵称': '暱稱', '注册时间': '註冊時間',
+    '等级名称': '等級名稱', '等级描述': '等級描述', '用户操作日志': '使用者操作記錄', '操作类型': '操作類型', '操作描述': '操作描述',
+    '操作数据ID': '操作資料 ID', '操作数据': '操作資料', 'IP地址': 'IP 位址', '操作时间': '操作時間',
+    '插件总数': '外掛總數', '已安装': '已安裝', '已启用': '已啟用', '待安装': '待安裝', '标识': '識別碼', '版本': '版本', '描述': '描述', '添加到主菜单': '新增至主選單',
+    '累计登录': '累計登入', '最后登录时间': '最後登入時間', '最后登录IP': '最後登入 IP',
+    '模型名称': '模型名稱', '模型标识': '模型識別碼', '模型类型': '模型類型', '字段数量': '欄位數量',
+    '菜单图标': '選單圖示', '菜单/节点名称': '選單／節點名稱', '父ID': '上層 ID', '节点URL': '節點 URL', '是否是菜单': '是否為選單', '操作日志名称': '操作記錄名稱',
+    '功能菜单/节点': '功能選單／節點', '父级菜单/节点': '上層選單／節點', '左侧菜单显示': '顯示於左側選單', '菜单/节点URL': '選單／節點 URL', '菜单排序': '選單排序',
+    '存储引擎': '儲存引擎', '行格式': '資料列格式', '行数': '資料列數', '字节数': '位元組數', '数据大小': '資料大小', '数据表注释': '資料表註解', '数据表': '資料表', '状态': '狀態',
+    '数据库中共有': '資料庫共有', '张表，共计': '張資料表，總計', '大小。': '。'
+  });
+  Object.assign(DICT.en, {
+    '新窗口打开': 'Open in new window', '隐藏栏目': 'Hide category', '父级栏目': 'Parent category', '是否外部链接': 'External link', '作者': 'Author',
+    '国际化': 'Internationalization', '首页SEO信息': 'Homepage SEO information', '变量名称': 'Variable name',
+    '为当前模板': 'Frontend languages for', '启用前台界面语言。勾选后会创建缺失的': 'can be enabled here. Selecting a language creates a missing',
+    '示例文件；已有语言文件不会覆盖。取消勾选只停用语言，不删除文件或翻译内容。简体中文固定为默认语言，始终勾选且不可修改。': 'sample file. Existing language files are never overwritten. Unchecking a language only disables it; it does not delete files or translations. Simplified Chinese is always enabled as the default and cannot be changed.',
+    '启用其他语言后，系统会使用一张通用内容翻译表；文档、栏目、标签编辑页的“多语言”页签用于填写翻译。未填写的字段回退到简体中文，停用语言不会删除已保存的翻译。': 'After enabling other languages, the system uses one shared content translation table. Enter translations on the “Languages” tabs in document, category, and tag editors. Empty fields fall back to Simplified Chinese. Disabling a language does not remove saved translations.',
+    '提交时自动翻译': 'Auto-translate on submit',
+    'AI翻译': 'AI Translation', '用于后台多语言自动翻译。': 'Provides automatic translation for multilingual admin content.', '插件帮助说明': 'Plugin help',
+    '阿里云百炼 API Key': 'Alibaba Cloud Model Studio API Key', '业务空间 ID（北京地域）': 'Workspace ID (Beijing region)', '模型调用': 'Model routing',
+    '密钥不会回显；留空保存表示保留已有密钥，输入新值并保存会替换。': 'The key is never displayed. Leave it blank to keep the saved key, or enter a new value to replace it.',
+    '请填写阿里云百炼 API Key': 'Enter your Alibaba Cloud Model Studio API Key', 'API Key 已配置，留空保存会保留原密钥': 'API Key configured; leave blank to keep it',
+    '请输入阿里云百炼业务空间 ID': 'Enter your Alibaba Cloud Model Studio Workspace ID', 'Qwen-MT Flash 和 Qwen-MT-Uni 均通过该业务空间的北京地域接口调用。': 'Qwen-MT Flash and Qwen-MT-Uni use the Beijing endpoint for this workspace.',
+    '普通文本、标题、SEO 和标签使用 Qwen-MT Flash；HTML/Markdown 正文及富文本自定义字段使用 Qwen-MT-Uni。': 'Qwen-MT Flash handles regular text, titles, SEO, and tags; Qwen-MT-Uni handles HTML/Markdown bodies and rich-text custom fields.',
+    '正在提交...': 'Submitting...', '提交失败，请检查网络后重试。': 'Submission failed. Check your network and try again.',
+    '提交等待超时，请先确认文档是否已保存，再决定是否重试。': 'The request timed out. Check whether the document was saved before retrying.',
+    '提交等待超时，请先确认内容是否已保存，再决定是否重试。': 'The request timed out. Check whether the content was saved before retrying.',
+    '开启自动翻译后，发布/编辑文档以及单页栏目“内容”提交时，会调用 AItranslation 插件翻译已启用语言中留空的字段，并保存到内容翻译表；已有译文和中文原文为空的字段会跳过。': 'When enabled, publishing or editing a document and saving single-page content calls the AItranslation plugin to fill blank fields for enabled languages and saves the results in the content translation table. Existing translations and fields with no Simplified Chinese source are skipped.',
+    '需先安装并启用 AItranslation 插件，并在插件配置中填写阿里云百炼 API Key 和业务空间 ID。插件配置入口：后台“插件管理 → AItranslation → 配置”。': 'Install and enable the AItranslation plugin, then enter your Alibaba Cloud Model Studio API Key and Workspace ID in its settings. Open Plugin Management → AItranslation → Configure.',
+    'AItranslation 尚未就绪；请安装、启用并完成插件配置后再开启此项。': 'AItranslation is not ready. Install and enable the plugin and complete its configuration before turning this on.',
+    '请先安装并启用 AItranslation 插件，在插件配置中填写 API Key 和业务空间 ID，再开启自动翻译': 'Install and enable the AItranslation plugin, enter the API Key and Workspace ID in its settings, then turn on auto-translation.',
+    '本页设置项请在网站上线前设置好，运营中尽量不要修改这些选项，避免影响SEO。': 'Set these options before launching the site. Avoid changing them while the site is running to protect SEO.',
+    'URL模式': 'URL mode', '动态URL': 'Dynamic URL', '伪静态化': 'Pretty URLs', '生成静态模式': 'Generate static pages', '生成静态路径设置': 'Static page paths',
+    '自动定时任务定时生成sitemap': 'Schedule automatic Sitemap generation', '自动定时任务定时提交到百度搜索资源平台': 'Schedule automatic submissions to Baidu Search Resource Platform',
+    'Sitemap设置': 'Sitemap settings', '更新频率': 'Update frequency', '优先级别': 'Priority', '生成数量': 'Items per batch', '首页': 'Homepage', '列表页': 'List pages', '内容页': 'Content pages',
+    '经常': 'Always', '每小时': 'Hourly', '每天': 'Daily', '每周': 'Weekly', '每月': 'Monthly', '每年': 'Yearly', '从不': 'Never',
+    '文档': 'Documents', '篇': 'items', 'TAG': 'Tags',
+    '当前「URL模式」是': 'The current URL mode is', '生成静态': 'static generation', '，不是「生成静态」，不能生成静态页面。请先到': ', not static generation, so static pages cannot be generated. Go to',
+    'SEO → URL配置': 'SEO → URL settings', '把「URL模式」切换成「生成静态」再回来。': 'and switch the URL mode to static generation, then return here.',
+    '生成的文件放在站点根目录（public/）：首页是 index.html，其余按「页面保存目录 + 页面地址」落盘。': 'Generated files are saved under the site root (public/): the homepage is index.html, and other pages follow “page folder + page path”.',
+    '网站链接': 'Website link', '字段数': 'Field count', '留言数': 'Message count', '未读': 'Unread', 'ID号': 'ID', '所属表单': 'Form', '留言内容': 'Message content',
+    '用户列表': 'User list', '会员等级': 'Membership level', '性别': 'Gender', '昵称': 'Nickname', '注册时间': 'Registration time',
+    '等级名称': 'Level name', '等级描述': 'Level description', '用户操作日志': 'User activity log', '操作类型': 'Action type', '操作描述': 'Action description',
+    '操作数据ID': 'Data ID', '操作数据': 'Data', 'IP地址': 'IP address', '操作时间': 'Action time',
+    '插件总数': 'Total plugins', '已安装': 'Installed', '已启用': 'Enabled', '待安装': 'Not installed', '标识': 'Identifier', '版本': 'Version', '描述': 'Description', '添加到主菜单': 'Add to main menu',
+    '累计登录': 'Total logins', '最后登录时间': 'Last login time', '最后登录IP': 'Last login IP',
+    '模型名称': 'Model name', '模型标识': 'Model ID', '模型类型': 'Model type', '字段数量': 'Field count',
+    '菜单图标': 'Menu icon', '菜单/节点名称': 'Menu/node name', '父ID': 'Parent ID', '节点URL': 'Node URL', '是否是菜单': 'Is menu', '操作日志名称': 'Log action name',
+    '功能菜单/节点': 'Menu / node', '父级菜单/节点': 'Parent menu / node', '左侧菜单显示': 'Show in sidebar', '菜单/节点URL': 'Menu / node URL', '菜单排序': 'Menu order',
+    '存储引擎': 'Storage engine', '行格式': 'Row format', '行数': 'Rows', '字节数': 'Bytes', '数据大小': 'Data size', '数据表注释': 'Table comment', '数据表': 'Table', '状态': 'Status',
+    '数据库中共有': 'Database contains', '张表，共计': 'tables; total size', '大小。': '.'
+  });
+
+  // 补齐后台模板、动态弹窗和插件说明中的界面词条。
+  var ADMIN_TEMPLATE_I18N = {
+    "选择缩略图": ["選擇縮圖", "Select thumbnail"],
+    "移除缩略图": ["移除縮圖", "Remove thumbnail"],
+    "安全设置，保护后台登录路径不被猜出。只能使用字母、数字、下划线，长度 2-32 位；不能与 api / crud / home / install / static / storage 等保留名冲突。保存后请用新路径访问后台。": ["安全設置，保護後台登入路徑不被猜出。只能使用字母、數字、底線，長度 2-32 位元；不能與 api / crud / home / install / static / storage 等保留名衝突。儲存後請用新路徑訪問後台。", "security settings to protect the background login path from being guessed. Only letters, numbers, and underscores can be used, and the length is 2-32 characters; it cannot conflict with reserved names such as api / crud / home / install / static / storage. After saving, please use the new path to access the backend."],
+    "绑定栏目后，前台该栏目下可直接调用此表单": ["綁定欄目後，前台該欄目下方可直接呼叫此表單", "After binding the category, this form can be called directly under the category in the frontend"],
+    "备用扩展标题，字段名 title_ext_1": ["備用擴充標題，欄位名稱 title_ext_1", "Alternate extension title, field name title_ext_1"],
+    "备用扩展标题，字段名 title_ext_2": ["備用擴充標題，欄位名稱 title_ext_2", "Alternate extension title, field name title_ext_2"],
+    "备用扩展标题，字段名 title_ext_3": ["備用擴充標題，欄位名稱 title_ext_3", "Alternate extended title, field name title_ext_3"],
+    "备用扩展标题，字段名title_ext_1": ["備用擴充標題，欄位名稱title_ext_1", "Alternate extended title, field name title_ext_1"],
+    "备用扩展标题，字段名title_ext_3": ["備用擴充標題，欄位名稱title_ext_3","Alternate extension title, field name title_ext_3"],
+    "必填时，前台表单必须填写才能提交": ["必填時，前台表單必須填寫才能提交", "is required, the frontend form must be filled in before it can be submitted."],
+    "不可与其他栏目的别名重复": ["不可與其他欄目的別名重複", "cannot be repeated with aliases in other categories"],
+    "不一定是登录密码，如QQ邮箱的是第三方授权登录码，要自己去开启，在邮箱的设置->账户->POP3/IMAP/SMTP/Exchange/CardDAV/CalDAV服务": ["不一定是登入密碼，如QQ信箱的是第三方授權登入碼，要自己去開啟，在信箱的設定->帳號->POP3/IMAP/SMTP/Exchange/CardDAV/CalDAV服務", "is not necessarily the login password. For example, the QQ mailbox is a third-party authorized login code. You have to turn it on yourself. Go to the mailbox settings->account->POP3/IMAP/SMTP/Exchange/CardDAV/CalDAV service."],
+
+    "多个关键词请用英文逗号（,）隔开，建议不超过5个关键词": ["多個關鍵字請用英文逗號（,）隔開，建議不超過5個關鍵字", "Please separate multiple keywords with English commas (,). It is recommended that no more than 5 keywords be used."],
+    "发布/编辑文档时，更新这些缓存，避免更新后前台内容不及时更新。": ["發布/編輯文件時，更新這些緩存，避免更新後前台內容不及時更新。", "When publishing/editing a document, update these caches to avoid the foreground content not being updated in time after the update."],
+    "发布文章时是否默认打开文章随机点击数": ["發佈文章時是否預設開啟文章隨機點擊數", "Whether to open the random number of article clicks by default when publishing an article"],
+    "发布文章时是否默认开启删除非站内链接": ["發佈文章時是否預設開啟刪除非站內鏈接", "Whether to enable deletion of non-site links by default when publishing an article"],
+    "发布文章时是否默认开启远程图片本地化": ["發佈文章時是否預設開啟遠端圖片在地化", "Whether to enable remote image localization by default when publishing an article"],
+    "方便后台管理时识别，前台不显示": ["方便後台管理時識別，前台不顯示", "is convenient for identification during background management and is not displayed in the frontend."],
+    "给人看的名字，后台列表里显示这个": ["給人看的名字，後台清單裡顯示這個", "The name that is shown to others, this is displayed in the background list"],
+    "公安网备案号": ["公安網備案號", "Public Security Network Registration Number"],
+    "后台多久没操作登录失效。单位：秒。例如 86400秒=1天": ["後台多久沒操作登入失效。單位：秒。例如 86400秒=1天", "The login failed after a long period of inactivity in the background. Unit: seconds. For example 86400 seconds = 1 day"],
+    "决定这个变量在表单里怎么填：文本 / 图片 / 开关 / 多媒体。换类型后下面的「变量值」控件会跟着换": ["決定這個變數在表單裡怎麼填：文字／圖片／開關／多媒體。更改類型後，下方的「變數值」控制項也會相應變更。","Choose how this variable is entered: text, image, switch, or multimedia. The Variable value control below changes with the selection."],
+    "开启后，后台可以对留言进行回复": ["開啟後，管理員可以在後台回覆留言。","When enabled, administrators can reply to messages."],
+    "开启后，会员注册必须填写邮箱验证码；验证码邮件使用下方模板和网站配置的 SMTP 邮箱。": ["開啟後，會員註冊必須填寫電郵驗證碼；驗證碼郵件會使用下方範本及網站設定的 SMTP 電郵。","When enabled, members must enter an email verification code to register. The code uses the template below and the website SMTP settings."],
+    "开启后，留言需后台审核才显示": ["開啟後，留言須經後台審核才會顯示。","When enabled, messages appear only after admin approval."],
+    "开启后，前台页面访问、登录、注册、收藏等用户行为会写入 user_log 表；关闭后停止新增记录，已有记录不会删除。": ["開啟後，前台頁面瀏覽、登入、註冊、收藏等使用者行為會寫入 user_log 表；關閉後停止新增記錄，現有記錄不會刪除。","When enabled, frontend page visits, logins, registrations, and favorites are recorded in the user_log table. Disabling it stops new records; existing records remain."],
+    "开启后，删除的文档、栏目将进入回收站，可以恢复。关闭后，删除的内容将直接永久删除，无法恢复。": ["開啟後，刪除的文件、欄目將進入回收站，可恢復。關閉後，刪除的內容將直接永久刪除，無法恢復。", "is turned on, deleted documents and categories will enter the recycle bin and can be restored. After closing, the deleted content will be directly deleted permanently and cannot be recovered."],
+    "开启后地址不带 index.php，需要服务器伪静态规则已生效。": ["開啟後位址不帶 index.php，需要伺服器偽靜態規則已生效。", "When enabled, the address does not contain index.php, and the server pseudo-static rule needs to be in effect."],
+    "可以不同于上面的账户，用于展示给发送方的邮箱，如：admin@miucms.com": ["可以不同於上面的帳戶，用於展示給發送方的郵箱，如：admin@miucms.com", "can be different from the above account and used to display to the sender's email address, such as: admin@miucms.com"],
+    "控制网站是否对外开放，用于临时维护等用途。关闭后前台所有页面都会显示下面设置的关闭页，后台不受影响。": ["控制網站是否對外開放，用於臨時維護等用途。關閉後前台所有頁面都會顯示下面設定的關閉頁，後台不受影響。", "controls whether the website is open to the public and is used for temporary maintenance and other purposes. After closing, all front-end pages will display the closing page set below, and the back-end will not be affected."],
+    "留言列表里这一列要不要显示": ["留言列表裡這一列要不要顯示", "Should this column be displayed in the message list?"],
+    "每行一个，只填写域名，不带 http(s):// 和 / 后面部分；发布文档时，这些域名的外链不删除。": ["每行一個，只填寫域名，不帶 http(s):// 和 / 後面部分；發布文件時，這些域名的外鏈不刪除。", "One per line, fill in only the domain name, without http(s):// and / following parts; when publishing the document, the external links of these domain names will not be deleted."],
+    "前台表单里显示的文字，如「姓名」「手机号」": ["前台表單裡顯示的文字，如「姓名」「手機號碼」", "Text displayed in the front form, such as \"name\" and \"mobile phone number\""],
+    "前台模板目录位于项目根目录 templates/ 下（在网站目录之外，浏览器访问不到），每个子目录就是一个模板。info.json 使用 JSON 格式记录模板名称、显示名称、版本和说明。模板自带的 css/js/images 放在模板目录的 static/ 下，切换模板或清缓存时会自动发布到 public/skin/ 供前台访问": ["前台範本目錄位於專案根目錄 templates/ 下（在網站目錄之外，瀏覽器存取不到），每個子目錄就是一個範本。info.json 使用 JSON 格式記錄範本識別碼、顯示名稱、版本和說明。模板自備的 css/js/images 放在模板目錄的 static/ 下，切換模板或清緩存時會自動發佈到 public/skin/ 供前台訪問", "The front-end template directory is under templates/ at the project root, outside the public web directory. Each subdirectory is a template. Its info.json stores the template identifier, display name, version, and description in JSON format. Template CSS, JavaScript, and images go in static/ and are published to public/skin/ when switching templates or clearing the cache."],
+    "如：miucms@qq.com": ["如：miucms@qq.com", "Such as: miucms@qq.com"],
+    "如：QQ邮箱的SMTP服务器地址是smtp.qq.com，163邮箱的SMTP服务器地址是smtp.163.com": ["如：QQ信箱的SMTP伺服器位址是smtp.qq.com，163信箱的SMTP伺服器位址是smtp.163.com", "For example: the SMTP server address of QQ mailbox is smtp.qq.com, and the SMTP server address of 163 mailbox is smtp.163.com"],
+    "如：QQ邮箱的ssl协议方式端口号是465/587，163邮箱的ssl协议方式端口号是465/994": ["如：QQ信箱的ssl協定方式埠號碼是465/587，163信箱的ssl協定方式埠號碼是465/994", "For example: the SSL protocol port number of QQ mailbox is 465/587, and the SSL protocol port number of 163 mailbox is 465/994"],
+    "如果开启文章随机点击数，此处必填；起始数值要小于结束数值；不能为负数。": ["若開啟文章隨機點選數，此處必填；起始數值要小於結束數值；不能為負數。", "If the random number of clicks on the article is turned on, this field is required; the starting value must be smaller than the ending value; it cannot be a negative number."],
+
+    "是否外部连接，如选择“是”，请填写下方外部链接": ["是否外部連接，如選擇“是”，請填寫下方外部鏈接", "Whether to connect externally, if you select \"Yes\", please fill in the external link below"],
+    "停用的变量不参与取值": ["停用的變數不參與取值", "Disabled variables do not participate in taking values"],
+    "完整外部链接地址": ["完整外部連結地址", "complete external link address"],
+    "网站版权信息，通常显示在网站底部。支持HTML代码。": ["網站版權訊息，通常顯示在網站底部。支援HTML程式碼。", "Website copyright information is usually displayed at the bottom of the website. Support HTML code."],
+    "网站关闭时的展示方式：提示文字——显示一句提示文字；跳转链接——跳转到指定网址；模板页面——显示 public/ 目录下的自定义页面。": ["網站關閉時的展示方式：提示文字－顯示一句提示文字；跳到連結－跳到指定網址；範本頁面－顯示 public/ 目錄下的自訂頁面。", "Display method when the website is closed: prompt text - display a prompt text; jump link - jump to the specified URL; template page - display a custom page in the public/ directory."],
+    "网站首页标题，是SEO优化的核心。建议80个字符以内，包含核心关键词。": ["網站首頁標題，是SEO優化的核心。建議80個字元以內，包含核心關鍵字。", "The title of the homepage of the website is the core of SEO optimization. It is recommended to be within 80 characters and include core keywords."],
+    "网站首页关键词，用于SEO优化。建议100个字符以内，用英文逗号隔开。": ["網站首頁關鍵字，用於SEO優化。建議100個字元以內，用英文逗號隔開。", "Website homepage keywords, used for SEO optimization. It is recommended to be within 100 characters and separated by commas."],
+    "网站首页描述，显示在搜索引擎搜索结果。建议200个字符以内。": ["網站首頁描述，顯示在搜尋引擎搜尋結果。建議200個字元以內。", "Website homepage description, displayed in search engine search results. It is recommended to keep it within 200 characters."],
+    "网站图标，将显示在浏览器地址栏和标签页。支持ico/png/jpg格式正方形图片": ["網站圖標，將顯示在瀏覽器網址列和標籤頁。支援ico/png/jpg格式正方形圖片", "website icon will be displayed in the browser address bar and tab page. Supports square pictures in ico/png/jpg format"],
+    "网站域名，包含http://或https://。<br>例如：https://www.xxxx.com": ["網站域名，內含http://或https://。<br>例如：https://www.xxxx.com", "Website domain name, including http:// or https://.<br>For example: https://www.xxxx.com"],
+    "网站LOGO图片，将显示在前台页面。建议使用PNG格式。": ["網站LOGO圖片，將顯示在前台頁面。建議使用PNG格式。", "website LOGO picture will be displayed on the front page. It is recommended to use PNG format."],
+    "未配置时默认使用文件缓存。选择 Redis 前请确保 Redis 服务已启动，且 PHP 已启用 Redis 扩展或安装 Predis；Redis 连接参数在 config/cache.php 中设置。Redis 不可用时系统会临时回退到文件缓存。": ["未配置時預設使用檔案快取。選擇 Redis 前請確保 Redis 服務已啟動，且 PHP 已啟用 Redis 擴充功能或安裝 Predis；Redis 連線參數在 config/cache.php 中設定。 Redis 不可用時系統會暫時回退到檔案快取。", "uses file cache by default when not configured. Before selecting Redis, make sure that the Redis service is started and PHP has the Redis extension enabled or Predis installed; the Redis connection parameters are set in config/cache.php. The system will temporarily fall back to file caching when Redis is unavailable."],
+    "文本类型必填。单行文本建议 250；多行文本按需要填，超过 255 会按长文本存（最大 65535）": ["文字類型必填。單行文本建議 250；多行文字依需要填，超過 255 會依長文存（最大 65535）", "Text type is required. The recommended value for single-line text is 250; for multi-line text, fill in as needed. If it exceeds 255, it will be saved as long text (maximum 65535)"],
+    "下拉框 / 单选框 / 多选框 必填；每行一个选项": ["下拉框 / 單選框 / 多選框 必填；每行一個選項", "Drop-down box / radio button / multi-select box Required; one option per line"],
+    "显示在前台栏目页的浏览器标题": ["顯示在前台欄目頁的瀏覽器標題", "The browser title displayed on the front category page"],
+    "新上传文件使用所选存储；已有附件仍按 file 表记录的存储位置管理。": ["新上傳檔案使用所選儲存；已有附件仍依 file 資料表記錄的儲存位置管理。", "Newly uploaded files use the selected storage; existing attachments are still managed according to the storage location recorded in the file table."],
+    "选「手机号码 / Email邮箱」时，前台提交会按格式校验": ["選「手機號碼 / Email信箱」時，前台投稿會依格式校驗", "When selecting \"Mobile phone number / Email address\", the front-end submission will be verified according to the format."],
+    "选择“是”，前端模板a标签中将添加target='_blank'": ["選擇“是”，前端模板a標籤中將新增target='_blank'", "Select \"Yes\", target='_blank' will be added to the front-end template a tag"],
+    "选择“是”，前台导航栏将不显示该栏目": ["選擇“是”，前台導覽列將不顯示該欄目", "Select \"Yes\", the front navigation bar will not display this category"],
+    "一般不超过200个字符，不填写时系统自动提取正文的前200个字符": ["一般不超過200個字符，不填寫時系統自動提取正文的前200個字符", "generally does not exceed 200 characters. If not filled in, the system will automatically extract the first 200 characters of the text."],
+    "用于页面标题等位置显示，尽量简短": ["用於頁面標題等位置顯示，盡量簡短", "is used to display the page title and other positions, keep it as short as possible"],
+    "用于展示给发送方，如：米柚CMS系统管理员": ["用於展示給發送方，如：米柚CMS系統管理員", "is used to display to the sender, such as: Miyou CMS system administrator"],
+    "允许上传文件的大小限制，单位是MB，建议不要超过10MB；不能超过php.ini的upload_max_filesize值，否则无效。": ["允許上傳檔案的大小限制，單位是MB，建議不要超過10MB；不能超過php.ini的upload_max_filesize值，否則無效。", "The size limit of the allowed uploaded files, the unit is MB, it is recommended not to exceed 10MB; it cannot exceed the upload_max_filesize value of php.ini, otherwise it will be invalid."],
+    "只列出当前模板目录里符合命名规则的模板文件。<br>不选就自动用 list_[模型nid].html": ["只列出目前範本目錄裡符合命名規則的範本檔案。<br>不選就自動用 list_[模型nid].html", "Only list template files that match the naming rules in the current template directory.<br>If not selected, list_[model nid].html will be used automatically."],
+    "只列出当前模板目录里符合命名规则的模板文件。<br>不选就自动用 view_[模型nid].html<br>单页模型没有内容模板": ["只列出目前範本目錄裡符合命名規則的範本檔案。<br>不選就自動用 view_[模型nid].html<br>單頁模型沒有內容模板", "Only list template files that match the naming rules in the current template directory.<br>If not selected, view_[model nid].html will be used automatically.<br>Single page model has no content template"],
+    "只能是字母、数字、下划线或短横线，最多 32 个字符，不能和已有变量重名": ["只能是字母、數字、底線或短橫線，最多 32 個字符，不能和已有變量重名", "can only be letters, numbers, underscores or dashes, up to 32 characters, and cannot have the same name as an existing variable."],
+    "只能填写数字，越小越靠前": ["只能填入數字，越小越前", "Only numbers can be filled in, the smaller the number, the higher it is."],
+    "注意：切换编辑器后，文章内容对应的文本内容可能需要重新编辑。": ["注意：切換編輯器後，文章內容對應的文字內容可能需要重新編輯。", "Note: After switching editors, the text content corresponding to the article content may need to be re-edited."],
+    "ICP备案号，即工信部备案号": ["ICP備案號，即工信部備案號", "ICP registration number, that is, the Ministry of Industry and Information Technology registration number"],
+
+    "请输入标识": ["請輸入標識", "Please enter the ID"],
+    "请输入表单名称": ["請輸入表單名稱", "Please enter the form name"],
+    "请输入插件标识": ["請輸入外掛程式標識", "Please enter the plug-in ID"],
+    "请输入插件名称": ["請輸入插件名稱", "Please enter the plug-in name"],
+    "请输入网站域名": ["請輸入網站域名", "Please enter the website domain name"],
+    "请输入SEO关键字": ["請輸入SEO關鍵字", "Please enter SEO keywords"],
+    "请选择父级菜单/节点": ["請選擇父級選單/節點", "Please select the parent menu/node"],
+    "请选择父级栏目": ["請選擇父級欄目", "Select a parent category"],
+    "请选择模型": ["請選擇模型", "Please select a model"],
+    "请选择用户等级": ["請選擇用戶等級", "Please select user level"],
+    "点击选择或输入图片地址": ["點選選擇或輸入圖片地址", "Click to select or enter the image address"],
+    "电话号码": ["電話號碼", "phone number"],
+    "电话名称，如售前咨询": ["電話名稱，如售前諮詢", "Phone name, such as pre-sales consultation"],
+    "画面富有活力，细节真实自然，景深柔和，避免生硬的数字生成痕迹，不使用动画或卡通风格，无文字、Logo或水印。": ["畫面富有活力，細節真實自然，景深柔和，避免生硬的數位生成痕跡，不使用動畫或卡通風格，無文字、Logo或水印。", "The picture is vibrant, the details are real and natural, the depth of field is soft, and the traces of rigid digital generation are avoided. No animation or cartoon style is used, and there is no text, logo or watermark."],
+    "可留空，使用 Bucket 默认域名": ["可留空，使用 Bucket 預設域名", "can be left blank to use the Bucket default domain name."],
+    "可留空，使用 COS 默认域名": ["可留空，使用 COS 預設域名", "can be left blank to use the COS default domain name."],
+    "可留空自动使用地域默认地址": ["可留空自動使用地理預設位址", "can be left blank to automatically use the regional default address."],
+    "例如 ap-beijing": ["例如 ap-beijing", "For example ap-beijing"],
+    "例如 cn-hangzhou": ["例如 cn-hangzhou", "For example cn-hangzhou"],
+    "例如 miucms-1250000000": ["例如 miucms-1250000000", "For example miucms-1250000000"],
+    "例如：米柚演示站": ["例如：米柚示範站", "For example: Miyou Demonstration Station"],
+    "您已配置 API Key，留空表示不修改 请填写 DeepSeek API Key": ["您已設定 API Key，留空表示不修改 請填寫 DeepSeek API Key", "You have configured the API Key. Leave it blank to not modify it. Please fill in the DeepSeek API Key."],
+    "您已配置 API Key，留空表示不修改 请填写 Spark-X2.5 API Key": ["您已設定 API Key，留空表示不修改 請填入 Spark-X2.5 API Key", "You have configured the API Key. Leave it blank to not modify it. Please fill in the Spark-X2.5 API Key."],
+    "您已配置 API Key，留空表示不修改 请填写百度千帆 API Key": ["您已設定 API Key，留空表示不修改 請填入百度千帆 API Key", "You have configured the API Key. Leave it blank to not modify it. Please fill in the Baidu Qianfan API Key."],
+    "您已配置 API Key，留空表示不修改 请填写方舟 API Key": ["您已設定 API Key，留空表示不修改 請填入方舟 API Key", "You have configured the API Key. Leave it blank to not modify it. Please fill in the Ark API Key."],
+    "您已配置 API Key，留空表示不修改 请填写火山方舟 API Key": ["您已設定 API Key，留空表示不修改 請填入火山方舟 API Key", "You have configured the API Key. Leave it blank to not modify it. Please fill in the Volcano Ark API Key."],
+    "您已配置 Token Plan API Key，留空表示不修改 请输入 Token Plan 专属 API Key": ["您已設定 Token Plan API Key，留空表示不修改 請輸入 Token Plan 專屬 API Key", "You have configured the Token Plan API Key. Leave it blank to not modify it. Please enter the Token Plan exclusive API Key."],
+    "您已配置按量付费 API Key，留空表示不修改 请输入按量付费 API Key（API Keys 页面创建）": ["您已設定按量付費 API Key，留空表示不修改 請輸入按量付費 API Key（API Keys 頁面建立）", "You have configured a pay-as-you-go API Key. Leave it blank to not modify it. Please enter a pay-as-you-go API Key (created on the API Keys page)"],
+    "请输入 AccessKey ID": ["請輸入 AccessKey ID", "Please enter AccessKey ID"],
+    "请输入 AccessKey Secret": ["請輸入 AccessKey Secret", "Please enter AccessKey Secret"],
+    "请输入 OSS Bucket 名称": ["請輸入 OSS Bucket 名稱", "Please enter the OSS Bucket name"],
+    "请输入 SecretId": ["請輸入 SecretId", "Please enter SecretId"],
+    "请输入 SecretKey": ["請輸入 SecretKey", "Please enter SecretKey"],
+    "请输入手机号码": ["請輸入手機號碼", "Please enter your mobile phone number"],
+    "输入示例文字": ["輸入範例文字", "Enter sample text"],
+    "输入要插入前台页面的文字": ["輸入要插入前台頁面的文字", "Enter the text to be inserted into the front page"],
+    "图片地址，例如 /uploads/qrcode.png": ["圖片地址，例如 /uploads/qrcode.png", "image address, for example /uploads/qrcode.png"],
+    "已配置 APISecret，留空表示不修改 图片 APISecret": ["已配置 APISecret，留空表示不修改 圖片 APISecret", "APISecret has been configured, leave it blank to not modify it Picture APISecret"],
+    "已配置 APPID，留空表示不修改 APPID": ["已設定 APPID，留空表示不修改 APPID", "APPID has been configured. Leave it blank to not modify the APPID."],
+    "已配置；留空表示不修改 仅用于演示，可留空": ["已配置；留空表示不修改 僅用於演示，可留空", "has been configured; leaving blank means no modification. For demonstration only, can be left blank."],
+    "已配置图片 APIKey，留空表示不修改 图片 APIKey": ["已設定圖片 APIKey，留空表示不修改 圖片 APIKey", "The picture APIKey has been configured. Leave it blank to not modify the picture APIKey."],
+    "https://客服链接，或 /站内路径": ["https://客服鏈接，或 /站內路徑", "https://customer service link, or /site path"],
+    "阿里云 OSS": ["阿里雲 OSS", "Alibaba Cloud OSS"],
+    "按量付费 API （API Key 未配置）": ["按量付費 API （API Key 未配置）", "Pay-as-you-go API (API Key not configured)"],
+    "百度千帆 （API Key 未配置）": ["百度千帆 （API Key 未配置）", "Baidu Qianfan (API Key not configured)"],
+    "本地存储": ["本機存儲", "local storage"],
+    "点击预览": ["點選預覽", "Click to preview"],
+    "更新上下篇": ["更新上下篇", "Update Part 1 and 2"],
+    "更新首页": ["更新首頁", "Update home page"],
+    "更新相关栏目": ["更新相關欄目", "Update related categories"],
+    "钩子回调示例": ["鉤子回呼範例", "hook callback example"],
+    "后台菜单+控制器+视图": ["後台選單+控制器+視圖", "Backstage menu + controller + view"],
+    "火山方舟 Seedream （API Key 未配置）": ["火山方舟 Seedream （API Key 未配置）", "Volcano Ark Seedream (API Key not configured)"],
+    "火山方舟（豆包） （API Key 未配置）": ["火山方舟（豆包） （API Key 未配置）", "Volcano Ark (bean bag) (API Key not configured)"],
+    "加粗": ["加粗", "bold"],
+    "居中": ["居中", "Centered"],
+    "开|关": ["開|關", "on|off"],
+    "前台路由+控制器+视图": ["前台路由+控制器+視圖", "frontend routing + controller + view"],
+    "清除上下篇缓存": ["清除上下篇緩存", "Clear cache of previous and next chapters"],
+    "清除首页缓存": ["清除首頁緩存", "Clear home page cache"],
+    "清除相关栏目缓存": ["清除相關欄目緩存", "Clear cache of related categories"],
+    "特荐": ["特薦", "Recommended"],
+    "腾讯云 COS": ["騰訊雲 COS", "Tencent Cloud COS"],
+    "跳转": ["跳轉", "jump"],
+    "头条": ["頭條", "Headlines"],
+    "推荐": ["推薦", "recommended"],
+    "未绑定": ["未綁定", "not bound"],
+    "未设置": ["未設定", "not set"],
+    "小米 MiMo （API Key 未配置）": ["小米 MiMo （API Key 未設定）", "Xiaomi MiMo (API Key not configured)"],
+    "讯飞星火 （API Key 未配置）": ["訊飛星火 （API Key 未配置）", "iFlytek Spark (API Key not configured)"],
+    "讯飞星火图片生成 （API 凭据未配置完整）": ["訊飛星火圖片產生 （API 憑證未配置完整）", "iFlytek Spark image generation (API credentials are not fully configured)"],
+    "已绑定": ["已綁定", "is bound"],
+    "右对齐": ["右對齊", "right aligned"],
+    "原创": ["原創", "original"],
+    "重新加载当前文件": ["重新載入目前文件", "Reload the current file"],
+    "左对齐": ["左對齊", "left aligned"],
+    "DeepSeek （API Key 未配置）": ["DeepSeek （API Key 未配置）", "DeepSeek (API Key not configured)"],
+    "HTML代码": ["HTML程式碼", "HTML code"],
+    "MiMo 2.6 Flash（响应更快）": ["MiMo 2.6 Flash（更快回應）", "MiMo 2.6 Flash (faster response)"],
+    "MiMo 2.6 Pro（推荐）": ["MiMo 2.6 Pro（建議）", "MiMo 2.6 Pro (recommended)"],
+    "Token Plan （API Key 未配置）": ["Token Plan （API Key 未設定）", "Token Plan (API Key not configured)"],
+    "-后台登录": ["-後台登入", "-Backend login"],
+    "，不是「生成静态」，不能生成静态页面。 请先到": ["，不是“生成靜態”，不能產生靜態頁面。 請先到", "is not \"generate static\" and cannot generate static pages. Please come first"],
+    "，由": ["，由", ", by"],
+    "，只创建插件自己的表。": ["，只建立插件自己的表。", ", only creates the plug-in's own table."],
+    "：后台登录校验、插件视图渲染和配置读取。": ["：背景登入校驗、外掛檢視渲染與設定讀取。", ": background login verification, plug-in view rendering and configuration reading."],
+    "：text、textarea、switch、number、radio、select、password、help_area、条件显示。": ["：text、textarea、switch、number、radio、select、password、help_area、條件顯示。", ": text, textarea, switch, number, radio, select, password, help_area, conditional display."],
+    "。系统只接受": ["。系統只接受", ". The system only accepts"],
+    "（如：html）": ["（如：html）", "(eg: html)"],
+    "（由 document_added 钩子写入，最多显示 条）": ["（由 document_added 鉤子寫入，最多顯示 條）", "(written by document_added hook, display at most bars)"],
+    "【扩展标题】": ["【擴充標題】", "[Extended title]"],
+    "/tag/92.html，第2页：tag/92_p2.html": ["/tag/92.html，第2頁：tag/92_p2.html", "/tag/92.html, page 2: tag/92_p2.html"],
+    "/tag/92/，第2页：tag/92/p2.html": ["/tag/92/，第2頁：tag/92/p2.html", "/tag/92/, page 2: tag/92/p2.html"],
+    "© 2024- 米柚 CMS · 让内容管理更简单": ["© 2024- 米柚 CMS · 讓內容管理更簡單", "© 2024- Miyou CMS · Make content management easier"],
+    "© 2024- MIUCMS · 米柚内容管理系统": ["© 2024- MIUCMS · 米柚內容管理系統", "© 2024- MIUCMS · MiYou Content Management System"],
+    "© 2024- MIUCMS 管理系统 · 建议使用 Chrome / Edge 访问": ["© 2024- MIUCMS 管理系統 · 建議使用 Chrome / Edge 訪問", "© 2024- MIUCMS Management System · It is recommended to use Chrome / Edge to access"],
+    "© 二〇二四- · 米柚内容管理系统": ["© 二〇二四- · 米柚內容管理系統", "© 2024- · Miyou Content Management System"],
+    "→ 控制器 → 独立模板。": ["→ 控制器 → 獨立模板。", "→ Controller → Independent template."],
+    "+ 新增播放组": ["+ 新增播放組", "+ New playback group"],
+    "2、特殊符号会被过滤掉，比如：&、=、?等": ["2.特殊符號會被過濾掉，例如：&、=、?等", "2. Special symbols will be filtered out, such as: &, =, ?, etc."],
+    "安全写入编译代码，输出时做 HTML 转义。": ["安全寫入編譯程式碼，輸出時會做 HTML 轉義。", "safely writes compiled code and does HTML escaping when outputting."],
+    "按量付费 API Key": ["按量付費 API Key", "Pay-as-you-go API Key"],
+    "百度千帆": ["百度千帆", "Baidu Qianfan"],
+    "百度千帆 API Key": ["百度千帆 API Key", "Baidu Qianfan API Key"],
+    "保存基础配置": ["儲存基礎配置", "Save basic configuration"],
+    "保存时提交到系统的": ["儲存時提交到系統的", "submitted to the system when saving"],
+    "备注内容": ["備註內容", "Remarks"],
+    "本插件负责多语言自动翻译。请先在“国际化配置”启用目标语言，再到本插件配置页填写阿里云百炼 API Key 和业务空间 ID，并按需开启“提交时自动翻译”。": ["此插件負責多語言自動翻譯。請先在「國際化配置」啟用目標語言，再到本外掛程式設定頁填寫阿里雲百煉 API Key 和業務空間 ID，並依需求開啟「提交時自動翻譯」。", "This plug-in is responsible for automatic translation of multiple languages. Please enable the target language in \"Internationalization Configuration\" first, then fill in the Alibaba Cloud Bailian API Key and business space ID on this plug-in configuration page, and turn on \"Automatic translation on submission\" as needed."],
+    "编辑-": ["編輯-", "Editor-"],
+    "编辑栏目": ["編輯欄目", "Edit category"],
+    "标注为禁用的选项表示模型 API Key 未配置。请先进入": ["標註為停用的選項表示模型 API Key 未配置。請先進入", "Options marked disabled indicate that the model API Key is not configured. Please enter first"],
+    "不修改密码请留空": ["不修改密碼請留空", "If you do not want to change the password, please leave it blank."],
+    "不验证": ["不驗證", "does not verify"],
+    "插件列表的“配置”按钮仍打开系统自动生成的通用配置表单。两种页面可以共存：通用表单适合快速配置，自定义表单适合插件专属布局和交互。": ["外掛程式清單的「設定」按鈕仍開啟系統自動產生的通用設定表單。兩種頁面可以共存：通用表單適合快速配置，自訂表單適合外掛專屬佈局和互動。", "The \"Configure\" button in the plug-in list still opens the general configuration form automatically generated by the system. Two types of pages can coexist: general forms are suitable for quick configuration, and custom forms are suitable for plug-in-specific layout and interaction."],
+    "插件配置演示表单": ["外掛程式設定示範表單", "plug-in configuration demonstration form"],
+    "查看在线留言": ["查看線上留言", "View online messages"],
+    "查找目标": ["找出目標", "Find target"],
+    "称呼": ["稱呼", "title"],
+    "城市": ["城市", "City"],
+    "存储类型": ["儲存類型", "storage type"],
+    "存储桶名称": ["儲存桶名稱", "bucket name"],
+    "打开前台演示页": ["開啟前台演示頁", "Open the front demo page"],
+    "打开自定义配置页": ["開啟自訂設定頁", "Open the custom configuration page"],
+    "代码中读取配置": ["程式碼中讀取配置", "Read the configuration in the code"],
+    "的": ["的", "of"],
+    "点击对应模型的“设置”填写 API Key。已保存的凭据不会回显；留空保存表示不修改，填写新值后保存会替换原凭据。模型版本按当前插件实际请求参数显示。": ["點選對應模型的「設定」填寫 API Key。已儲存的憑證不會回顯；留空儲存表示不修改，填入新值後儲存會取代原憑證。模型版本按目前插件實際請求參數顯示。", "Click \"Settings\" of the corresponding model to fill in the API Key. The saved credentials will not be echoed; leaving them blank means they will not be modified. Filling in new values ​​and saving will replace the original credentials. The model version is displayed according to the actual request parameters of the current plug-in."],
+    "电话列表": ["電話列表", "phone list"],
+    "多语言内容": ["多重語言內容", "Multilingual content"],
+    "二维码图片": ["二維碼圖片", "QR code picture"],
+    "发布/编辑文档时": ["發佈/編輯文件時", "When publishing/editing a document"],
+    "发送测试邮件": ["發送測試郵件", "Send test email"],
+    "发送人": ["發送人", "Sender"],
+    "繁體中文": ["繁體中文", "Traditional Chinese"],
+    "范围为 1 到 100，控制器会再次校验。": ["範圍為 1 到 100，控制器會再校驗。", "ranges from 1 to 100, the controller will verify again."],
+    "方法渲染。": ["方法渲染。", "method rendering."],
+    "访问官网": ["訪問官網", "Visit the official website"],
+    "访问域名": ["訪問域名", "access domain name"],
+    "附件配置": ["配件配置", "accessory configuration"],
+    "该字段不会回显已保存内容。留空会保留旧值，填写新值才会替换；本演示插件不会使用此 Key。真实插件也不要在页面、接口响应或日志中输出密钥。": ["此欄位不會回顯已儲存內容。留空會保留舊值，填入新值才會被替換；本示範外掛程式不會使用此 Key。真實插件也不要在頁面、介面回應或日誌中輸出金鑰。", "This field does not echo saved content. Leave it blank to retain the old value, and fill in the new value to replace it; this demo plug-in will not use this Key. Real plugins should also not output keys on pages, interface responses, or logs."],
+    "功能配置": ["功能配置", "function configuration"],
+    "共 条": ["共 條", "Total items"],
+    "勾选语言后会在模板目录下创建对应的语言库示例文件；简体中文为默认语言。": ["勾選語言後會在範本目錄下建立對應的語言庫範例檔；簡體中文為預設語言。", "After selecting the language, the corresponding language library sample file will be created in the template directory; Simplified Chinese is the default language."],
+    "钩子或插件类中：": ["鉤子或外掛程式類別中：", "hook or plug-in class:"],
+    "管理 AI 模型与 API 密钥": ["管理 AI 模型與 API 金鑰", "Manage AI models and API keys"],
+    "管理文章生成与生图模型": ["管理文章產生與生圖模型", "Management article generation and graph model"],
+    "国家/地区": ["國家/地區", "Country/Region"],
+    "和此自定义表单。": ["和此自訂表單。", "and this custom form."],
+    "后台管理 - - miucms.com": ["後台管理 - - miucms.com", "Admin panel - miucms.com"],
+    "后台控制器中：": ["後台控制器中：", "In the background controller:"],
+    "后台路径": ["後台路徑", "background path"],
+    "后台页面": ["後台頁面", "backend page"],
+    "画面风格": ["畫面風格", "picture style"],
+    "欢迎来到 Miucms 插件开发演示。": ["歡迎來到 Miucms 外掛程式開發演示。", "Welcome to the Miucms plug-in development demo."],
+    "欢迎语风格": ["歡迎語風格", "welcome style"],
+    "火山方舟 · 文章": ["火山方舟 · 文章", "Volcano Ark · Article"],
+    "火山方舟 · Seedream": ["火山方舟 · Seedream", "Volcano Ark · Seedream"],
+    "火山方舟控制台": ["火山方舟控制台", "Volcano Ark Console"],
+    "火山方舟文章 API Key": ["火山方舟文章 API Key", "Volcano Ark Article API Key"],
+    "火山方舟需要 Seedream 图片 API Key；讯飞需要 APPID、图片 APIKey、APISecret 三项全部填写。": ["火山方舟需要 Seedream 圖片 API Key；訊飛需要 APPID、圖片 APIKey、APISecret 三項全部填寫。", "Volcano Ark requires the Seedream picture API Key; iFlytek requires all three items: APPID, picture APIKey, and APISecret."],
+    "记录 ID": ["記錄 ID", "Record ID"],
+    "记录时间": ["記錄時間", "recording time"],
+    "简洁直接": ["簡約直接", "Simple and direct"],
+    "简体中文": ["簡體中文", "Simplified Chinese"],
+    "建议按这个顺序体验": ["建議以這個順序體驗", "It is recommended to experience it in this order"],
+    "将": ["將", "will"],
+    "角色名称": ["角色名稱", "character name"],
+    "接入教程": ["接入教學課程", "access tutorial"],
+    "接入说明": ["接取說明", "access instructions"],
+    "开放平台": ["開放平台","Open platform"],
+    "开启后，发布或编辑文档时会自动将文档地址推送到百度搜索资源平台；请填写下方 token，未配置时会跳过推送。": ["開啟後，發佈或編輯文件時會自動將文件位址推送至百度搜尋資源平台；請填入下方 token，未設定時會跳過推播。", "is turned on, the document address will be automatically pushed to the Baidu search resource platform when publishing or editing a document; please fill in the token below. If it is not configured, the push will be skipped."],
+    "开启后，客服组件会自动显示在前台页面右侧。在线留言保存在本插件的数据表中，可在“在线留言列表”查看。": ["開啟後，客服元件會自動顯示在前台頁面右側。線上留言保存在本插件的資料表中，可在「線上留言清單」上查看。", "is turned on, the customer service component will automatically be displayed on the right side of the front page. Online messages are saved in the data table of this plug-in and can be viewed in the \"Online Message List\"."],
+    "可按需添加或删除电话。留空的电话行不会保存。": ["可按需新增或刪除電話。留空的電話行不會保存。", "Phones can be added or removed as needed. Phone lines left blank are not saved."],
+    "可填写 oss-cn-hangzhou.aliyuncs.com 或 https:// 开头的域名。": ["可填寫 oss-cn-hangzhou.aliyuncs.com 或 https:// 開頭的網域。", "can fill in the domain name starting with oss-cn-hangzhou.aliyuncs.com or https://."],
+    "可填写绑定到 Bucket 的 HTTPS 自定义域名；上传文件将设置为公共读，请确认 Bucket 允许公网读取。": ["可填寫綁定至 Bucket 的 HTTPS 自訂網域；上傳檔案將設定為公共讀取，請確認 Bucket 允許公網讀取。", "can fill in the HTTPS custom domain name bound to the Bucket; the uploaded file will be set to public reading, please confirm that the Bucket allows public network reading."],
+    "可填写绑定到存储桶的 HTTPS 自定义域名；上传对象会设置为公有读，请确认存储桶权限允许访问。": ["可填入綁定至儲存桶的 HTTPS 自訂網域；上傳物件會設定為公有讀，請確認儲存桶權限允許存取。", "can fill in the HTTPS custom domain name bound to the bucket; the uploaded object will be set to public read, please confirm that the bucket permissions allow access."],
+    "可用变量：%site_name% 网站名称、%username% 会员账号、%email% 收件邮箱、%reset_url% 重置链接按钮地址、%reset_url_text% 可复制的链接原文、%expire_minutes% 有效分钟数。": ["可用變數：%site_name% 網站名稱、%username% 會員帳號、%email% 收件信箱、%reset_url% 重置連結按鈕地址、%reset_url_text% 可複製的連結原文、%expire_minutes% 有效分鐘數。", "Available variables:%site_name% website name,%username% Member account,%email% Receiving email,%reset_url% Reset link button address,%reset_url_text% Original link that can be copied,%expire_minutes% Valid minutes."],
+    "客服链接": ["客服鏈接", "customer service link"],
+    "控制 TinyMCE 正文工具栏中的 AI 按钮。": ["控制 TinyMCE 正文工具列中的 AI 按鈕。", "Controls the AI button in the TinyMCE body toolbar."],
+    "控制器：": ["控制器：", "controller:"],
+    "控制文档新增/编辑页标题后方的 AI 生成按钮。": ["控製文件新增/編輯頁標題後方的 AI 產生按鈕。", "Controls the AI generation button behind the title of the document's new/edit page."],
+    "扩展标题1": ["擴充標題1", "extended title 1"],
+    "扩展标题2": ["擴充標題2", "Extended title 2"],
+    "扩展标题3": ["擴充標題3", "extended title 3"],
+    "软件大小": ["軟體大小", "Software size"],
+    "软件语言": ["軟體語言", "Software language"],
+    "软件类型": ["軟體類型", "Software type"],
+    "软件授权": ["軟體授權", "License"],
+    "软件类别": ["軟體類別", "Software category"],
+    "开发者官网": ["開發者官網", "Developer website"],
+    "来源与账号记录": ["來源與帳號記錄", "source and account record"],
+    "联系地址": ["聯絡地址", "Contact address"],
+    "联系电话": ["聯絡電話", "Contact number"],
+    "两种服务使用不同的 API Key；未配置对应密钥的类型不可选。请在“AI创作模型配置”的小米 MiMo 设置弹窗中分别填写。": ["兩種服務使用不同的 API Key；未配置對應金鑰的類型不選用。請在「AI創作模型配置」的小米 MiMo 設定彈窗中分別填寫。", "The two services use different API Keys; the corresponding key type is not configured and cannot be selected. Please fill them in separately in the Xiaomi MiMo settings pop-up window of \"AI Creation Model Configuration\"."],
+    "列表模板是：lists_模型标识.html": ["清單範本是：lists_模型識別.html", "list template is: lists_model identification.html"],
+    "留空表示保留当前密钥。请使用权限仅限此存储桶的子账号密钥。": ["留空表示保留目前金鑰。請使用權限僅限此儲存桶的子帳號金鑰。", "Leave blank to keep the current key. Please use a subaccount key with permissions limited to this bucket."],
+    "留空时该字段使用简体中文原文。": ["留空時此欄位使用簡體中文原文。", "This field uses the original Simplified Chinese text when left blank."],
+    "留言页面": ["留言頁面", "message page"],
+    "路由：": ["路由：", "routing:"],
+    "每行填写一集，格式：集数$播放地址": ["每行填入一集，格式：集數$播放位址", "Fill in one episode in each line, format: episode number $ playback address"],
+    "模板标签：": ["模板標籤：", "template tag:"],
+    "模板标签：参数通过": ["模板標籤：參數通過", "Template label: Parameter passed"],
+    "模型标识必须是字母或数字，字母开头，且长度为3到16位": ["模型標識必須是字母或數字，字母開頭，且長度為3到16位", "model identification must be letters or numbers, starting with a letter, and the length is 3 to 16 digits"],
+    "默认": ["預設", "default"],
+    "男|女": ["男|女", "Male|Female"],
+    "配置项": ["配置項", "configuration item"],
+    "配置页：": ["設定頁：","Configuration page:"],
+    "配置中的示例 API Key 仅演示密码字段，不会调用服务，也不会显示明文。": ["配置中的範例 API Key 僅示範密碼字段，不會呼叫服務，也不會顯示明文。", "configuration only demonstrates the password field, does not call the service, and does not display clear text."],
+    "配置状态": ["配置狀態", "configuration status"],
+    "匹配大小写": ["匹配大小寫", "matches case"],
+    "篇 TAG": ["篇 TAG", "TAG"],
+    "其他配置": ["其他配置", "other configurations"],
+    "启用 AI 创作": ["啟用 AI 創作", "Enable AI creation"],
+    "启用编辑器 AI": ["啟用編輯器 AI", "Enable editor AI"],
+    "启用前台模板多语言。": ["啟用前台範本多語言。", "Enable front-end template multi-language."],
+    "启用页脚注入": ["啟用頁尾註入", "Enable footer injection"],
+    "千帆控制台": ["千帆控制台", "Qianfan console"],
+    "前台欢迎语": ["前台歡迎語", "Welcome message at the frontend"],
+    "前台开关": ["前台開關", "frontend switch"],
+    "前台路由：": ["前台路由：", "frontend routing:"],
+    "前台默认模板": ["前台預設模板", "front-end default template"],
+    "前台入口": ["前台入口", "Front entrance"],
+    "清空文档演示记录": ["清空文件示範記錄", "Clear document demonstration record"],
+    "请为该 RAM 用户仅授予此 Bucket 所需的读写权限。": ["請為此 RAM 使用者僅授予此 Bucket 所需的讀寫權限。", "Please grant this RAM user only the required read and write permissions for this Bucket."],
+    "请先保存 SMTP 配置，再发送测试邮件。": ["請先儲存 SMTP 配置，再發送測試郵件。", "Please save the SMTP configuration before sending a test email."],
+    "请选择类型": ["請選擇類型", "Please select type"],
+    "全部（ ）": ["全部（ ）", "All ( )"],
+    "全部表单": ["全部表單", "All forms"],
+    "全部分组": ["全部分組", "All groups"],
+    "权限配置说明": ["權限配置說明", "permission configuration instructions"],
+    "人": ["人", "people"],
+    "上传附件限制(MB)": ["上傳附件限制(MB)", "Upload attachment limit (MB)"],
+    "生成插件骨架": ["產生插件骨架", "Generate plug-in skeleton"],
+    "生日": ["生日", "birthday"],
+    "生图教程": ["生圖教程", "Drawing Tutorial"],
+    "省份/州": ["省/州", "Province/State"],
+    "示例 API Key": ["範例 API Key", "Example API Key"],
+    "示例 Key： 已配置（内容不回显） 未配置": ["範例 Key： 已配置（內容不回顯） 未配置", "Example Key: Configured (content is not echoed) Not configured"],
+    "手机绑定": ["手機綁定", "mobile phone binding"],
+    "首页：": ["首頁：", "Home page:"],
+    "首页记录数量": ["首頁記錄數量", "Home page record number"],
+    "数据表：": ["資料表：", "data sheet:"],
+    "数据表：安装脚本使用": ["資料表：安裝腳本使用", "datasheet: installation script usage"],
+    "搜索词清理": ["搜尋字詞清理", "search word cleaning"],
+    "缩略图比例": ["縮圖比例", "thumbnail ratio"],
+    "缩略图生成提示词": ["縮圖產生提示詞", "Thumbnail generation prompt word"],
+    "所选风格会与比例和提示词一起提交给图片模型。": ["所選風格會與比例和提示詞一起提交給圖片模型。", "The selected style is submitted to the image model along with the scale and prompt words."],
+    "提交时间": ["提交時間", "submission time"],
+    "提示说明": ["提示說明", "Tips"],
+    "替换为": ["替換為", "replaced by"],
+    "添加电话": ["新增電話", "Add phone number"],
+    "填写对应密钥。": ["填寫對應金鑰。", "Fill in the corresponding key."],
+    "填写完整存储桶名称，包含末尾的 APPID。": ["填寫完整儲存桶名稱，包含末端的 APPID。", "Fill in the complete bucket name, including the APPID at the end."],
+    "填写需要生成静态页面的文件夹名称，不能包含特殊字符，不能和根目录系统文件夹重名；其他已配置语言会放在此目录下的语言子目录，例如 html/en-us/、html/zh-tw/": ["填寫需要產生靜態頁面的資料夾名稱，不能包含特殊字符，不能和根目錄系統資料夾重名；其他已配置語言會放在此目錄下的語言子目錄，例如 html/en-us/、html/zh-tw/", "Fill in the folder name that needs to generate static pages. It cannot contain special characters and cannot have the same name as the root directory system folder; other configured languages will be placed in the language subdirectory under this directory, such as html/en-us/, html/zh-tw/"],
+    "填写已上传图片的地址；留空隐藏二维码按钮。": ["填入已上傳圖片的位址；留空隱藏二維碼按鈕。", "Fill in the address of the uploaded image; leave it blank to hide the QR code button."],
+    "条件筛选：": ["條件篩選：", "condition filter:"],
+
+    "头像地址": ["頭像位址", "avatar address"],
+    "图片生成模型": ["圖片產生模型", "image generation model"],
+    "图片生成文档": ["圖片產生文檔", "image generation document"],
+    "推荐人ID": ["推薦人ID", "recommender ID"],
+
+
+    "网站Logo": ["網站Logo", "Website Logo"],
+    "未读（ ）": ["未讀（ ）", "Unread ( )"],
+    "文档 ID": ["文件 ID", "Document ID"],
+    "文档发布记录": ["文件發布記錄", "Document release record"],
+    "文章生成模型": ["文章生成模型", "article generation model"],
+    "文章随机点击数": ["文章隨機點擊數","Random article click count"],
+    "显示的邮箱": ["顯示的信箱", "Displayed email address"],
+    "详情模板是：view_模型标识.html": ["詳情範本是：view_模型標識.html", "details template is: view_model identification.html"],
+    "小米 MiMo": ["小米 MiMo", "Xiaomi MiMo"],
+    "协议端口号": ["協定連接埠號", "protocol port number"],
+    "星标": ["星標", "star mark"],
+    "修改配置字段时，请同步维护": ["修改設定欄位時，請同步維護", "When modifying configuration fields, please maintain them simultaneously"],
+    "选填，支持 Markdown；生成后会显示在插件配置页的帮助说明中。": ["選填，支援 Markdown；產生後會顯示在外掛程式設定頁的說明中。", "Optional, supports Markdown; after generation, it will be displayed in the help description of the plug-in configuration page."],
+    "选择播放器": ["選擇播放器", "Select player"],
+    "HTML5播放器": ["HTML5 播放器", "HTML5 player"],
+    "DPlayer播放器": ["DPlayer 播放器", "DPlayer player"],
+    "选择栏目": ["選擇欄目", "Select category"],
+    "选择属性": ["選擇屬性", "Select properties"],
+    "选择图片": ["選擇圖片", "Select picture"],
+    "选择文章生成和图片生成使用的模型。未填写对应模型的 API Key 或凭据不完整时，该选项会禁用；请先到“AI创作模型配置”填写密钥。模型密钥各自独立保存。": ["選擇文章產生和圖片產生使用的模型。未填寫對應模型的 API Key 或憑證不完整時，選項會停用；請先到「AI創作模型配置」填寫金鑰。模型密鑰各自獨立保存。", "Select the model used for article generation and image generation. When the API Key of the corresponding model is not filled in or the credentials are incomplete, this option will be disabled; please first go to \"AI Creation Model Configuration\" to fill in the key. Model keys are kept independently."],
+    "循环查找": ["循環查找", "loop search"],
+    "讯飞图片 APIKey": ["訊飛圖片 APIKey", "iFLYTEK Picture APIKey"],
+    "讯飞图片 APISecret": ["訊飛圖片 APISecret", "iFlytek Picture APISecret"],
+    "讯飞图片 APPID": ["訊飛圖 APPID", "iFlytek Pictures APPID"],
+    "讯飞星辰 MaaS": ["訊飛星辰 MaaS", "iFlytek MaaS"],
+    "讯飞星火 · 图片": ["訊飛星火 · 圖片", "iFlytek Spark · Pictures"],
+    "讯飞星火 · 文章": ["訊飛星火 · 文章", "iFlytek Spark · Article"],
+    "讯飞星火 MaaS API Key": ["訊飛星火 MaaS API Key", "iFlytek Spark MaaS API Key"],
+    "压缩包": ["壓縮包", "compressed package"],
+    "演示 hooks.php 的 search_before 映射。": ["示範 hooks.php 的 search_before 映射。", "demonstrates search_before mapping for hooks.php."],
+    "演示 template_parse 钩子修改最终 HTML。": ["示範 template_parse 鉤子修改最終 HTML。", "demonstrates template_parse hook modifying the final HTML."],
+    "演示插件配置": ["示範插件配置", "demo plug-in configuration"],
+    "演示插件首页": ["示範外掛首頁", "Demo plug-in home page"],
+    "演示站点名称": ["示範網站名稱", "Demo site name"],
+    "邀请二维码ID": ["邀請二維碼ID", "invitation QR code ID"],
+    "业务空间 ID": ["業務空間 ID", "business space ID"],
+    "页脚对齐": ["頁腳對齊", "Footer alignment"],
+    "页脚文字": ["頁腳文字", "Footer text"],
+    "页脚注入： 已开启 未开启": ["頁尾注入：已開啟／未開啟","Footer injection: Enabled / Disabled"],
+    "页面将保存在 /": ["頁面將儲存在 /","Pages will be saved in /"],
+    "页面文件放在 public/ 目录下，默认 public/tpl/close.html，可自行替换内容。": ["頁面檔案放在 public/ 目錄下，預設 public/tpl/close.html，可自行取代內容。", "page file is placed in the public/ directory. The default is public/tpl/close.html. You can replace the content by yourself."],
+    "已读": ["已讀", "Read"],
+    "已开启 未开启": ["已開啟 未開啟", "turned on not turned on"],
+    "已删除": ["已刪除", "Deleted"],
+    "映射钩子：": ["映射鉤子：", "mapping hook:"],
+    "用户行为记录开关": ["使用者行為記錄開關", "User behavior recording switch"],
+    "用户ID": ["用戶ID", "User ID"],
+    "邮件测试": ["郵件測試", "Email test"],
+    "邮件模板": ["郵件模板", "email template"],
+    "邮箱授权码": ["信箱授權碼", "email authorization code"],
+    "邮箱验证码模板": ["信箱驗證碼模板", "Email Verification Code Template"],
+    "邮箱账户": ["信箱帳戶", "email account"],
+    "友好亲切": ["友善親切", "Friendly and cordial"],
+    "右侧悬浮客服": ["右側懸浮客服", "Right floating customer service"],
+    "右侧悬浮客服配置": ["右側懸浮客服配置", "Right floating customer service configuration"],
+    "预览站点": ["預覽站點", "preview site"],
+    "在线留言": ["線上留言", "Leave a message online"],
+    "在线留言列表": ["線上留言列表", "Online message list"],
+    "站点：": ["站點：", "site:"],
+    "站点开关": ["站台開關", "site switch"],
+    "站点名称预览：": ["站台名稱預覽：", "site name preview:"],
+    "站点状态开关": ["站點狀態開關", "site status switch"],
+    "账号与会员状态": ["帳號與會員狀態", "account and membership status"],
+    "账号状态": ["帳號狀態", "account status"],
+    "找不到模板": ["找不到模板", "Template not found"],
+    "找回密码邮件模板": ["找回密碼郵件模板", "Password recovery email template"],
+    "这个插件演示了什么": ["這個插件示範了什麼", "What does this plug-in demonstrate?"],
+    "这里不是业务插件，而是一份可运行的开发样例。你可以从下面的卡片进入自定义配置页、打开前台演示页，再按“开发流程”查看代码分别放在哪个文件。": ["這裡不是商業插件，而是一份可運作的開發範例。你可以從下面的卡片進入自訂設定頁、開啟前台演示頁，再按「開發流程」查看程式碼分別放在哪個檔案。", "This is not a business plug-in, but a runnable development sample. You can enter the custom configuration page from the card below, open the front-end demo page, and then click \"Development Process\" to see which files the code is placed in."],
+    "这是插件自己编写的配置页，文件位于": ["這是外掛程式自己寫的設定頁，檔案位於", "This is the configuration page written by the plug-in itself. The file is located at"],
+    "支持 http/https 链接和站内根路径；留空隐藏在线客服按钮。": ["支援 http/https 連結和站內根路徑；留空隱藏線上客服按鈕。", "supports http/https links and site root paths; leave it blank to hide the online customer service button."],
+    "支付回调地址": ["支付回呼地址", "payment callback address"],
+    "支付商户号": ["支付商家號", "payment merchant number"],
+    "支付证书路径": ["支付證書路徑", "payment certificate path"],
+    "支付API密钥": ["支付API金鑰", "Payment API Key"],
+    "只能字母、数字、下划线、短横线": ["只能字母、數字、底線、短橫線", "can only use letters, numbers, underlines, and dashes"],
+    "指向": ["指向", "points to"],
+    "中声明的字段；本表单把所有可编辑字段一起提交，避免遗漏其他配置。": ["中宣告的欄位；本表單把所有可編輯欄位一起提交，避免遺漏其他配置。", "; this form submits all editable fields together to avoid missing other configurations."],
+    "注册及其他邮箱验证码场景共用此模板。可用变量：%site_name% 网站名称、%email% 收件邮箱、%code% 验证码、%expire_minutes% 有效分钟数。": ["註冊及其他郵箱驗證碼場景共用此範本。可用變數：%site_name% 網站名稱、%email% 收件信箱、%code% 驗證碼、%expire_minutes% 有效分鐘數。", "This template is shared by registration and other email verification code scenarios. Available variables:%site_name% website name,%email% Receiving email,%code% Verification code,%expire_minutes% Valid minutes."],
+    "注册来源平台": ["註冊來源平台", "registration source platform"],
+    "注册邮箱验证": ["註冊信箱驗證", "registered email verification"],
+    "注册IP": ["註冊IP", "registered IP"],
+    "专题文章": ["專題文章", "Featured Article"],
+    "专业正式": ["專業正式", "Professional and formal"],
+    "资料更新时间": ["資料更新時間", "data update time"],
+    "自定义示例字段": ["自訂範例字段", "Custom example field"],
+    "自动翻译功能开关和接口配置请到“插件 → AI翻译”设置。": ["自動翻譯功能開關和介面配置請到「插件 → AI翻譯」設定。", "Please go to \"Plug-in → AI Translation\" settings for automatic translation function switch and interface configuration."],
+    "自动钩子：": ["自動鉤子：", "automatic hook:"],
+    "最多 250 个字符。留空保存后会恢复默认提示词；选择“动漫”时会自动移除默认提示词中的禁用动画要求。": ["最多 250 個字元。留空儲存後會恢復預設提示字；選擇「動漫」時會自動移除預設提示詞中的停用動畫要求。", "Maximum 250 characters. After leaving it blank and saving, the default prompt word will be restored; when \"Animation\" is selected, the requirement to disable animation in the default prompt word will be automatically removed."],
+    "作为顶级菜单/节点": ["作為頂層選單/節點", "as top menu/node"],
+    "作为顶级节点": ["作為頂層節點", "as top node"],
+    "作为顶级栏目": ["作為頂級欄目", "Set as a top-level category"],
+    "作者：": ["作者：", "Author:"],
+    "作者官网：": ["作者官網：", "Author’s official website:"],
+    "AI创作功能配置": ["AI創作功能配置", "AI creation function configuration"],
+    "AI 创作": ["AI 創作", "AI writing"],
+    "AI润色": ["AI 潤色", "AI Polish"],
+    "AI续写": ["AI 續寫", "AI Continue"],
+    "AI扩写": ["AI 擴寫", "AI Expand"],
+    "AI总结": ["AI 摘要", "AI Summarize"],
+    "AI校对": ["AI 校對", "AI Proofread"],
+    "AI翻译": ["AI 翻譯", "AI Translate"],
+    "自定义指令…": ["自訂指令…", "Custom instructions…"],
+    "自定义 AI 指令": ["自訂 AI 指令", "Custom AI instructions"],
+    "AI 生成选项": ["AI 生成選項", "AI generation options"],
+    "生成文章": ["生成文章", "Generate article"],
+    "主题": ["主題", "Topic"],
+    "请输入文章主题": ["請輸入文章主題", "Enter an article topic"],
+    "例如：普通人如何利用AI提供工作效率": ["例如：普通人如何利用 AI 提升工作效率", "Example: How ordinary people can use AI to improve work efficiency"],
+    "标题": ["標題", "Title"],
+    "留空时由 AI 拟定标题": ["留空時由 AI 擬定標題", "Leave blank for AI to suggest a title"],
+    "文章字数": ["文章字數", "Word count"],
+    "约300字": ["約 300 字", "About 300 characters"],
+    "约500字": ["約 500 字", "About 500 characters"],
+    "约800字": ["約 800 字", "About 800 characters"],
+    "约1200字": ["約 1200 字", "About 1,200 characters"],
+    "约2000字": ["約 2000 字", "About 2,000 characters"],
+    "约3000字": ["約 3000 字", "About 3,000 characters"],
+    "约5000字": ["約 5000 字", "About 5,000 characters"],
+    "文章语言": ["文章語言", "Article language"],
+    "英语（English）": ["英語（English）", "English"],
+    "日语（日本語）": ["日語（日本語）", "Japanese"],
+    "韩语（한국어）": ["韓語（한국어）", "Korean"],
+    "法语（Français）": ["法語（Français）", "French"],
+    "西班牙语（Español）": ["西班牙語（Español）", "Spanish"],
+    "德语（Deutsch）": ["德語（Deutsch）", "German"],
+    "俄语（Русский）": ["俄語（Русский）", "Russian"],
+    "写作风格": ["寫作風格", "Writing style"],
+    "不选择": ["不選擇", "None"],
+    "通俗易懂": ["通俗易懂", "Easy to understand"],
+    "专业严谨": ["專業嚴謹", "Professional and rigorous"],
+    "幽默风趣": ["幽默風趣", "Humorous"],
+    "文艺优美": ["文藝優美", "Literary and elegant"],
+    "情感细腻": ["情感細膩", "Emotionally nuanced"],
+    "犀利深刻": ["犀利深刻", "Sharp and insightful"],
+    "简单直接": ["簡單直接", "Simple and direct"],
+    "目标读者": ["目標讀者", "Target audience"],
+    "普通大众": ["一般大眾", "General audience"],
+    "学生群体": ["學生族群", "Students"],
+    "职场人士": ["職場人士", "Working professionals"],
+    "创业者": ["創業者", "Entrepreneurs"],
+    "专业人士": ["專業人士", "Professionals"],
+    "年轻女性": ["年輕女性", "Young women"],
+    "年轻男性": ["年輕男性", "Young men"],
+    "大龄人群": ["較年長族群", "Older adults"],
+    "写作语气": ["寫作語氣", "Writing tone"],
+    "自然亲切": ["自然親切", "Warm and natural"],
+    "客观中立": ["客觀中立", "Objective and neutral"],
+    "热情积极": ["熱情積極", "Enthusiastic and positive"],
+    "庄重正式": ["莊重正式", "Formal"],
+    "温暖治愈": ["溫暖療癒", "Warm and comforting"],
+    "富有感染力": ["富有感染力", "Engaging"],
+    "SEO选项": ["SEO 選項", "SEO options"],
+    "简单标题": ["簡短標題", "Short title"],
+    "其他要求": ["其他要求", "Additional requirements"],
+    "选填，例如：分为三个小标题，结尾加入总结": ["選填，例如：分成三個小標題，並在結尾加入總結", "Optional, e.g. use three headings and end with a summary"],
+    "自定义指令": ["自訂指令", "Custom instructions"],
+    "目标语种": ["目標語言", "Target language"],
+    "AI 生成结果": ["AI 生成結果", "AI generation result"],
+    "插入到编辑器": ["插入至編輯器", "Insert into editor"],
+    "重新生成": ["重新生成", "Regenerate"],
+    "放弃": ["放棄", "Discard"],
+    "微软雅黑": ["微軟雅黑", "Microsoft YaHei"],
+    "苹果苹方": ["蘋方", "PingFang SC"],
+    "宋体": ["宋體", "SimSun"],
+    "仿宋体": ["仿宋體", "FangSong"],
+    "黑体": ["黑體", "SimHei"],
+    "知乎配置": ["知乎設定", "Zhihu"],
+    "小米配置": ["小米設定", "Xiaomi"],
+    "AI翻译 - 插件首页": ["AI翻譯 - 外掛程式首頁", "AI Translation - Plug-in Home Page"],
+    "批量AI翻译": ["批量AI翻譯", "Batch AI translation"],
+    "AI模型": ["AI模型", "AI model"],
+    "API 文档": ["API 文件", "API Documentation"],
+    "API Key 管理": ["API Key 管理", "API Key Management"],
+    "API Token配置": ["API Token配置", "API Token configuration"],
+    "Bucket 名称": ["Bucket 名稱", "Bucket Name"],
+    "COS 地域": ["COS 地域", "COS Region"],
+    "Email邮箱": ["Email信箱", "Email"],
+    "MiMo 服务类型": ["MiMo 服務類型", "MiMo Service Type"],
+    "MiMo 模型": ["MiMo 模型", "MiMo model"],
+    "MiMo 平台": ["MiMo 平台", "MiMo Platform"],
+    "OSS 地域": ["OSS 地域", "OSS Region"],
+    "Seedream 会按所选比例提交满足接口像素要求的最小尺寸。讯飞只支持固定尺寸：3:2 使用 640×480，2:3 使用 512×680，21:9 使用 640×360；生成后的缩略图会保留所选比例。": ["Seedream 會以所選比例提交符合介面像素要求的最小尺寸。訊飛只支援固定尺寸：3:2 使用 640×480，2:3 使用 512×680，21:9 使用 640×360；產生後的縮圖會保留所選比例。", "Seedream will deliver the smallest size that meets the pixel requirements of the interface at the selected scale. iFlytek only supports fixed sizes: 640×480 for 3:2, 512×680 for 2:3, and 640×360 for 21:9; the generated thumbnails will retain the selected ratio."],
+    "Seedream 图片 API Key": ["Seedream 圖片 API Key", "Seedream Picture API Key"],
+    "SMTP地址": ["SMTP位址", "SMTP address"],
+    "管理员列表": ["管理員列表", "Administrator List"],
+    "角色": ["角色", "role"],
+    "超级管理员不能删除": ["超級管理者不能刪除", "super administrator cannot delete"],
+    "您确定要删除该账户": ["您確定要刪除該帳戶", "Are you sure you want to delete this account?"],
+    "提示": ["提示", "Tips"],
+    "图片管理器": ["圖片管理器", "Picture Manager"],
+    "请至少选择一张图片": ["請至少選一張圖片", "Please select at least one picture"],
+    "只能选择一个文件": ["只能選擇一個文件", "Only one file can be selected"],
+    "广告列表": ["廣告列表", "Advertisement List"],
+    "广告标识": ["廣告標識", "advertising logo"],
+    "已复制到剪贴板": ["已複製到剪貼簿", "copied to clipboard"],
+    "确定删除该广告吗？": ["確定刪除該廣告嗎？", "Are you sure you want to delete this ad?"],
+    "代码调用": ["程式碼調用", "code call"],
+    "复制标签": ["複製標籤", "Copy tag"],
+    "复制JavaScript": ["複製JavaScript", "Copy JavaScript"],
+    "字段列表": ["欄位列表", "field list"],
+    "字段标题": ["欄位標題", "field title"],
+    "所属模型": ["所屬模型", "model"],
+    "确定删除该字段吗？<br/> <font style=\"color:red\">该操作将删除数据库中的对应字段，不可恢复！<br/>谨慎操作！</font>": ["確定刪除該欄位嗎？<br/> <font style=\"color:red\">該操作將刪除資料庫中的對應字段，不可恢復！<br/>謹慎操作！</font>", "Are you sure you want to delete this field?<br/> <font style=\"color:red\">This operation will delete the corresponding field in the database and is irrecoverable!<br/>Proceed with caution!</font>"],
+    "确定删除该字段吗？": ["確定刪除該欄位嗎？", "Are you sure you want to delete this field?"],
+    "该操作将删除数据库中的对应字段，不可恢复！": ["此操作將刪除資料庫中的對應字段，不可恢復！", "This operation will delete the corresponding field in the database and cannot be restored!"],
+    "谨慎操作！": ["謹慎操作！", "Operate with caution!"],
+    "模型列表": ["模型列表", "model list"],
+    "确定删除该模型吗？<br/><b style=\"color:red;\">该操作会删除模型对应的表，不可恢复！<br/>谨慎操作！</b>": ["確定刪除該模型嗎？<br/><b style=\"color:red;\">該操作會刪除模型對應的表，且不可恢復！<br/>謹慎操作！</b>", "Are you sure you want to delete this model?<br/><b style=\"color:red;\">This operation will delete the table corresponding to the model and is irrecoverable!<br/>Proceed with caution!</b>"],
+    "确定删除该模型吗？": ["確定刪除該模型嗎？", "Are you sure you want to delete this model?"],
+    "该操作会删除模型对应的表，不可恢复！": ["此操作會刪除模型對應的表，且不可恢復！", "This operation will delete the table corresponding to the model and cannot be restored!"],
+    "请至少选择一个文件": ["請至少選擇一個文件", "Please select at least one file"],
+    "输入远程下载链接（每行一个）": ["輸入遠端下載連結（每行一個）", "Enter the remote download link (one per line)"],
+    "未检测到有效网址，请确保链接以 http:// 或 https:// 开头": ["未偵測到有效網址，請確保連結以 http:// 或 https:// 開頭", "No valid URL detected, please make sure the link starts with http:// or https://"],
+    "选择视频": ["選擇視頻", "Select video"],
+    "添加到播放组": ["加入播放組", "Add to playgroup"],
+    "删除播放组": ["刪除播放組", "Delete playback group"],
+    "校验格式": ["校驗格式", "Check format"],
+    "播放组名称，例如：默认线路": ["播放組名稱，例如：預設線路", "Group name, e.g. Default line"],
+    "视频集": ["影片集", "Video playlists"],
+    "删除非站内链接": ["刪除站外連結", "Remove external links"],
+    "请至少选择一个视频文件": ["請至少選擇一個視訊文件", "Please select at least one video file"],
+    "没有可添加的视频文件": ["沒有可新增的視訊文件", "No video files to add"],
+    "请先填写视频播放地址": ["請先填寫影片播放地址", "Please fill in the video playback address first"],
+    "格式校验完成，共": ["格式校驗完成，共", "format verification completed, total"],
+    "集": ["集", "Episode"],
+    "请先勾选要添加的文档": ["請先勾選要新增的文檔", "Please check the documents you want to add first"],
+    "已添加": ["已新增", "added"],
+    "篇文档": ["篇文檔", "documents"],
+    "所选文档已在该节点中": ["所選文件已在該節點中", "The selected document is already in this node"],
+    "已添加该文档": ["已新增此文檔", "added this document"],
+    "该文档已在列表中": ["該文件已在清單中", "This document is already in the list"],
+    "确定删除「": ["確定刪除“", "Confirm to delete \""],
+    "」吗？": ["」嗎？", "\"?"],
+    "输入接收测试邮件的邮箱": ["輸入接收測試郵件的信箱", "Enter the email address for receiving test emails"],
+    "API测试用户注册": ["API測試用戶註冊", "API test user registration"],
+    "注册": ["註冊", "Register"],
+    "请填写用户名": ["請填寫用戶名", "Please fill in your username"],
+    "请填写密码": ["請填寫密碼", "Please fill in the password"],
+    "两次密码填写不一致": ["兩次密碼填寫不一致", "The passwords filled in twice are inconsistent."],
+    "API测试用户登录": ["API測試使用者登入", "API test user login"],
+    "登录": ["登入", "Login"],
+    "已复制：": ["已複製：", "Copied:"],
+    "复制失败，请手动选中后 Ctrl+C": ["複製失敗，請手動選取後 Ctrl+C", "Copy failed, please select manually Ctrl+C"],
+    "<span class=\"layui-font-red\">后台路径已更改！请牢记！</span><br/>请使用【<a href=\"{:htmlspecialchars(request()->domain())}/": ["<span class=\"layui-font-red\">後台路徑已更改！請牢記！</span><br/>請使用【<a href=\"{:htmlspecialchars(request()->domain())}/", "<span class=\"layui-font-red\">The background path has changed! Please remember!</span><br/>Please use [<a href=\"{:htmlspecialchars(request()->domain())}/"],
+    "后台路径已更改！请牢记！": ["後台路徑已更改！請牢記！", "The background path has been changed! Please remember!"],
+    "请使用【": ["請使用【", "Please use【"],
+    "</a>】打开后台": ["</a>】打開後台", "</a>】Open the background"],
+    "】打开后台": ["】打開後台", "】Open the background"],
+    "我已牢记新后台路径": ["我已牢記新後台路徑", "I have the new background path in mind"],
+    "自定义变量列表": ["自訂變數列表", "Custom variable list"],
+    "ID编号": ["ID編號", "ID number"],
+    "确定要删除该变量吗？": ["確定要刪除該變數嗎？", "Are you sure you want to delete this variable?"],
+    "确认要还原该备份吗?": ["確認要還原該備份嗎?", "Are you sure you want to restore this backup?"],
+    "数据还原中...": ["資料還原中...", "Data is being restored..."],
+    "确认要删除该备份吗?": ["確認要刪除該備份嗎?", "Are you sure you want to delete this backup?"],
+    "确认要清除该备份吗?": ["確認要清除該備份嗎?", "Are you sure you want to clear this backup?"],
+    "备份中...，请勿关闭本页面": ["備份中...，請勿關閉本頁面", "Backing up..., please do not close this page"],
+    "备份完成": ["備份完成", "Backup completed"],
+    "立即备份": ["立即備份", "Back up now"],
+    "请先选择表": ["請先選擇表", "Please select the table first"],
+    "确认要备份选中的": ["確認要備份選取的", "Confirm to back up the selected"],
+    "个数据表吗?": ["個資料表嗎?", "datasheets?"],
+    "开始备份，请不要关闭本页面！": ["開始備份，請不要關閉本頁！", "Start backup, please do not close this page!"],
+    "检测到有一个备份任务未完成，请先清除未完成的备份": ["偵測到有一個備份任務未完成，請先清除未完成的備份", "It is detected that a backup task is not completed. Please clear the unfinished backup first."],
+    "确认要优化选中的": ["確認要最佳化選取的", "Confirm to optimize the selected"],
+    "执行中": ["執行中", "is executing"],
+    "确认要修复选中的": ["確認要修復選取的", "Confirm to repair the selected"],
+    "MarkDown编辑器未初始化": ["MarkDown編輯器未初始化", "MarkDown editor is not initialized"],
+    "请先完善文档内容": ["請先完善文件內容", "Please improve the document content first"],
+    "<i class=\"layui-icon miuai-runse layui-font-16 zoom-in-out neon-text\"></i><span class=\"neon-text\">&emsp; 正在提交...</span>": ["<i class=\"layui-icon miuai-runse layui-font-16 zoom-in-out neon-text\"></i><span class=\"neon-text\">正在提交...</span>", "<i class=\"layui-icon miuai-runse layui-font-16 zoom-in-out neon-text\"></i><span class=\"neon-text\">Submitting...</span>"],
+    "&emsp; 正在提交...": ["正在提交...", "Submitting..."],
+    "文档内容已修改，是否保存？": ["文件內容已修改，是否已儲存？", "The document content has been modified. Do you want to save it?"],
+    "不保存": ["不保存", "Do not save"],
+    "所有文档": ["所有文檔", "All documents"],
+    "<i class=\"layui-icon layui-icon-tips\"></i> 键盘ESC键可快速关闭发布窗口哦<br><i class=\"layui-icon layui-icon-tips\"></i> 双击文章可快速打开编辑页": ["<i class=\"layui-icon layui-icon-tips\"></i> 鍵盤ESC鍵可快速關閉發布視窗哦<br><i class=\"layui-icon layui-icon-tips\"></i> 雙擊文章可快速開啟編輯頁", "<i class=\"layui-icon layui-icon-tips\"></i> The ESC key on the keyboard can quickly close the publishing window.<br><i class=\"layui-icon layui-icon-tips\"></i> Double-click the article to quickly open the editing page"],
+    "键盘ESC键可快速关闭发布窗口哦": ["鍵盤ESC鍵可快速關閉發佈視窗哦", "The ESC key on the keyboard can quickly close the publishing window."],
+    "双击文章可快速打开编辑页": ["雙擊文章可快速開啟編輯頁", "Double-click the article to quickly open the editing page"],
+    "所属栏目": ["所屬欄目", "Category"],
+    "文章属性 <i class=\"layui-icon layui-icon-tips\" lay-event=\"table-header-tips\" title=\"该字段开启了编辑功能\" style=\"margin-left: 3px;\"></i>": ["文章屬性 <i class=\"layui-icon layui-icon-tips\" lay-event=\"table-header-tips\" title=\"该字段开启了编辑功能\" style=\"margin-left: 3px;\"></i>", "Article properties <i class=\"layui-icon layui-icon-tips\" lay-event=\"table-header-tips\" title=\"该字段开启了编辑功能\" style=\"margin-left: 3px;\"></i>"],
+    "文章属性": ["文章屬性", "Article Properties"],
+    "审核": ["審核", "Review"],
+    "至少选择一行": ["至少選一行", "Select at least one row"],
+    "已设为单行": ["已設為單行", "is set to single line"],
+    "已设为多行": ["已設為多行", "has been set to multiple lines"],
+    "请先创建栏目": ["請先建立欄目", "Please create a category first"],
+    "发布文档 <span class=\"layui-font-12 layui-font-gray\" style=\"float: right;margin-right: 20px;\"><i class=\"layui-icon layui-icon-leaf\" style=\"font-size: 12px;\"></i> Esc快速关闭当前页</span>": ["發布文件 <span class=\"layui-font-12 layui-font-gray\" style=\"float: right;margin-right: 20px;\"><i class=\"layui-icon layui-icon-leaf\" style=\"font-size: 12px;\"></i> Esc快速關閉目前頁</span>", "publish document <span class=\"layui-font-12 layui-font-gray\" style=\"float: right;margin-right: 20px;\"><i class=\"layui-icon layui-icon-leaf\" style=\"font-size: 12px;\"></i> Esc quickly closes the current page</span>"],
+    "Esc快速关闭当前页": ["Esc快速關閉目前頁", "Esc quickly closes the current page"],
+    "加载中": ["載入中", "Loading"],
+    "确定删除所选文档吗？": ["確定刪除所選文件嗎？", "Are you sure you want to delete the selected document?"],
+    "文档回收站": ["文件回收站", "Document Recycle Bin"],
+    "编辑文档 <span class=\"layui-font-12 layui-font-gray\" style=\"float: right;margin-right: 20px;\"><i class=\"layui-icon layui-icon-leaf\" style=\"font-size: 12px;\"></i> Esc快速关闭当前页</span>": ["編輯文檔 <span class=\"layui-font-12 layui-font-gray\" style=\"float: right;margin-right: 20px;\"><i class=\"layui-icon layui-icon-leaf\" style=\"font-size: 12px;\"></i> Esc快速關閉目前頁</span>", "Edit document <span class=\"layui-font-12 layui-font-gray\" style=\"float: right;margin-right: 20px;\"><i class=\"layui-icon layui-icon-leaf\" style=\"font-size: 12px;\"></i> Esc quickly closes the current page</span>"],
+    "立即保存": ["立即儲存", "Save now"],
+    "确定要删除该文档吗?": ["確定要刪除該文件嗎?", "Are you sure you want to delete this document?"],
+    "文章属性 <i class=\"layui-icon layui-icon-tips layui-font-14\" lay-event=\"table-header-tips\" title=\"该字段开启了编辑功能\" style=\"margin-left: 3px;\"></i>": ["文章屬性 <i class=\"layui-icon layui-icon-tips layui-font-14\" lay-event=\"table-header-tips\" title=\"该字段开启了编辑功能\" style=\"margin-left: 3px;\"></i>", "Article properties <i class=\"layui-icon layui-icon-tips layui-font-14\" lay-event=\"table-header-tips\" title=\"该字段开启了编辑功能\" style=\"margin-left: 3px;\"></i>"],
+    "删除时间": ["刪除時間", "deletion time"],
+    "确定要把该文档恢复到正常列表吗？": ["決定要把該文件恢復到正常清單嗎？", "Are you sure you want to restore this document to the normal list?"],
+    "彻底删除后无法恢复，确定要删除该文档吗？": ["徹底刪除後無法恢復，確定要刪除該文件嗎？", "cannot be recovered after complete deletion. Are you sure you want to delete this document?"],
+    "确定彻底删除": ["確定徹底刪除", "Confirm complete deletion"],
+    "请先选择要恢复的文档": ["請先選擇要恢復的文檔", "Please select the document you want to restore first"],
+    "确定要把选中的": ["決定要把選取的", "Make sure you want to select"],
+    "个文档恢复到正常列表吗？": ["個文件恢復到正常清單嗎？", "documents restored to normal list?"],
+    "请先选择要彻底删除的文档": ["請先選擇要徹底刪除的文檔", "Please select the document you want to delete completely first"],
+    "彻底删除后无法恢复，确定要删除选中的": ["徹底刪除後無法恢復，確定要刪除選取的", "cannot be recovered after complete deletion. Be sure to delete the selected"],
+    "个文档吗？": ["個文件嗎？", "documents?"],
+    "确定要清空回收站吗？<br><span style=\"color:#FF5722;font-weight:700;\">回收站里的全部文档都会被彻底删除，此操作不可恢复！</span>": ["確定要清空回收站嗎？<br><span style=\"color:#FF5722;font-weight:700;\">回收站裡的全部文件都會被徹底刪除，此操作不可恢復！</span>", "Are you sure you want to empty the Recycle Bin?<br><span style=\"color:#FF5722;font-weight:700;\">All documents in the recycle bin will be completely deleted, and this operation is irreversible!</span>"],
+    "确定要清空回收站吗？": ["確定要清空回收站嗎？", "Are you sure you want to empty the Recycle Bin?"],
+    "我已知晓，继续": ["我已知曉，繼續", "I already know, continue"],
+    "最后确认：真的要清空整个回收站吗？<br><span style=\"color:#FF5722;font-weight:700;\">删除后数据无法找回，请确认已经做好数据库备份！</span>": ["最後確認：真的要清空整個回收站嗎？<br><span style=\"color:#FF5722;font-weight:700;\">刪除後資料無法找回，請確認已做好資料庫備份！</span>", "Final confirmation: Do you really want to empty the entire Recycle Bin?<br><span style=\"color:#FF5722;font-weight:700;\">The data cannot be retrieved after deletion, please make sure you have done a database backup!</span>"],
+    "最后确认：真的要清空整个回收站吗？": ["最後確認：真的要清空整個回收站嗎？", "Final confirmation: Do you really want to empty the entire Recycle Bin?"],
+    "删除后数据无法找回，请确认已经做好数据库备份！": ["刪除後資料無法找回，請確認已做好資料庫備份！", "The data cannot be retrieved after deletion, please make sure you have done a database backup!"],
+    "危险操作": ["危險操作", "Dangerous operation"],
+    "确认清空回收站": ["確認清空回收站", "Confirm emptying the Recycle Bin"],
+    "我再想想": ["我再想", "Let me think about it again"],
+    "文件回收站": ["檔案回收站", "File Recycle Bin"],
+    "预览图": ["預覽圖", "preview"],
+    "文件路径": ["檔案路徑", "file path"],
+    "确定永久删除该文件记录及未被正常附件引用的源文件吗？此操作不可恢复。": ["決定永久刪除該檔案記錄及未被正常附件引用的來源檔案嗎？此操作不可恢復。", "Are you sure you want to permanently delete this file record and the source files that are not referenced by normal attachments? This operation is irreversible."],
+    "确认删除": ["確認刪除", "Confirm deletion"],
+    "请先单击选择要还原的文件": ["請先點選選擇要還原的文件", "Please click to select the file you want to restore first"],
+    "确认还原选中的 <strong class=\"layui-font-blue\">": ["確認還原選取的 <strong class=\"layui-font-blue\">", "Confirm to restore selected <strong class=\"layui-font-blue\">"],
+    "确认还原选中的": ["確認還原選取的", "Confirm to restore the selected"],
+    "</strong> 个文件吗？还原后会重新出现在正常文件列表中。": ["</strong> 個文件嗎？還原後會重新出現在正常檔案清單中。", "</strong> A file? It will reappear in the normal file list after restoration."],
+    "个文件吗？还原后会重新出现在正常文件列表中。": ["個檔案嗎？還原後會重新出現在正常檔案清單中。", "files? It will reappear in the normal file list after restoration."],
+    "批量还原确认": ["批次還原確認", "Batch restore confirmation"],
+    "确认还原": ["確認還原", "Confirm restoration"],
+    "请先单击选择要删除的文件": ["請先點選選擇要刪除的文件", "Please click to select the file you want to delete first"],
+    "<div class=\"file-recycle-warning\"><i class=\"layui-icon layui-icon-tips\"></i><div><strong>确认永久删除选中的": ["<div class=\"file-recycle-warning\"><i class=\"layui-icon layui-icon-tips\"></i><div><strong>確認永久刪除選取的", "<div class=\"file-recycle-warning\"><i class=\"layui-icon layui-icon-tips\"></i><div><strong>Confirm permanent deletion of selected"],
+    "确认永久删除选中的": ["確認永久刪除選取的", "Confirm permanent deletion of selected"],
+    "个文件吗？</strong>对应的回收站记录将被删除，未被正常附件引用的源文件也会物理删除。此操作不可恢复。</div></div>": ["個文件嗎？</strong>對應的回收站記錄將被刪除，未被正常附件引用的來源檔案也會實際刪除。此操作不可恢復。</div></div>", "A file?</strong>The corresponding recycle bin records will be deleted, and source files not referenced by normal attachments will also be physically deleted. This operation is irreversible.</div></div>"],
+    "个文件吗？": ["個檔案嗎？"," files?"],
+    "对应的回收站记录将被删除，未被正常附件引用的源文件也会物理删除。此操作不可恢复。": ["對應的回收站記錄將會被刪除，未被正常附件引用的來源檔案也會實際刪除。此操作不可恢復。", "will be deleted, and source files that are not referenced by normal attachments will also be physically deleted. This operation is irreversible."],
+    "批量永久删除确认": ["批次永久刪除確認", "Batch permanent deletion confirmation"],
+    "确认永久删除": ["確認永久刪除", "Confirm permanent deletion"],
+    "清空文件回收站": ["清空文件回收站", "Empty the file recycle bin"],
+    "继续下一步": ["繼續下一步", "Continue to the next step"],
+    "<div class=\"file-recycle-warning\"><i class=\"layui-icon layui-icon-tips\"></i><div><strong>最后一次确认</strong>你即将永久清空整个文件回收站。此操作不可撤销，请确认后再继续。</div></div>": ["<div class=\"file-recycle-warning\"><i class=\"layui-icon layui-icon-tips\"></i><div><strong>最後一次確認</strong>你即將永久清空整個文件回收站。此操作不可撤銷，請確認後再繼續。</div></div>", "<div class=\"file-recycle-warning\"><i class=\"layui-icon layui-icon-tips\"></i><div><strong>last confirmed</strong>You are about to permanently empty the entire Recycle Bin. This operation cannot be undone, please confirm before continuing.</div></div>"],
+    "最后一次确认": ["最後一次確認", "last confirmed"],
+    "你即将永久清空整个文件回收站。此操作不可撤销，请确认后再继续。": ["你即將永久清空整個文件回收站。此操作不可撤銷，請確認後再繼續。", "You are about to permanently empty the entire Recycle Bin. This operation cannot be undone, please confirm before continuing."],
+    "最后确认：永久删除": ["最後確認：永久刪除", "Final confirmation: permanent deletion"],
+    "确认永久清空": ["確認永久清空", "Confirm permanent clearing"],
+    "我再检查": ["我再檢查", "I will check again"],
+    "上传中...": ["上傳中...", "Uploading..."],
+    "上传失败": ["上傳失敗", "upload failed"],
+    "请先选择文件": ["請先選擇文件", "Please select the file first"],
+    "请填写分组名称": ["請填寫分組名稱", "Please fill in the group name"],
+    "重命名分组": ["重新命名分組", "Rename group"],
+    "删除该分组": ["刪除該分組", "Delete this group"],
+    "个文件移动到『": ["個檔案移動到『", "files moved to \""],
+    "』分组吗？": ["’分組嗎？", "Group?"],
+    "确定要删除该分组吗？请慎重": ["決定要刪除該分組嗎？請慎重", "Are you sure you want to delete this group? Please be careful"],
+    "视频地址为空": ["視訊位址為空", "video address is empty"],
+    "音频地址为空": ["音訊位址為空", "audio address is empty"],
+    "文件记录不存在": ["檔案記錄不存在", "file record does not exist"],
+    "未找到文件路径": ["找不到檔案路徑", "File path not found"],
+    "未设置目标（target参数缺失）": ["未設定目標（target參數缺失）", "The target is not set (target parameter is missing)"],
+    "仅支持图片和视频双击插入": ["僅支援圖片和影片雙擊插入", "only supports double-click insertion of pictures and videos"],
+    "编辑器回调函数不存在": ["編輯器回呼函數不存在", "Editor callback function does not exist"],
+    "仅支持图片双击插入": ["僅支援圖片雙擊插入", "only supports double-clicking pictures to insert"],
+    "多图上传回调函数不存在": ["多圖上傳回呼函數不存在", "Multi-image upload callback function does not exist"],
+    "下载资源回调函数不存在": ["下載資源回呼函數不存在", "Download resource callback function does not exist"],
+    "只能选择视频文件": ["只能選擇視訊文件", "Only video files can be selected"],
+    "视频播放组回调函数不存在": ["影片播放組回呼函數不存在", "Video playback group callback function does not exist"],
+    "表单字段列表": ["表單欄位列表", "form field list"],
+    "可选值": ["選用值", "optional value"],
+    "确定删除这个字段吗？（历史留言里已填的值会保留）": ["確定刪除這個欄位嗎？ （歷史留言裡已填入的值會保留）", "Are you sure you want to delete this field? (The values filled in the historical messages will be retained)"],
+    "表单列表": ["表單列表", "form list"],
+    "删除表单会把它下面的字段和已收到的留言一起删掉，确定吗？": ["刪除表單會把它下面的欄位和已收到的留言一起刪掉，確定嗎？", "Deleting the form will delete the fields below it and the received messages. Are you sure?"],
+    "读取字段失败": ["讀取欄位失敗", "Failed to read field"],
+    "调用示例：": ["呼叫範例：", "calling example:"],
+    "已复制": ["已複製", "copied"],
+    "复制失败，请手动选中复制": ["複製失敗，請手動選取複製", "Copy failed, please select copy manually"],
+    "留言列表": ["留言列表", "message list"],
+    "回复留言": ["回覆留言", "reply to message"],
+    "请先勾选留言": ["請先勾選留言", "Please check the box to leave a message first"],
+    "确定删除选中的": ["決定刪除選取的", "Confirm to delete the selected"],
+    "条留言吗？": ["留言嗎？", "comments?"],
+    "留言不存在": ["留言不存在", "message does not exist"],
+    "留言详情": ["留言詳情", "Message details"],
+    "确定删除这条留言吗？": ["確定刪除這則留言嗎？", "Are you sure you want to delete this message?"],
+    "感谢您给作者加鸡腿🍗🍗": ["感謝您為作者加雞腿🍗🍗", "Thank you for adding chicken legs to the author🍗🍗"],
+    "标签分组列表": ["標籤分組列表", "tag group list"],
+    "标签数": ["標籤數", "tag number"],
+    "确定要删除该分组吗?": ["決定要刪除該分組嗎?", "Are you sure you want to delete this group?"],
+    "关键字列表": ["關鍵字列表", "keyword list"],
+    "文档数": ["文件數", "number of documents"],
+    "请先选择要移动的标签": ["請先選擇要移動的標籤", "Please select the label you want to move first"],
+    "请先选择要删除的标签": ["請先選擇要刪除的標籤", "Please select the tag you want to delete first"],
+    "确定删除所选的": ["決定刪除所選的", "Confirm to delete the selected"],
+    "个标签吗?": ["個標籤嗎?", "tags?"],
+    "确定要删除吗?": ["確定要刪除嗎?", "Are you sure you want to delete it?"],
+    "用户等级列表": ["用戶等級列表", "User level list"],
+    "确定要禁用该等级吗?": ["決定要停用該等級嗎?", "Are you sure you want to disable this level?"],
+    "确定要启用该等级吗?": ["決定要啟用此等級嗎?", "Are you sure you want to enable this level?"],
+    "友情链接列表": ["友情連結列表", "Friendly link list"],
+    "确定要删除该数据吗？": ["確定要刪除該資料嗎？", "Are you sure you want to delete this data?"],
+    "操作日志列表": ["操作日誌列表", "operation log list"],
+    "操作用户": ["操作用戶", "operating user"],
+    "请先完善单页内容": ["請先完善單頁內容", "Please complete the content of the single page first"],
+    "别名": ["別名","Alias"],
+    "是否外链": ["是否外鏈", "an external link?"],
+    "未选择任何数据": ["未選擇任何數據", "No data selected"],
+    "删除所有选定数据，删除后不可恢复！你确定吗?": ["刪除所有選定數據，刪除後不可恢復！你確定嗎?", "deletes all selected data and cannot be recovered after deletion! Are you sure?"],
+    "栏目回收站": ["欄目回收站", "Category recycle bin"],
+    "请在 留言-表单管理 新建表单并关联该栏目": ["請在 留言-表單管理 新表單並關聯該欄目", "Please create a new form in Message-Form Management and associate this category"],
+    "确定要把该栏目恢复到正常列表吗？": ["確定要把該欄目恢復到正常清單嗎？", "Are you sure you want to restore this category to the normal list?"],
+    "彻底删除后无法恢复，确定要删除该栏目吗？": ["徹底刪除後無法恢復，確定要刪除該欄目嗎？", "cannot be restored after complete deletion. Are you sure you want to delete this category?"],
+    "请先选择要恢复的栏目": ["請先選擇要恢復的欄目", "Please select the category you want to restore first"],
+    "个栏目恢复到正常列表吗？": ["個欄目恢復到正常清單嗎？", "categories restored to normal list?"],
+    "请先选择要彻底删除的栏目": ["請先選擇要徹底刪除的欄目", "Please select the category you want to delete completely first"],
+    "个栏目吗？": ["個欄目嗎？", "categories?"],
+    "确定要清空回收站吗？<br><span style=\"color:#FF5722;font-weight:700;\">回收站里的全部栏目都会被彻底删除，此操作不可恢复！</span>": ["確定要清空回收站嗎？<br><span style=\"color:#FF5722;font-weight:700;\">回收站裡的全部欄目都會被徹底刪除，此操作無法恢復！</span>", "Are you sure you want to empty the Recycle Bin?<br><span style=\"color:#FF5722;font-weight:700;\">All categories in the recycle bin will be completely deleted, and this operation cannot be restored!</span>"],
+    "保存失败，请检查网络后重试": ["儲存失敗，請檢查網路後再試試", "failed to save, please check the network and try again"],
+    "选择插件图标": ["選擇插件圖標", "Select plug-in icon"],
+    "生成中...": ["生成...", "Generating..."],
+    "生成成功！<br><br>已生成文件：<br>": ["生成成功！<br><br>已產生檔案：<br>", "Generated successfully!<br><br>File generated:<br>"],
+    "生成成功！": ["生成成功！", "generated successfully!"],
+    "已生成文件：": ["已產生檔案：", "File generated:"],
+    "<br><br>去列表里点「安装」即可使用。": ["<br><br>去列表裡點「安裝」即可使用。", "<br><br>Go to the list and click \"Install\" to use it."],
+    "去列表里点「安装」即可使用。": ["去清單裡點「安裝」即可使用。", "Go to the list and click \"Install\" to use it."],
+    "完成": ["完成", "Complete"],
+    "钩子名称": ["鉤子名稱", "hook name"],
+    "模块/控制器/方法": ["模組/控制器/方法", "module/controller/method"],
+    "监听的插件": ["監聽的插件", "monitoring plug-in"],
+    "创建插件页面尚未加载完成，请稍后再试": ["建立外掛頁面尚未載入完成，請稍後再試", "The plug-in creation page has not been loaded, please try again later."],
+    "创建插件": ["建立插件", "Create plug-in"],
+    "后台菜单面板尚未加载，请刷新后台后重试": ["後台選單面板尚未加載，請刷新後台後重試", "The background menu panel has not been loaded. Please refresh the background and try again."],
+    "配置页面尚未加载完成，请稍后再试": ["設定頁面尚未載入完成，請稍後再試", "The configuration page has not been loaded yet, please try again later."],
+    "导出插件不会导出插件产生的数据！<br>点击确定执行导出。": ["匯出插件不會匯出插件產生的資料！<br>點選確定執行匯出。", "The export plug-in will not export the data generated by the plug-in!<br>Click OK to perform the export."],
+    "导出插件不会导出插件产生的数据！": ["匯出插件不會匯出插件產生的資料！", "The export plug-in will not export the data generated by the plug-in!"],
+    "点击确定执行导出。": ["點選確定執行匯出。", "Click OK to execute the export."],
+    "导出确认": ["匯出確認", "Export confirmation"],
+    "确定要安装插件【": ["確定要安裝插件【", "Confirm to install the plug-in【"],
+    "】吗？": ["】嗎？", "】?"],
+    "二次确认": ["二次確認", "Second confirmation"],
+    "该插件没有配置菜单": ["此插件沒有配置選單", "This plug-in has no configuration menu"],
+    "确定要把【": ["確定要把【", "Make sure you want to【"],
+    "】添加到后台菜单吗？": ["】加入到後台選單嗎？", "】Add to the background menu?"],
+    "确定要删除【": ["確定要刪除【", "Are you sure you want to delete【"],
+    "】的后台菜单吗？<br><span style=\"color:#999;\">只删菜单，插件和数据不受影响。</span>": ["】的後台菜單嗎？<br><span style=\"color:#999;\">只刪除選單，插件和資料不受影響。</span>", "]Backend menu?<br><span style=\"color:#999;\">Only the menu is deleted, plug-ins and data are not affected.</span>"],
+    "】的后台菜单吗？": ["】的後台選單嗎？", "】Backend menu?"],
+    "只删菜单，插件和数据不受影响。": ["只刪選單，外掛程式和資料不受影響。", "Only deletes the menu, plug-ins and data are not affected."],
+    "正在生成插件压缩包…": ["正在產生插件壓縮包…", "is generating the plug-in compressed package..."],
+    "插件压缩包已开始下载": ["外掛程式壓縮包已開始下載", "plug-in compressed package has been downloaded"],
+    "插件导出失败": ["外掛程式匯出失敗", "Plug-in export failed"],
+    "权限组名称": ["權限群組名稱", "permission group name"],
+    "确定要删除该权限角色吗？": ["確定要刪除該權限角色嗎？", "Are you sure you want to delete this permission role?"],
+    "选择菜单图标": ["選擇選單圖標", "Select menu icon"],
+    "请选择是否在左侧菜单显示": ["請選擇是否在左側選單顯示", "Please choose whether to display it in the left menu"],
+    "关键字搜索列表": ["關鍵字搜尋列表", "keyword search list"],
+    "搜索次数": ["搜尋次數", "Search times"],
+    "当前不是「生成静态模式」，请先到 SEO → URL配置 切换": ["目前不是“生成靜態模式”，請先到 SEO → URL配置 切換", "is currently not in \"Generate static mode\", please go to SEO → URL configuration to switch"],
+    "请至少选择一种地图类型": ["請至少選擇一種地圖類型", "Please select at least one map type"],
+    "开始生成": ["開始生成", "starts generating"],
+    "没有需要生成的页面": ["沒有需要產生的頁面", "There is no page that needs to be generated."],
+    "请求失败，请确认网站可以正常访问": ["請求失敗，請確認網站可以正常訪問", "The request failed, please confirm that the website can be accessed normally"],
+    "正在生成静态页面": ["正在產生靜態頁面", "is generating a static page"],
+    "生成中断了，请重新点击生成按钮（已生成的文件会保留）": ["產生中斷了，請重新點選產生按鈕（已產生的檔案會保留）", "The generation is interrupted, please click the generate button again (the generated files will be retained)"],
+    "生成完成（有": ["產生完成（有", "generation completed (with"],
+    "个失败）": ["失敗）", "failures)"],
+    "去页面生成": ["去頁面生成", "Go to page generation"],
+    "知道了": ["知道了", "Got it"],
+    "操作完成": ["操作完成", "Operation completed"],
+    "生成失败，请检查网站是否可访问": ["生成失敗，請檢查網站是否可訪問", "Generation failed, please check whether the website is accessible"],
+    "加载失败": ["載入失敗", "loading failed"],
+    "没有打开的文件": ["沒有開啟的文件", "No open files"],
+    "文件未修改，无需保存": ["檔案未修改，無需儲存", "The file has not been modified and does not need to be saved."],
+    "文件路径无效": ["檔案路徑無效", "File path is invalid"],
+    "保存失败": ["儲存失敗", "failed to save"],
+    "没有需要保存的文件": ["沒有需要儲存的文件", "There are no files to save"],
+    "已保存": ["已儲存", "saved"],
+    "个文件": ["個文件", "files"],
+    "已刷新": ["已重新整理", "refreshed"],
+    "当前文件有未保存的修改，重新加载将丢失这些修改，确定继续？": ["目前檔案有未儲存的修改，重新載入將遺失這些修改，確定繼續？", "The current file has unsaved modifications. Reloading will lose these modifications. Are you sure to continue?"],
+    "文件已重新加载": ["檔案已重新載入", "file reloaded"],
+    "已经是最上级目录": ["已經是最上級目錄", "is already the top directory"],
+    "已返回上一级": ["已返回上一級", "has returned to the previous level"],
+    "查找": ["尋找", "Search"],
+    "请输入查找目标": ["請輸入找目標", "Please enter the search target"],
+    "未找到匹配内容": ["找不到符合內容", "No matching content found"],
+    "已到": ["已到", "Reached"],
+    "开头": ["開頭", "Beginning"],
+    "末尾": ["末", "end"],
+    "，可勾选「循环查找」": ["，可勾選「循環找」", ", you can check \"Loop Search\""],
+    "已替换": ["已替換", "replaced"],
+    "处": ["處", "occurrences"],
+    "跳转到": ["跳到", "jump to"],
+    "输入要跳转到的行号": ["輸入要跳到的行號", "Enter the line number to jump to"],
+    "保存并关闭": ["儲存並關閉", "Save and close"],
+    "不保存关闭": ["不儲存關閉", "Close without saving"],
+    "有文件保存失败，已取消关闭": ["有檔案儲存失敗，已取消關閉", "A file failed to save and the shutdown has been cancelled."],
+    "编辑器模板未找到": ["編輯器模板找不到", "Editor template not found"],
+    "模板编辑器": ["模板編輯器", "Template Editor"],
+    "目录名": ["目錄名", "directory name"],
+    "文件名（如 header.html）": ["檔名（如 header.html）", "file name (such as header.html)"],
+    "名称不能为空": ["名稱不能為空", "name cannot be empty"],
+    "」吗？<br><span style=\"color:#999;\">文件会放进回收站（runtime/template_trash），可手动恢复。</span>": ["」嗎？<br><span style=\"color:#999;\">檔案會放進回收站（runtime/template_trash），可手動恢復。</span>", "\"?\"<br><span style=\"color:#999;\">The file will be put into the recycle bin (runtime/template_trash) and can be restored manually.</span>"],
+    "文件会放进回收站（runtime/template_trash），可手动恢复。": ["檔案會放進回收站（runtime/template_trash），可手動復原。", "file will be put into the recycle bin (runtime/template_trash) and can be restored manually."],
+    "文件名": ["檔案名", "file name"],
+    "文件大小": ["檔案大小", "file size"],
+    "地区数据加载失败，请刷新页面后重试": ["地區資料載入失敗，請重新整理頁面後再試", "Regional data loading failed, please refresh the page and try again"],
+    "您确定要禁用该用户": ["您確定要停用該用戶", "Are you sure you want to disable this user?"],
+    "您确定要启用该用户": ["您確定要啟用該用戶", "Are you sure you want to enable this user?"],
+    "用户操作日志列表": ["使用者操作日誌列表", "User operation log list"],
+    "AItranslation 插件配置": ["AItranslation 外掛程式配置", "AItranslation plug-in configuration"],
+    "保存失败，请检查后台登录状态后重试": ["儲存失敗，請檢查背景登入狀態後重試", "failed to save, please check the background login status and try again"],
+    "模型配置已保存": ["模型配置已儲存", "model configuration saved"],
+    "模型配置保存失败": ["模型配置保存失敗", "model configuration failed to save"],
+    "模型配置保存失败，请稍后重试": ["模型配置儲存失敗，請稍後再試", "Model configuration failed to save, please try again later."],
+    "保存请求失败，请检查网络后重试": ["儲存要求失敗，請檢查網路後再試一次", "The save request failed, please check the network and try again."],
+    "只会删除演示插件记录表中的数据，不会删除文档或其他插件数据。确定继续吗？": ["只會刪除演示插件記錄表中的數據，不會刪除文件或其他插件數據。確定繼續嗎？", "will only delete the data in the demo plug-in record table, and will not delete documents or other plug-in data. Are you sure you want to continue?"],
+    "清空演示记录": ["清空示範記錄", "Clear demo records"],
+    "请求失败，请检查网络后重试": ["請求失敗，請檢查網路後重試", "request failed, please check the network and try again"],
+    "电话名称和号码都要填写": ["電話名稱和號碼都要填寫", "Both phone name and number must be filled in"],
+    "保存完成": ["儲存完成", "Save completed"],
+    "哎呀！找不到模板文件": ["哎呀！找不到模板文件", "Ouch! Template file not found"],
+    "模板不存在，请检查对应的目录文件，注意区分大小写！": ["模板不存在，請檢查對應的目錄文件，注意區分大小寫！", "template does not exist, please check the corresponding directory file, pay attention to case sensitivity!"],
+    "© 2025 miucms.com Apache-2.0 license，Powered by 米柚CMS": ["© 2025 miucms.com Apache-2.0 license，Powered by 米柚CMS", "© 2025 miucms.com Apache-2.0 license, Powered by Miyou CMS"],
+    "暂无备份数据": ["暫無備份數據", "No backup data yet"],
+    "备份": ["備份", "Backup"],
+    "优化": ["最佳化", "Optimize"],
+    "修复": ["修復", "Repair"],
+    "还原": ["還原", "Restore"],
+    "导入": ["匯入", "Import"],
+    "发送": ["發送", "Send"],
+    "重新设置": ["重新設定", "Reset settings"],
+    "备份时间：": ["備份時間：", "backup time:"],
+    "提交 IP": ["提交 IP", "Submit IP"],
+    "提交来源": ["投稿來源", "Submission source"],
+    "手机端": ["手機端", "Mobile version"],
+    "电脑端": ["電腦端", "PC version"],
+    "回复内容": ["回覆內容", "reply content"],
+    "\">暂无新通知": ["\">暫無新通知", "\">No new notifications yet"],
+    "输入管理员密码解锁": ["輸入管理員密碼解鎖", "Enter administrator password to unlock"],
+    "不选就自动用 view_[模型nid].html": ["不選就自動用 view_[模型nid].html", "Automatically used if not selected view_[model nid].html"],
+    "切到左边「生成插件骨架」tab，填标识、名称，勾选要生成的内容，点「生成骨架」。": ["切到左邊「產生外掛骨架」tab，填標示、名稱，勾選要產生的內容，點選「產生骨架」。", "Go to the \"Generate plug-in skeleton\" tab on the left, fill in the logo and name, check the content to be generated, and click \"Generate skeleton\"."],
+    "去「插件管理」列表找到新插件，点「安装」。": ["去「插件管理」清單找到新插件，點「安裝」。", "Go to the \"Plug-in Management\" list to find the new plug-in and click \"Install\"."],
+    "左侧菜单会多出插件菜单（勾了后台菜单的话），前台按路由地址访问（勾了前台路由的话）。": ["左側選單會多出插件選單（勾了後台選單的話），前台依路由位址存取（勾了前台路由的話）。", "There will be an additional plug-in menu on the left menu (if the background menu is checked), and the frontend can be accessed according to the routing address (if the frontend routing is checked)."],
+    "生成的是可运行骨架。下面是从零手写的完整教程，也是\"看懂生成出来的代码\"的说明。": ["產生的是可運作骨架。以下是從零手寫的完整教程，也是\"看懂生成出來的程式碼\"的說明。", "generates a runnable skeleton. The following is a complete tutorial on handwriting from scratch, as well as instructions on \"understanding the generated code\"."],
+    "下面以插件标识": ["以下以外掛標識","The examples below use the plugin identifier"],
+    "（名称\"打招呼\"）为例，目录名和命名空间都跟着这个标识走。": ["（名稱\"打招呼\"）為例，目錄名稱和命名空間都跟著這個標識走。", "(name \"Hello\") as an example, the directory name and namespace follow this logo."],
+    "只要这个文件存在且语法正确，「插件管理」列表就能扫到它 —— 这已经是一个能安装的最小插件了。": ["只要這個檔案存在且語法正確，「插件管理」清單就能掃到它 —— 這已經是一個能安裝的最小插件了。", "As long as this file exists and the syntax is correct, it can be scanned in the \"Plug-in Management\" list - this is already the smallest plug-in that can be installed."],
+    "类里加": ["類別裡加", "Class Riga"],
+    "，后台「插件管理 → 配置」会按它自动生成表单。支持": ["，後台「外掛程式管理 → 設定」會按下它自動產生表單。支援", ", \"Plug-in Management → Configuration\" in the background will automatically generate a form according to it. support"],
+    "是只读帮助区域，": ["是唯讀幫助區域，", "is a read-only help area,"],
+    "填 Markdown 原文，系统会安全转换后显示在插件配置页；它不会作为插件设置写入数据库。创建插件时填写的帮助说明会自动写入生成的": ["填入 Markdown 原文，系統會安全轉換後顯示在插件設定頁；它不會作為插件設定寫入資料庫。建立插件時填寫的幫助說明會自動寫入產生的", "Fill in the original Markdown text, and the system will safely convert it and display it on the plug-in configuration page; it will not be written to the database as plug-in settings. The help description filled in when creating the plug-in will be automatically written into the generated"],
+    "读取配置：": ["讀取配置：", "Read configuration:"],
+    "插件代码通过": ["插件程式碼透過", "plug-in code passed"],
+    "读取记录时，只能读取自身标识对应的配置；查询其他插件会被拒绝，查询已安装插件列表也只会返回自身记录。插件运行在 CMS 的 PHP 进程中，这项限制约束插件系统提供的读取接口，不构成 PHP 代码或直接数据库访问的沙箱。": ["讀取記錄時，只能讀取自身標識對應的配置；查詢其他外掛程式會被拒絕，查詢已安裝外掛程式清單也只會傳回自身記錄。插件運行在 CMS 的 PHP 進程中，這項限制約束插件系統提供的讀取接口，不構成 PHP 程式碼或直接資料庫存取的沙箱。", "reads records, it can only read the configuration corresponding to its own identity; querying other plug-ins will be rejected, and querying the list of installed plug-ins will only return its own records. The plug-in runs in the PHP process of the CMS. This restriction restricts the read interface provided by the plug-in system and does not constitute a sandbox for PHP code or direct database access."],
+    "① 菜单定义": ["① 選單定義", "① Menu definition"],
+    "② 后台控制器": ["② 後台控制器", "②Backend controller"],
+    "③ 后台视图": ["③ 後台視圖", "③ Backstage view"],
+    "安装插件": ["安裝插件", "Install plug-in"],
+    "不会": ["不會", "No"],
+    "自动加菜单。装完去「插件管理」列表点一下「": ["自動加選單。裝完去「插件管理」清單點一下“", "automatically adds a menu. After installation, go to the \"Plug-in Management\" list and click \""],
+    "添加后台菜单": ["新增後台選單", "Add background menu"],
+    "」按钮（那列里带": ["」按鈕（那列裡帶", "\" button (with the"],
+    "图标的），确认后菜单才会写进": ["圖示的），確認後選單才會寫進", "icon), the menu will be written after confirmation"],
+    "并授权给超管组，左侧才会出现「打招呼 → 设置页」。加过之后这个按钮会变成减号（": ["並授權給超管組，左側才會出現「打招呼 → 設定頁」。加過之後這個按鈕會變成減號（", "and authorize it to the super management group, then the \"Greeting → Settings Page\" will appear on the left. After adding, this button will change to a minus sign ("],
+    "删除后台菜单": ["刪除背景選單", "Delete background menu"],
+    "），点它可以只删菜单、不动插件和数据。禁用插件时菜单自动隐藏，卸载时自动删除。": ["），點它可以只刪選單、不動插件和資料。停用插件時選單自動隱藏，卸載時自動刪除。", "), click it to delete only the menu and leave the plug-ins and data unchanged. The menu is automatically hidden when the plug-in is disabled and deleted when uninstalled."],
+    "菜单图标用的是插件类里声明的": ["選單圖示用的是插件類別裡宣告的", "The menu icon is declared in the plug-in class."],
+    "（创建插件时选的那个），排序固定 100。": ["（建立插件時選的那個），排序固定 100。", "(the one selected when creating the plug-in), the sorting is fixed at 100."],
+    "① 路由": ["① 路由", "① Routing"],
+    "② 前台控制器": ["② 前台控制器", "② frontend controller"],
+    "③ 前台视图": ["③ 前台視圖", "③ Front view"],
+    "启用插件后访问": ["啟用插件後訪問", "Access after enabling the plug-in"],
+    "即可打开。": ["即可開啟。", "can be opened."],
+    "① 标签类": ["① 標籤類", "① Label class"],
+    "② 在任何前台模板里用：": ["② 在任何前台模板裡使用：", "② Use in any frontend template:"],
+    "标签前缀 = 标签类类名的小写，所以类叫": ["標籤前綴 = 標籤類別名稱的小寫，所以類別叫", "label prefix = lowercase of label class name, so the class is called"],
+    "就写": ["就寫", "just write"],
+    "。注意别和别的插件的类名撞车。": ["。注意不要與其他插件的類別名稱重複。",". Make sure it does not conflict with another plugin's class name."],
+    "类里定义": ["在類別中定義", "Define in the class"],
+    "与钩子同名的驼峰方法": ["與鉤子同名的駝峰方法", "Camel method with the same name as the hook"],
+    "，系统会自动注册（完整清单见下面第三节）：": ["，系統會自動註冊（完整清單請見下方第三節）：", ", the system will automatically register (see the third section below for the complete list):"],
+    "也可以改用映射方式，新建": ["也可以改用映射方式，新建", "can also use mapping mode, create a new"],
+    "两种方式二选一，别对同一个钩子重复声明，否则回调会被注册两次。": ["兩種方式二選一，別對同一個鉤子重複聲明，否則回調會被註冊兩次。", "Choose one of the two methods. Do not declare the same hook repeatedly, otherwise the callback will be registered twice."],
+    "引用传参的坑（重要）：": ["引用傳參的坑（重要）：", "Pitfalls in quoting parameters (important):"],
+    "带": ["帶", "belt"],
+    "的参数是": ["的參數是", "are"],
+    "引用": ["引用", "Quote"],
+    "，插件方法里必须也写成": ["，插件方法裡一定也寫成", ", the plug-in method must also be written as"],
+    "才能改到调用方的值；只写": ["才能改到呼叫方的值；只寫", "can be changed to the value of the caller; only write"],
+    "拿到的是副本，改了没用。 另外，引用参数只能传「变量」，不能传字面量或表达式——自己在插件里手动触发钩子时，要写": ["拿到的是副本，改了沒用。 另外，引用參數只能傳「變數」，不能傳字面量或表達式——自己在插件手動觸發鉤子時，要寫", "What I got is a copy, it is useless to change it. In addition, reference parameters can only pass \"variables\", not literals or expressions - when you manually trigger the hook in the plug-in, you need to write"],
+    "， 不能写": ["， 不能寫", ", cannot be written"],
+    "或": ["或", "or"],
+    "， 否则 PHP 会直接报": ["， 否則 PHP 會直接報", ", otherwise PHP will report directly"],
+    "。不确定某个钩子的参数是不是引用，先看第二节的清单或": ["。不確定某個鉤子的參數是否為參照，請先查看第二節的清單或。",". If you are unsure whether a hook parameter is passed by reference, check the list in section 2 or"],
+    "里的方法签名。": ["裡的方法簽名。", "."],
+    "（安装时执行）：": ["（安裝時執行）：", "(executed during installation):"],
+    "（卸载时执行）：": ["（卸載時執行）：", "(executed when uninstalling):"],
+    "③ 插件里读写（表名不用写前缀，": ["③ 外掛裡讀寫（表名不用寫前綴，", "③ Read and write in the plug-in (no need to write a prefix on the table name,"],
+    "会自动加）：": ["會自動加）：", "will be added automatically):"],
+    "会被自动替换成项目实际表前缀。表名建议带插件标识（如": ["會被自動替換成項目實際錶前綴。表名建議帶有插件標識（如", "will be automatically replaced with the actual table prefix of the project. It is recommended that the table name include a plug-in identifier (such as"],
+    "），避免和主表冲突。": ["），避免和主表衝突。", ") to avoid conflicts with the main table."],
+    "后台 → 插件 → 插件管理 → 找到你的插件 → 点「安装」。": ["後台 → 外掛程式 → 外掛程式管理 → 找到你的外掛程式 → 點「安裝」。", "Backend → Plug-in → Plug-in Management → Find your plug-in → Click \"Install\"."],
+    "安装会执行": ["安裝會執行", "installation will be executed"],
+    "→ 写插件记录 → 启用插件 → 注册钩子。": ["→ 寫入插件記錄 → 啟用插件 → 註冊鉤子。", "→ Write plug-in record → Enable plug-in → Register hook."],
+    "后台菜单不会自动加": ["後台選單不會自動加", "The background menu will not be added automatically."],
+    "，要回列表点「添加后台菜单」按钮（已加过的会变成减号，点一下就是删除）。": ["，要回列表點「新增後台選單」按鈕（已加過的會變成減號，點一下就是刪除）。", ", to return to the list, click the \"Add Backend Menu\" button (those that have been added will become a minus sign, click to delete)."],
+    "左侧菜单出现插件菜单；前台按": ["左側選單會顯示插件選單；前台路由依","The plugin menu appears in the sidebar; frontend routes follow"],
+    "的规则访问。": ["的規則存取。", "."],
+    "改完代码后：改了模板标签要去后台点「清缓存」（模板要重新编译）；改了钩子/菜单去插件管理「禁用」再「启用」。": ["改完程式碼後：改了模板標籤要去後台點「清除快取」（模板要重新編譯）；改了鉤子/選單去插件管理「停用」再「啟用」。", "After changing the code: After changing the template label, go to the background and click \"Clear Cache\" (the template needs to be recompiled); change the hook/menu and go to the plug-in management to \"disable\" and then \"enable\"."],
+    "方法名是钩子名的驼峰形式（": ["方法名是鉤子名的駝峰形式（", "The method name is the camel case form of the hook name ("],
+    "）。带": ["）。附帶","). Include"],
+    "的参数是引用传参，插件里改了调用方拿到的是改后的值。": ["的參數是引用傳參，插件裡改了呼叫方拿到的是改過的值。", "are passed by reference. If changed in the plug-in, the caller will get the modified value."],
+    "插件内取配置": ["插件內取配置", "Get the configuration from the plug-in"],
+    "插件外取配置": ["插件外取配置", "plug-in external configuration"],
+    "取插件实例": ["取插件實例", "Get plug-in example"],
+    "插件根目录": ["插件根目錄", "plug-in root directory"],
+    "已启用的插件": ["已啟用的插件", "enabled plugin"],
+    "后台渲染插件视图": ["後台渲染外掛程式視圖", "background rendering plug-in view"],
+    "继承": ["繼承", "inheritance"],
+    "后用": ["後用", "for later use"],
+    "前台渲染插件视图": ["前台渲染外掛程式視圖", "front-end rendering plug-in view"],
+    "（模板名以": ["（範本名稱以","(template names start with"],
+    "开头）": ["開頭）", ")"],
+    "数据库": ["資料庫", "database"],
+    "（不带前缀）": ["（不含字首）", "(without prefix)"],
+    "目录名 = 插件标识": ["目錄名 = 外掛程式標識", "directory name = plug-in ID"],
+    "：字母开头，只含字母/数字/下划线；命名空间必须是": ["：字母開頭，只含字母/數字/底線；命名空間必須是", ": starts with a letter, only contains letters/numbers/underscores; the namespace must be"],
+    "，主类必须叫": ["，主類別必須叫", ", the main class must be called"],
+    "后台页面地址": ["後台頁面位址", "background page address"],
+    "（c 默认 Index，a 默认 index），后台菜单的 url 就这么写，不用自己配路由。": ["（c 預設 Index，a 預設 index），後台選單的 url 就這麼寫，不用自己配路由。", "(c defaults to Index, a defaults to index), the url of the background menu is written like this, there is no need to configure the route yourself."],
+    "后台 action 用蛇形命名": ["後台 action 用蛇形命名", "background action is named with snake shape"],
+    "（如": ["（如", "(such as"],
+    "）。鉴权按节点 src 匹配且会转小写，驼峰 action 会匹配不上。": ["）。鑑權按節點 src 匹配且會轉小寫，駝峰 action 會不匹配。", "). Authentication is matched based on node src and will be converted to lower case. Camel case action will not match."],
+    "表名带插件前缀": ["錶名帶插件前綴", "table name with plug-in prefix"],
+    "渲染插件视图时模板名要以": ["渲染外掛視圖時模板名稱要以", "When rendering the plug-in view, the template name should end with"],
+    "）。不加的话框架会按「当前控制器」自动加前缀 —— 后台插件页地址是": ["）。不加的話框架會按「目前控制器」自動加前綴 —— 後台插件頁位址是", "). If not, the framework will automatically add the prefix according to the \"current controller\" - the address of the background plug-in page is"],
+    "，控制器是": ["，控制器是", ", the controller is"],
+    "，传": ["，傳", ", pass"],
+    "会被拼成": ["會被拼成", "will be spelled"],
+    "，报「模板文件不存在」。后台继承": ["，會提示「範本檔案不存在」。後台頁面繼承",", reports that the template file does not exist. Admin views extend"],
+    "用": ["使用", "Use"],
+    "的已自动处理，手写前台控制器时要注意。": ["的已自動處理，手寫前台控制器時要注意。", "has been automatically processed, please pay attention when writing the front controller by hand."],
+    "type 2 弹层自适应高度": ["type 2 彈層自適應高度", "type 2 elastic layer adaptive height"],
+    "：子页面要加": ["：子頁面要加", ": Sub-page needs to be added"],
+    "，否则后台全局的": ["，否則後台全域的", ", otherwise the background is global"],
+    "会让": ["會讓", "will let"],
+    "量不出真实高度；另外": ["量不出真實高度；另外", "cannot measure the true height; in addition"],
+    "要写数字，不能写": ["要寫數字，不能寫", "wants to write numbers but cannot"],
+    "缓存": ["緩存", "cache"],
+    "：装/卸/启用/禁用会自动清插件缓存；模板标签改了要手动点「清缓存」重新编译。": ["：裝/卸/啟用/停用會自動清除插件快取；模板標籤改了要手動點「清除快取」重新編譯。", ": Installing/uninstalling/enabling/disabling will automatically clear the plug-in cache; if the template label is changed, you must manually click \"Clear Cache\" to recompile."],
+    "列表里看不到我的插件": ["清單裡看不到我的插件", "My plug-in cannot be seen in the list"],
+    "：检查目录名、命名空间、类名三者是否一致；": ["：檢查目錄名稱、命名空間、類別名稱三者是否一致；", ": Check whether the directory name, namespace, and class name are consistent;"],
+    "有语法错误也会扫不到。": ["有文法錯誤也會掃不到。", "will not be scanned even if there are grammatical errors."],
+    "后台菜单没出现": ["後台選單沒出現", "The background menu does not appear"],
+    "：先确认点过列表里的「添加后台菜单」按钮（安装不会自动加）；加过之后菜单会授权给「超级管理员」组，如果你用的不是超管账号，去 系统 → 权限角色 给对应角色勾上；也可以去 系统 → 功能节点 看节点在不在。": ["：先確認點過清單裡的「新增後台選單」按鈕（安裝不會自動加）；加過之後選單會授權給「超級管理員」群組，如果你用的不是超管帳號，去 系統 → 權限角色 給對應角色勾上；也可以去 系統 → 功能節點節點 看節點在。", ": First make sure you click the \"Add Backend Menu\" button in the list (it will not be added automatically during installation); after adding it, the menu will be authorized to the \"Super Administrator\" group. If you are not using a super administrator account, go to System → Permission Role to check the corresponding role; you can also go to System → Function Node to see if the node is there."],
+    "点按钮提示\"你没有权限\"": ["點按鈕提示\"你沒有權限\"", "Click the button and prompt \"You do not have permission\""],
+    "：每个后台操作动作都要在 系统 → 功能节点 里有对应节点（src 与访问路径一致），否则连超管都会被拦。": ["：每個後台操作動作都要在 系統 → 功能節點 裡有對應節點（src 與訪問路徑一致），否則連超管都會被攔截。", ": Each background operation action must have a corresponding node in System → Function Node (src is consistent with the access path), otherwise even super management will be blocked."],
+    "模板标签没生效": ["模板標籤沒生效", "template tag does not take effect"],
+    "：后台点一下「清缓存」重新编译模板。": ["：後台點一下「清除快取」重新編譯模板。", ": Click \"Clear Cache\" in the background to recompile the template."],
+    "弹层高度不对": ["彈層高度不對", "The elastic layer height is wrong"],
+    "：见上面「命名与约定」里的弹层那条。": ["：請看上面「命名與約定」裡的彈層那條。", ": See the bullet layer item in \"Naming and Conventions\" above."],
+    "报 Class not found": ["報 Class not found", "reported Class not found"],
+    "：命名空间和目录没对上，或文件名大小写不符。": ["：命名空間和目錄沒對上，或檔案名稱大小寫不符。", ": The namespace and directory do not match, or the file name does not match the case."],
+    "改完代码没反应": ["改完碼沒反應", "No response after changing the code"],
+    "：先点「清缓存」；还不行就把插件禁用再启用。": ["：先點「清除快取」；還不行就把外掛程式停用再啟用。", ": Click \"Clear Cache\" first; if that doesn't work, disable and enable the plug-in."],
+    "系统自带一个完整示例插件": ["系統自備一個完整範例插件", "system comes with a complete sample plug-in"],
+    "，把配置、钩子、后台菜单、前台路由、模板标签、建表全演示了一遍，直接照抄最快。": ["，把配置、鉤子、後台選單、前台路由、模板標籤、建表全示範了一遍，直接照抄最快。", "demonstrated all configurations, hooks, background menus, front-end routing, template tags, and table creation. It is fastest to copy directly."],
+    "注意：如果右侧子级权限有节点被勾选了，左侧的顶级权限就必须勾选，否则无法查看右侧的子级菜单。": ["注意：如果右側子級權限有節點被勾選了，左側的頂層權限就必須勾選，否則無法查看右側的子級選單。", "Note: If a sub-level permission node on the right is checked, the top-level permission on the left must be checked, otherwise the sub-level menu on the right cannot be viewed."],
+    "选择可操作的顶级权限": ["選擇可操作的頂層權限", "Select operational top-level permissions"],
+    "选择可操作的子级权限": ["選擇可操作的子級權限", "Select operational sub-level permissions"],
+    "文件位置:": ["檔案位置:", "file location:"],
+    "行 1, 列 0": ["行 1, 列 0", "row 1, column 0"],
+    "制表符: 4": ["製表符: 4", "Tab: 4"],
+    "编码: UTF-8": ["編碼: UTF-8", "encoding: UTF-8"],
+    "语言: HTML": ["語言: HTML", "Language: HTML"],
+    "共有 条数据（ 个文件， 个文件夹）": ["共有資料（檔案：，資料夾：）","Items: files:; folders:"],
+    "已开启": ["已開啟", "is turned on"],
+    "未开启": ["未開啟", "is not turned on"],
+    "已配置": ["已配置", "Configured"],
+    "未配置": ["未配置", "Not configured"],
+    "API Key 不会在此页面显示。开关和接口参数请在插件管理的 AItranslation 配置页修改。": ["API Key 不會在此頁面顯示。開關和介面參數請在外掛程式管理的 AItranslation 設定頁修改。", "API Key will not be displayed on this page. Please modify the switch and interface parameters on the AItranslation configuration page of plug-in management."],
+    "密钥已配置": ["金鑰已配置", "Key configured"],
+    "文章模型版本：": ["文章模型版本：", "article model version:"],
+    "服务：": ["服務：", "Service:"],
+    "按量付费 API：": ["按量付費 API：", "Pay-as-you-go API:"],
+    "文章生成模型。按量付费 API 与 Token Plan 的 Key 不通用。": ["文章產生模型。以量付費 API 與 Token Plan 的 Key 不通用。", "article generation model. Pay-as-you-go API and Token Plan keys are not compatible."],
+    "文章模型版本：ERNIE 5.0（": ["文章模型版本：ERNIE 5.0（", "article model version: ERNIE 5.0 ("],
+    "文章生成接口。": ["文章產生介面。", "article generation interface."],
+    "文章生成模型，不提供图片生成。": ["文章產生模型，不提供圖片生成。", "article generation model does not provide image generation."],
+    "图片模型版本：": ["圖片模型版本：", "picture model version:"],
+    "独立于文章模型的图片服务。": ["獨立於文章模型的圖片服務。", "Image service independent of article model."],
+    "MaaS API Key（调用示例也称 API Password）。": ["MaaS API Key（呼叫範例也稱為 API Password）。", "MaaS API Key (call example also called API Password)."],
+    "凭据完整": ["憑證完整", "Credentials complete"],
+    "凭据未完整": ["憑證未完整", "Credentials incomplete"],
+    "图片接口要求 APPID、APIKey、APISecret 三项。": ["圖片介面需求 APPID、APIKey、APISecret 三項。", "picture interface requires three items: APPID, APIKey, and APISecret."],
+    "按量付费 API 与 Token Plan 使用不同的 API Key，请分别填写。密钥不会回显；留空的字段保持原配置，填写新值后会替换对应服务的密钥。": ["按量付費 API 與 Token Plan 使用不同的 API Key，請分別填寫。密鑰不會回顯；留空的欄位保持原始配置，填入新值後會取代對應服務的密鑰。", "Pay-as-you-go API and Token Plan use different API Keys, please fill them in separately. The key will not be echoed; fields left blank will retain the original configuration, and filling in the new value will replace the key of the corresponding service."],
+    "密钥不会回显。留空表示不修改，填写新值后保存会替换原密钥。": ["金鑰不會回顯。留空表示不修改，填入新值後儲存會取代原密鑰。", "key will not be echoed. Leave it blank to not modify it. Filling in the new value and saving it will replace the original key."],
+    "图片服务需要 APPID、APIKey 和 APISecret。已保存内容不会回显，可单独填写需要修改的字段；留空字段保持现有配置。": ["圖片服務需要 APPID、APIKey 和 APISecret。已儲存內容不會回顯，可單獨填寫需要修改的欄位；留空欄位保持現有配置。", "Image service requires APPID, APIKey and APISecret. The saved content will not be echoed, you can fill in the fields that need to be modified separately; leave the fields blank to keep the existing configuration."],
+    "页脚注入：": ["頁腳注入：", "Footer injection:"],
+    "示例 Key：": ["範例 Key：", "Example Key:"],
+    "已配置（内容不回显）": ["已配置（內容不回顯）", "has been configured (the content will not be echoed)"],
+    "1. 配置插件": ["1. 設定插件", "1. Configure plug-in"],
+    "进入“插件配置”填写站点名和欢迎语。密码字段不会回显；留空保存表示保留旧值。": ["進入「插件設定」填寫站點名稱和歡迎語。密碼欄位不會回顯；留空保存表示保留舊值。", "Enter \"Plug-in Configuration\" and fill in the site name and welcome message. The password field will not be echoed; saving it blank means retaining the old value."],
+    "2. 查看前台": ["2. 查看前台", "2. View the frontend"],
+    "打开前台演示页，观察配置读取和": ["開啟前台示範頁，查看設定讀取和","Open the frontend demo page to see the configuration loading and"],
+    "标签的输出。": ["標籤的輸出。", "tag."],
+    "3. 触发文档钩子": ["3. 觸發文件鉤子", "3. Trigger document hook"],
+    "发布一篇文档，": ["發布一篇文檔，", "published a document,"],
+    "会将标题写入插件自己的数据表。": ["會將標題寫入插件自己的資料表。", "will write the title to the plugin's own data table."],
+    "4. 阅读源码": ["4. 閱讀原始碼", "4. Read the source code"],
+    "从": ["從", "from"],
+    "开始，再看菜单、控制器、视图、路由、标签和 SQL 文件。": ["開始，再看選單、控制器、視圖、路由、標籤和 SQL 檔案。", "Let's get started and look at menus, controllers, views, routes, labels, and SQL files."],
+    "暂无记录。确认插件已安装并启用后，到后台发布一篇文档即可体验。": ["暫無紀錄。確認外掛程式已安裝並啟用後，到後台發布一篇文件即可體驗。", "has no record yet. After confirming that the plug-in has been installed and enabled, go to the backend to publish a document to experience it."],
+    "前台悬浮客服": ["前台懸浮客服", "Floating customer service"],
+    "收到的留言": ["收到的留言", "Messages received"],
+    "暂无留言": ["暫無留言", "No message yet"],
+    "第 / 页": ["頁碼", "Page"],
+    "该字段开启了编辑功能": ["該欄位已開啟編輯功能", "Inline editing is enabled for this field."],
+
+
+
+  };
+  Object.assign(ADMIN_TEMPLATE_I18N, {
+    '已默认': ['已預設', 'Default'],
+    '设置为默认语言': ['設為預設語言', 'Set as default language'],
+    '请选择已勾选的语言作为默认语言': ['請選擇已勾選的語言作為預設語言', 'Choose an enabled language as the default.'],
+    '勾选、取消勾选语言或点击“设置为默认语言”都会立即保存当前页配置；启用语言时会补建缺失的语言库示例文件。': ['勾選、取消勾選語言或點擊「設為預設語言」都會立即儲存目前頁面的設定；啟用語言時會補建缺少的語言庫範例檔。', 'Checking or unchecking a language, or clicking Set as default language, immediately saves all settings on this page. Missing sample dictionaries are created when enabling a language.'],
+    '默认语言必须启用；简体中文非默认时可停用，中文原文及语言包仍保留用于翻译回退。修改默认语言后，请重新生成静态页面和 Sitemap。': ['預設語言必須啟用；簡體中文非預設時可停用，中文原文及語言庫仍保留供翻譯備用。修改預設語言後，請重新產生靜態頁面和 Sitemap。', 'The default language must remain enabled. Simplified Chinese can be disabled when it is not the default; Chinese source content and dictionaries remain available as translation fallbacks. Regenerate static pages and Sitemap after changing the default language.']
+  });
+  Object.assign(ADMIN_TEMPLATE_I18N, {
+    '创建模板': ['建立範本', 'Create template'],
+    '模板已创建': ['範本已建立', 'Template created'],
+    '模板标识 *': ['範本識別碼 *', 'Template identifier *'],
+    '模板类型 *': ['範本類型 *', 'Template type *'],
+    '模板名称 *': ['範本名稱 *', 'Template name *'],
+    '模板版本': ['範本版本', 'Template version'],
+    '最低 CMS 版本': ['最低 CMS 版本', 'Minimum CMS version'],
+    '作者': ['作者', 'Author'],
+    '作者网址': ['作者網址', 'Author website'],
+    '模板简介': ['範本簡介', 'Description'],
+    '例如 mytheme': ['例如 mytheme', 'For example, mytheme'],
+    '后台显示的模板名称': ['後台顯示的範本名稱', 'Template name shown in the admin panel'],
+    '作者名称（可选）': ['作者名稱（選填）', 'Author name (optional)'],
+    'https://example.com（可选）': ['https://example.com（選填）', 'https://example.com (optional)'],
+    '模板用途与说明（可选）': ['範本用途與說明（選填）', 'Template purpose and description (optional)'],
+    '留空表示不限': ['留空表示不限', 'Leave blank for no restriction'],
+    '正在创建模板…': ['正在建立範本…', 'Creating template…'],
+    '模板已创建，可在列表中点击启用': ['範本已建立，可在清單中點擊啟用', 'Template created. Enable it from the template list.'],
+    '模板类型': ['範本類型', 'Template type'],
+    '企业官网': ['企業官網', 'Corporate website'],
+    '博客站': ['部落格網站', 'Blog'],
+    '图片站': ['圖片網站', 'Image gallery'],
+    '视频站': ['影片網站', 'Video site'],
+    '资讯门户': ['資訊入口網站', 'News portal'],
+    '选择模板类型后生成对应的页面骨架与视觉样式；所有内容均读取网站现有栏目和文档。模板包含各模型页面、搜索、标签页、三种语言包及全部 18 个内置标签的调用示例。': ['選擇範本類型後會建立對應的頁面骨架與視覺樣式；所有內容均讀取網站現有欄目和文件。範本包含各模型頁面、搜尋、標籤頁、三種語言庫及全部 18 個內建標籤的呼叫範例。', 'Choose a type to generate its page structure and visual style. Content comes from existing site categories and documents. Includes model pages, search, tags, three language dictionaries and examples for all 18 built-in tags.'],
+    '企业官网沿用当前模板骨架；其他类型会生成对应的首页、内容列表布局和视觉样式。': ['企業官網沿用目前的範本骨架；其他類型會建立對應的首頁、內容列表版面和視覺樣式。', 'Corporate websites use the current scaffold. Other types get a matching home page, content list layout and visual style.'],
+    '请选择有效的模板类型': ['請選擇有效的範本類型', 'Choose a valid template type.'],
+    '模板标识只能包含 1 至 32 位字母、数字和下划线': ['範本識別碼只能包含 1 至 32 個英文字母、數字和底線', 'Use 1–32 letters, numbers or underscores for the identifier.'],
+    'default 是系统保留的模板标识，请使用其他名称': ['default 是系統保留的範本識別碼，請使用其他名稱', 'default is reserved. Please choose another identifier.'],
+    '模板标识已被现有目录或文件使用，请更换名称': ['範本識別碼已被現有目錄或檔案使用，請更換名稱', 'This identifier is already used by a directory or file.'],
+    '请填写有效的版本号，例如 1.0.0': ['請填寫有效的版本號，例如 1.0.0', 'Enter a valid version, such as 1.0.0.'],
+    '作者网址请填写有效的 HTTP 或 HTTPS 地址': ['作者網址請填寫有效的 HTTP 或 HTTPS 位址', 'Enter a valid HTTP or HTTPS author website.'],
+    '仅生成对应类型的模板骨架与简单视觉样式，你可以在此基础上进行模板开发、修改等操作；': ['只會建立對應類型的範本骨架與簡單視覺樣式，您可以在此基礎上開發和修改範本；', 'Creates a basic scaffold and visual style for the selected type. You can continue developing and modifying the template.'],
+    '生成的模板文件路径为/templates/': ['產生的範本檔案路徑為 /templates/', 'Template files are generated in /templates/'],
+    '模板包含各模型页面、搜索、标签页、三种语言包及模板标签的调用示例。': ['範本包含各模型頁面、搜尋、標籤頁、三種語言庫及模板標籤呼叫範例。', 'The template includes model pages, search, tag pages, three language packs and template tag examples.'],
+    '只允许字母、数字、下划线；禁止 default 和现有目录名，大小写视为相同。': ['只允許英文字母、數字和底線；禁止 default 和現有目錄名稱，不區分大小寫。', 'Letters, numbers and underscores only. default and existing names are reserved, ignoring case.'],
+    '生成可启用的基础模板，包含首页、各模型页面、搜索、标签页、三种语言包及全部 18 个内置标签的调用示例。创建后在模板列表中选择启用。': ['產生可啟用的基礎範本，包含首頁、各模型頁面、搜尋、標籤頁、三種語言庫及全部 18 個內建標籤的呼叫範例。建立後在範本清單選擇啟用。', 'Generate a starter template with model pages, search, tags, three language dictionaries and examples for all 18 built-in tags. Enable it from the template list after creation.']
+  });
+  Object.assign(ADMIN_TEMPLATE_I18N, {
+    '模板': ['範本', 'Templates'],
+    '模板总数': ['範本總數', 'Total templates'],
+    '可启用': ['可啟用', 'Available'],
+    '不可用': ['無法使用', 'Unavailable'],
+    '当前 CMS 版本': ['目前 CMS 版本', 'Current CMS version'],
+    '系统升级 -': ['系統升級 -', 'System update -'],
+    '模板目录：': ['範本目錄：', 'Template directory: '],
+    '，当前启用：': ['，目前啟用：', ', currently enabled: '],
+    '。启用时会自动发布模板静态资源到 ': ['。啟用時會自動發布範本靜態資源至 ', '. Enabling publishes its static assets to '],
+    '，切换后请刷新前台页面。': ['，切換後請重新整理前台頁面。', '. Refresh the frontend after switching.'],
+    '模板列表': ['範本清單', 'Template list'],
+    '点击「启用」切换前台模板': ['點擊「啟用」切換前台範本', 'Click Enable to switch the frontend template'],
+    '当前启用': ['目前啟用', 'Current'],
+    '使用中': ['使用中', 'In use'],
+    '标识：': ['識別碼：', 'Identifier: '],
+    '暂无模板说明': ['暫無範本說明', 'No description provided'],
+    '模板版本:': ['範本版本：', 'Template version:'],
+    '最低CMS版本:': ['最低 CMS 版本：', 'Minimum CMS version:'],
+    '作者:': ['作者：', 'Author:'],
+    '作者网址:': ['作者網址：', 'Author website:'],
+    '未提供': ['未提供', 'Not provided'],
+    '不限': ['不限', 'No minimum'],
+    '正在使用': ['正在使用', 'In use'],
+    '已启用': ['已啟用', 'Enabled'],
+    '无法启用': ['無法啟用', 'Cannot enable'],
+    '可切换到该模板': ['可切換至此範本', 'Ready to switch'],
+    '启用': ['啟用', 'Enable'],
+    'templates 目录下暂无模板': ['templates 目錄中沒有範本', 'No templates found in the templates directory'],
+    '启用模板': ['啟用範本', 'Enable template'],
+    '启用后会自动发布该模板的静态资源。': ['啟用後會自動發布此範本的靜態資源。', 'The template assets will be published automatically when enabled.'],
+    '正在启用模板并同步静态资源…': ['正在啟用範本並同步靜態資源…', 'Enabling template and syncing static assets…'],
+    '模板已启用': ['範本已啟用', 'Template enabled'],
+    '启用失败': ['啟用失敗', 'Could not enable template'],
+    '请求失败，请检查网络后重试': ['請求失敗，請檢查網路後重試', 'Request failed. Check your connection and try again.']
+  });
+  Object.assign(ADMIN_TEMPLATE_I18N, {
+    '生成的模板文件路径为/templates/<模板标识>/；': ['產生的範本檔案路徑為 /templates/<範本識別碼>/；', 'Template files are generated in /templates/<template-id>/;'],
+    '。启用时会自动发布模板静态资源到': ['。啟用時會自動發布範本靜態資源至', '. Enabling publishes the template assets to'],
+
+    '2、特殊符号会被过滤掉，比如：&、=、?等': ['2、特殊符號會被過濾，例如：&、=、? 等', '2. Special characters such as &, = and ? are filtered out.'],
+    '/skin/<模板名>/': ['/skin/<範本名稱>/', '/skin/<template-name>/'],
+    '清空后保存会删除当前密钥。请为该 RAM 用户仅授予此 Bucket 所需的读写权限。': ['清空後儲存會刪除目前金鑰。請只授予此 RAM 使用者該 Bucket 所需的讀寫權限。', 'Saving an empty value deletes the current key. Grant this RAM user read/write access only to this bucket.'],
+    '清空后保存会删除当前密钥。请使用权限仅限此存储桶的子账号密钥。': ['清空後儲存會刪除目前金鑰。請使用權限僅限此儲存桶的子帳號金鑰。', 'Saving an empty value deletes the current key. Use a sub-account key restricted to this bucket.'],
+    '手机端电脑端': ['手機版／電腦版', 'Mobile / desktop'],
+    '有': ['有', 'There are'],
+    '个留言未处理': ['則留言尚未處理', 'unprocessed messages'],
+
+    'MiuCMS官网': ['MiuCMS 官網', 'MiuCMS website'],
+    '已默认设置为默认语言': ['已設為預設語言', 'Set as the default language']
+    ,'按住拖动排序': ['按住拖曳排序', 'Hold and drag to reorder']
+    ,'共 {} 张': ['共 {} 張', '{} images in total']
+    ,'正常|禁用': ['正常|停用', 'Enabled|Disabled']
+    ,'点击复制': ['點擊複製', 'Click to copy']
+    ,'有图': ['有圖', 'Has image']
+    ,'收起/展开栏目导航': ['收合／展開欄目導覽', 'Collapse/expand category navigation']
+    ,'拖动调整栏目导航宽度': ['拖曳調整欄目導覽寬度', 'Drag to resize category navigation']
+    ,'单页栏目': ['單頁欄目', 'Single-page category']
+    ,'留言栏目': ['留言欄目', 'Message category']
+    ,'查看留言': ['查看留言', 'View messages']
+    ,'已加星标': ['已加星標', 'Starred']
+    ,'科技风格登录页': ['科技風格登入頁', 'Tech login page']
+    ,'商务风格登录页': ['商務風格登入頁', 'Business login page']
+    ,'扁平风格登录页': ['扁平風格登入頁', 'Flat login page']
+    ,'国风登录页': ['國風登入頁', 'Chinese-style login page']
+    ,'是|否': ['是|否', 'Yes|No']
+    ,'删除左侧菜单快捷入口': ['刪除左側選單快速入口', 'Remove left-menu shortcut']
+    ,'添加到左侧菜单快捷入口': ['加入左側選單快速入口', 'Add to left-menu shortcuts']
+    ,'导出为 ZIP 插件包': ['匯出為 ZIP 外掛套件', 'Export as a ZIP plugin package']
+    ,'全站': ['全站', 'Entire site']
+    ,'自定义日期': ['自訂日期', 'Custom date range']
+    ,'xml地图': ['XML 地圖', 'XML sitemap']
+    ,'txt地图': ['TXT 地圖', 'TXT sitemap']
+    ,'html地图': ['HTML 地圖', 'HTML sitemap']
+    ,'llms.txt（AI地图）': ['llms.txt（AI 地圖）', 'llms.txt (AI sitemap)']
+  });
+  Object.keys(ADMIN_TEMPLATE_I18N).forEach(function (source) {
+    DICT['zh-HK'][source] = ADMIN_TEMPLATE_I18N[source][0];
+    DICT.en[source] = ADMIN_TEMPLATE_I18N[source][1];
+  });
+  DICT['zh-HK'].Disabled = '已停用';
+  DICT['zh-HK'].Restore = '還原';
+
+  function readLocale() {
+    try {
+      var saved = window.localStorage.getItem(STORAGE_KEY);
+      return LOCALES.indexOf(saved) >= 0 ? saved : 'zh-CN';
+    } catch (e) {
+      return 'zh-CN';
+    }
+  }
+
+  var locale = readLocale();
+  if (document.documentElement) document.documentElement.lang = locale;
+  var COMPONENT_MESSAGES = {
+    'zh-HK': {
+      code: { copy: '複製程式碼', copied: '已複製', copyError: '複製失敗', maximize: '最大化顯示', restore: '還原顯示', preview: '在新視窗預覽' },
+      colorpicker: { clear: '清除', confirm: '確定' },
+      dropdown: { noData: '暫無資料' },
+      flow: { loadMore: '載入更多', noMore: '沒有更多內容' },
+      form: { select: { noData: '暫無資料', noMatch: '沒有相符項目', placeholder: '請選擇' }, validateMessages: { required: '必填欄位不能為空', phone: '手機號碼格式不正確', email: '電子郵件格式不正確', url: '連結格式不正確', number: '只能填寫數字', date: '日期格式不正確', identity: '身分證號碼格式不正確' }, verifyErrorPromptTitle: '提示' },
+      laydate: { months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'], weeks: ['日', '一', '二', '三', '四', '五', '六'], time: ['時', '分', '秒'], literal: { year: '年' }, selectDate: '選擇日期', selectTime: '選擇時間', startTime: '開始時間', endTime: '結束時間', tools: { confirm: '確定', clear: '清空', now: '現在', reset: '重設' }, rangeOrderPrompt: '結束時間不能早於開始時間\n請重新選擇', invalidDatePrompt: '不在有效日期或時間範圍內\n', formatErrorPrompt: '日期格式不合法\n必須遵循：\n{format}\n', autoResetPrompt: '已自動重設', preview: '目前選取的結果' },
+      layer: { confirm: '確定', cancel: '取消', defaultTitle: '訊息', prompt: { InputLengthPrompt: '最多輸入 {length} 個字元' }, photos: { noData: '沒有圖片', tools: { rotate: '旋轉', scaleX: '水平翻轉', zoomIn: '放大', zoomOut: '縮小', reset: '還原', close: '關閉' }, viewPicture: '查看原圖', urlError: { prompt: '目前圖片網址異常，\n是否繼續查看下一張？', confirm: '下一張', cancel: '不查看' } } },
+      laypage: { prev: '上一頁', next: '下一頁', first: '首頁', last: '末頁', total: '共 {total} 筆', pagesize: '筆／頁', goto: '前往第', page: '頁', confirm: '確定' },
+      table: { sort: { asc: '升冪', desc: '降冪' }, noData: '暫無資料', tools: { filter: { title: '篩選欄位' }, export: { title: '匯出', noDataPrompt: '目前表格沒有資料', compatPrompt: '匯出功能不支援 IE，請使用 Chrome 等瀏覽器', csvText: '匯出 CSV 檔案' }, print: { title: '列印', noDataPrompt: '目前表格沒有資料' } }, dataFormatError: '回傳資料格式不正確，正確的成功狀態碼應為："{statusName}": {statusCode}', xhrError: '請求異常，錯誤訊息：{msg}' },
+      transfer: { noData: '暫無資料', noMatch: '沒有相符項目', title: ['清單一', '清單二'], searchPlaceholder: '搜尋關鍵字' },
+      tree: { defaultNodeName: '未命名', noData: '暫無資料', deleteNodePrompt: '確定刪除「{name}」節點嗎？' },
+      upload: { fileType: { file: '檔案', image: '圖片', video: '影片', audio: '音訊' }, validateMessages: { fileExtensionError: '選取的{fileType}包含不支援的格式', filesOverLengthLimit: '同時最多只能選取 {length} 個檔案', currentFilesLength: '目前已選取 {length} 個檔案', fileOverSizeLimit: '檔案大小不能超過 {size}' }, chooseText: '{length} 個檔案' }
+    },
+    en: {
+      code: { copy: 'Copy code', copied: 'Copied', copyError: 'Copy failed', maximize: 'Maximize', restore: 'Restore', preview: 'Preview in a new window' },
+      colorpicker: { clear: 'Clear', confirm: 'Confirm' },
+      dropdown: { noData: 'No data' },
+      flow: { loadMore: 'Load more', noMore: 'No more data' },
+      form: { select: { noData: 'No data', noMatch: 'No matching options', placeholder: 'Please select' }, validateMessages: { required: 'This field is required', phone: 'Invalid phone number', email: 'Invalid email address', url: 'Invalid URL', number: 'Numbers only', date: 'Invalid date', identity: 'Invalid ID number' }, verifyErrorPromptTitle: 'Notice' },
+      laydate: { months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'], weeks: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], time: ['Hour', 'Minute', 'Second'], literal: { year: '' }, selectDate: 'Select date', selectTime: 'Select time', startTime: 'Start time', endTime: 'End time', tools: { confirm: 'Confirm', clear: 'Clear', now: 'Now', reset: 'Reset' }, rangeOrderPrompt: 'End time must be after start time.\nPlease select again.', invalidDatePrompt: 'Date or time is out of range.\n', formatErrorPrompt: 'Invalid date format.\nExpected format:\n{format}\n', autoResetPrompt: 'Reset automatically', preview: 'Selected value' },
+      layer: { confirm: 'Confirm', cancel: 'Cancel', defaultTitle: 'Message', prompt: { InputLengthPrompt: 'Enter no more than {length} characters' }, photos: { noData: 'No images', tools: { rotate: 'Rotate', scaleX: 'Flip horizontally', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset', close: 'Close' }, viewPicture: 'View original image', urlError: { prompt: 'The image URL is invalid.\nContinue to the next image?', confirm: 'Next', cancel: 'Cancel' } } },
+      laypage: { prev: 'Previous', next: 'Next', first: 'First', last: 'Last', total: '{total} total', pagesize: 'per page', goto: 'Go to', page: '', confirm: 'Go' },
+      table: { sort: { asc: 'Ascending', desc: 'Descending' }, noData: 'No data', tools: { filter: { title: 'Filter columns' }, export: { title: 'Export', noDataPrompt: 'The table has no data', compatPrompt: 'Export is not supported in IE. Use a modern browser such as Chrome.', csvText: 'Export CSV' }, print: { title: 'Print', noDataPrompt: 'The table has no data' } }, dataFormatError: 'Invalid response format. Expected success status: "{statusName}": {statusCode}', xhrError: 'Request error: {msg}' },
+      transfer: { noData: 'No data', noMatch: 'No matching items', title: ['List 1', 'List 2'], searchPlaceholder: 'Search keywords' },
+      tree: { defaultNodeName: 'Unnamed', noData: 'No data', deleteNodePrompt: 'Delete node "{name}"?' },
+      upload: { fileType: { file: 'File', image: 'Image', video: 'Video', audio: 'Audio' }, validateMessages: { fileExtensionError: 'The selected {fileType} contains an unsupported format', filesOverLengthLimit: 'Select no more than {length} files at a time', currentFilesLength: '{length} files selected', fileOverSizeLimit: 'File size must not exceed {size}' }, chooseText: '{length} files' }
+    }
+  };
+  window.LAYUI_GLOBAL = window.LAYUI_GLOBAL || {};
+  var globalI18n = window.LAYUI_GLOBAL.i18n || {};
+  globalI18n.locale = locale;
+  globalI18n.messages = globalI18n.messages || {};
+  ['zh-HK', 'en'].forEach(function (code) {
+    var current = globalI18n.messages[code] || {};
+    var defaults = COMPONENT_MESSAGES[code];
+    Object.keys(defaults).forEach(function (key) {
+      if (!current[key]) current[key] = defaults[key];
+    });
+    globalI18n.messages[code] = current;
+  });
+  window.LAYUI_GLOBAL.i18n = globalI18n;
+
+  var textState = new WeakMap();
+  var attrState = new WeakMap();
+  var TABLE_UI_SELECTOR = 'button,.layui-btn,.layui-badge,.adv-type-tag,.adv-content-more,.miu-i18n-ui-label,.layui-form-checkbox,.layui-form-switch,.layui-form-radio';
+  var SKIP_SELECTOR = 'input,textarea,script,style,pre,code,[contenteditable="true"],.layui-table-body,.CodeMirror,.editormd,.mce-content-body,[data-miu-i18n-ignore]';
+  var SKIP_ATTR_SELECTOR = 'script,style,pre,code,[contenteditable="true"],.layui-table-body,.CodeMirror,.editormd,.mce-content-body,[data-miu-i18n-ignore]';
+  var UI_SELECTOR = 'title,footer,legend,[lay-radio],select,option,p,li,td,b,strong,.login-form,.theme-item,button,a,label,th,h1,h2,h3,h4,h5,h6,.layui-form-item,.layui-form-label,.layui-form-mid,.layui-td-gray,.layui-td-gray-2,.layui-text,.layui-elem-quote,.layui-quote-nm,.layui-word-aux,.layui-btn,.layui-badge,.adv-type-tag,.adv-content-more,.miu-i18n-ui-label,.layui-nav,.layui-tab-title,.layui-tabs-header,.layui-colla-title,.layui-card-title,.layui-card-header,.layui-card-body,.layui-layer-title,.layui-layer-content,.layui-table-header,.layui-table-page,.layui-breadcrumb,.layui-tree,.layui-form-radio,.layui-form-checkbox,.layui-form-switch,.layui-form-select dl dd,.layui-upload-text,.layui-bg-gray,.notic,.notic2,.notic-red,.exp,.exp-txt,.gen-tip,.right-tips,.quick-nav-item,.num-title,.info-td,.info-warning,.info-value,.stat-label,.stat-sub,.info-tips,.info-text,.footer,.k,.v,.miucms-sub-title,.index-tip,.t,.d,.miu-lock-tip,.language-required,.note,.warn,.red,.status-item,.total,.layui-font-gray,.model-version,.model-key-status,.model-dialog-tip,.model-status,.layui-padding-1,#dataTips,#menuList,#subNav,#miuSearch,#miuNotice,.miu-tab-menu,.miucms-head-item,.tox';
+
+  function insideSkip(node) {
+    var element = node.nodeType === 1 ? node : node.parentElement;
+    if (!element || !element.closest) return false;
+    var skipped = element.closest(SKIP_SELECTOR);
+    if (!skipped) return false;
+    // 表格正文里的数据不翻译，但保留对行内操作按钮的翻译。
+    if (skipped.matches('.layui-table-body')) {
+      var uiLabel = element.closest(TABLE_UI_SELECTOR);
+      if (uiLabel && skipped.contains(uiLabel)) return false;
+    }
+    return true;
+  }
+
+  function isUiNode(node) {
+    var element = node.nodeType === 1 ? node : node.parentElement;
+    return !!(element && element.closest && element.closest(UI_SELECTOR));
+  }
+
+  function recoverSource(value, dictionary) {
+    var trimmed = value.trim();
+    if (locale === 'zh-CN' || !dictionary) return value;
+    var match = null;
+    Object.keys(dictionary).some(function (source) {
+      if (dictionary[source] !== trimmed) return false;
+      if (match !== null) {
+        match = false;
+        return true;
+      }
+      match = source;
+      return false;
+    });
+    if (typeof match !== 'string') return value;
+    return value.slice(0, value.indexOf(trimmed)) + match + value.slice(value.indexOf(trimmed) + trimmed.length);
+  }
+
+  var translateDynamicText = (function () {
+    var patterns = [
+      [/^格式校验完成，共\s*(\d+)\s*集$/, '格式校驗完成，共 $1 集', 'Format check complete. Episode count: $1.'],
+      [/^已添加\s*(\d+)\s*篇文档$/, '已新增 $1 篇文件', 'Documents added: $1'],
+      [/^已复制：([\s\S]*)$/, '已複製：$1', 'Copied: $1'],
+      [/^确认要备份选中的\s*(\d+)\s*个数据表吗[?？]$/, '確定要備份所選的 $1 個資料表嗎？', 'Back up the $1 selected tables?'],
+      [/^确认要优化选中的\s*(\d+)\s*个数据表吗[?？]$/, '確定要最佳化所選的 $1 個資料表嗎？', 'Optimize the $1 selected tables?'],
+      [/^确认要修复选中的\s*(\d+)\s*个数据表吗[?？]$/, '確定要修復所選的 $1 個資料表嗎？', 'Repair the $1 selected tables?'],
+      [/^确定要把选中的\s*(\d+)\s*个文档恢复到正常列表吗？$/, '確定要將所選的 $1 篇文件還原到正常列表嗎？', 'Restore the $1 selected documents to the list?'],
+      [/^确定要把选中的\s*(\d+)\s*个栏目恢复到正常列表吗？$/, '確定要將所選的 $1 個欄目還原到正常列表嗎？', 'Restore the $1 selected categories to the list?'],
+      [/^彻底删除后无法恢复，确定要删除选中的\s*(\d+)\s*个文档吗？$/, '徹底刪除後無法還原，確定要刪除所選的 $1 篇文件嗎？', 'This cannot be undone. Permanently delete the $1 selected documents?'],
+      [/^彻底删除后无法恢复，确定要删除选中的\s*(\d+)\s*个栏目吗？$/, '徹底刪除後無法還原，確定要刪除所選的 $1 個欄目嗎？', 'This cannot be undone. Permanently delete the $1 selected categories?'],
+      [/^确定删除选中的\s*(\d+)\s*条留言吗？$/, '確定要刪除所選的 $1 條留言嗎？', 'Delete the $1 selected messages?'],
+      [/^确定删除所选的\s*(\d+)\s*个标签吗\?$/, '確定要刪除所選的 $1 個標籤嗎？', 'Delete the $1 selected tags?'],
+      [/^确定要把选中的\s*(\d+)\s*个文件移动到『([\s\S]+)』分组吗？$/, '確定要將所選的 $1 個檔案移至「$2」分組嗎？', 'Move the $1 selected files to "$2"?'],
+      [/^确定还原选中的\s*(\d+)\s*个文件吗？还原后会重新出现在正常文件列表中。$/, '確定要還原所選的 $1 個檔案嗎？還原後會重新出現在正常檔案列表中。', 'Restore the $1 selected files? They will reappear in the file list.'],
+      [/^确认还原选中的\s*(\d+)$/, '確定要還原所選的 $1', 'Confirm restoring the $1 selected'],
+      [/^\s*个文件吗？还原后会重新出现在正常文件列表中。$/, ' 個檔案嗎？還原後會重新出現在正常檔案列表中。', ' files? They will reappear in the file list.'],
+      [/^确认永久删除选中的\s*(\d+)$/, '確定要永久刪除所選的 $1', 'Confirm permanently deleting the $1 selected'],
+      [/^\s*个文件吗？对应的回收站记录将被删除，未被正常附件引用的源文件也会物理删除。此操作不可恢复。$/, ' 個檔案嗎？對應的回收站記錄將被刪除，未被正常附件引用的來源檔案也會永久刪除。此操作無法還原。', ' files? Their recycle-bin records will be deleted, and unreferenced source files will be permanently removed. This cannot be undone.'],
+      [/^确定删除「([\s\S]+)」吗？$/, '確定要刪除「$1」嗎？', 'Delete "$1"?'],
+      [/^确定启用模板「([\s\S]+)」吗？$/, '確定要啟用範本「$1」嗎？', 'Enable the "$1" template?'],
+      [/^确定要安装插件【([\s\S]+)】吗？$/, '確定要安裝外掛「$1」嗎？', 'Install the "$1" plugin?'],
+      [/^当前 MiuCMS 版本（([\s\S]+)）低于插件要求的最低版本（([\s\S]+)），请升级后再安装。$/, '目前 MiuCMS 版本（$1）低於外掛要求的最低版本（$2），請升級後再安裝。', 'The current MiuCMS version ($1) is below the plugin minimum ($2). Upgrade MiuCMS before installing.'],
+      [/^确定要把【([\s\S]+)】添加到后台菜单吗？$/, '確定要將「$1」加入後台選單嗎？', 'Add "$1" to the admin menu?'],
+      [/^确定要删除【([\s\S]+)】的后台菜单吗？$/, '確定要刪除「$1」的後台選單嗎？', 'Remove the admin menu for "$1"?'],
+      [/^调用示例：([\s\S]*)$/, '呼叫範例：$1', 'Usage example: $1'],
+      [/^生成完成（有\s*(\d+)\s*个失败）$/, '生成完成（$1 個失敗）', 'Generation complete ($1 failed)'],
+      [/^已保存\s*(\d+)\s*个文件$/, '已儲存 $1 個檔案', 'Files saved: $1'],
+      [/^已到(开头|末尾)，可勾选「循环查找」$/, '已到$1，可勾選「循環查找」', 'Reached the $1. Select "Wrap search" to continue.'],
+      [/^已替换\s*(\d+)\s*处$/, '已替換 $1 處', 'Replaced $1 occurrences'],
+      [/^设置\s+([\s\S]+?)\s+API Key$/, '設定 $1 API Key', 'Set $1 API key'],
+      [/^第\s*(\d+)\s*\/\s*(\d+)\s*页$/, '第 $1 / $2 頁', 'Page $1 of $2'],
+      [/^共\s*(\d+)\s*条$/, '共 $1 條', '$1 total'],
+      [/^共\s*(\d+)\s*张$/, '圖片數：$1', 'Images: $1'],
+      [/^后台管理 - (.+) - miucms\.com$/, '後台管理 - $1 - miucms.com', 'Admin - $1 - miucms.com'],
+      [/^字段标识(.+)$/, '欄位標識 $1', 'Field identifier $1'],
+      [/^备份时间：([\s\S]+)$/, '備份時間：$1', 'Backup time: $1'],
+      [/^下载备份\(分卷(.+)\)$/, '下載備份（第 $1 卷）', 'Download backup (part $1)'],
+      [/^全部（(\d+)）$/, '全部（$1）', 'All ($1)'],
+      [/^未读（(\d+)）$/, '未讀（$1）', 'Unread ($1)'],
+      [/^留言详情 · ([\s\S]+)$/, '留言詳情 · $1', 'Message details · $1'],
+      [/^编辑-([\s\S]*)$/, '編輯 - $1', 'Edit - $1'],
+      [/^三、钩子清单（共\s*(\d+)\s*个）$/, '三、鉤子清單（共 $1 個）', '3. Hook list ($1 total)'],
+      [/^页面将保存在 ([\s\S]+)\/$/, '頁面將儲存在 $1/', 'Pages will be saved in $1/'],
+      [/^共有\s*(\d+)\s*条数据（\s*(\d+)\s*个文件，\s*(\d+)\s*个文件夹）$/, '共 $1 條資料（檔案：$2，資料夾：$3）', 'Items: $1; files: $2; folders: $3'],
+      [/^站点：([\s\S]+)$/, '網站：$1', 'Site: $1'],
+      [/^作者：([\s\S]+)$/, '作者：$1', 'Author: $1'],
+      [/^页脚注入：([\s\S]+)$/, '頁尾注入：$1', 'Footer injection: $1'],
+      [/^示例 Key：([\s\S]+)$/, '範例 Key：$1', 'Example key: $1'],
+      [/^（由 document_added 钩子写入，最多显示\s*(\d+)\s*条）$/, '（由 document_added 鉤子寫入，最多顯示 $1 條）', '(Written by the document_added hook; showing up to $1 records)'],
+      [/^服务：([\s\S]+)$/, '服務：$1', 'Service: $1'],
+      [/^© 二〇二四-(\d+) · 米柚内容管理系统$/, '© 2024-$1 · 米柚內容管理系統', '© 2024-$1 · MiuCMS'],
+      [/^请使用【$/, '請使用【', 'Open the admin at 【'],
+      [/^】打开后台$/, '】開啟後台', '】'],
+      [/^请选择([\s\S]+)$/, '請選擇$1', 'Select $1'],
+      [/^未读$/, '未讀', 'Unread']
+    ];
+    return function (value) {
+      if (locale === 'zh-CN') return value;
+      for (var i = 0; i < patterns.length; i++) {
+        var match = value.match(patterns[i][0]);
+        if (!match) continue;
+        return patterns[i][locale === 'zh-HK' ? 1 : 2].replace(/\$(\d+)/g, function (placeholder, index) {
+          return match[Number(index)] || '';
+        });
+      }
+      return value;
+    };
+  })();
+
+  function translateTextNode(node) {
+    if (!node || node.nodeType !== 3 || insideSkip(node) || !isUiNode(node)) return;
+    var current = node.nodeValue;
+    var state = textState.get(node);
+    if (!state) {
+      state = { source: recoverSource(current, DICT[locale]), translated: null };
+      textState.set(node, state);
+    } else if (state.translated !== null && current !== state.translated) {
+      state.source = recoverSource(current, DICT[locale]);
+      state.translated = null;
+    }
+
+    var source = state.source;
+    var trimmed = source.trim();
+    var translated = locale === 'zh-CN' ? trimmed : ((DICT[locale] && DICT[locale][trimmed]) || translateDynamicText(trimmed));
+    var textElement = node.parentElement;
+    if (locale === 'en' && translated === trimmed && textElement && textElement.closest && textElement.closest('.info-value')) {
+      var seconds = trimmed.match(/^(\d+)\s*秒$/);
+      if (seconds) translated = seconds[1] + ' seconds';
+    }
+    if (translated === trimmed) {
+      if (current !== source) node.nodeValue = source;
+      state.translated = null;
+      return;
+    }
+    var leading = source.match(/^\s*/)[0];
+    var trailing = source.match(/\s*$/)[0];
+    var output = leading + translated + trailing;
+    if (current !== output) node.nodeValue = output;
+    state.translated = output;
+  }
+
+  function translateAttribute(element, name) {
+    var skipped = element.closest && element.closest(SKIP_ATTR_SELECTOR);
+    var tableUi = element.closest && element.closest(TABLE_UI_SELECTOR);
+    if (skipped && !(skipped.matches('.layui-table-body') && tableUi && skipped.contains(tableUi))) return;
+    var value = element.getAttribute(name);
+    if (value === null) return;
+    var states = attrState.get(element);
+    if (!states) {
+      states = Object.create(null);
+      attrState.set(element, states);
+    }
+    var state = states[name];
+    if (!state) state = states[name] = { source: recoverSource(value, DICT[locale]), translated: null };
+    else if (state.translated !== null && value !== state.translated) {
+      state.source = recoverSource(value, DICT[locale]);
+      state.translated = null;
+    }
+    var source = state.source;
+    var translated = locale === 'zh-CN' ? source : ((DICT[locale] && DICT[locale][source.trim()]) || translateDynamicText(source));
+    if (translated !== value) element.setAttribute(name, translated);
+    state.translated = translated === source ? null : translated;
+  }
+
+  function translateElement(element) {
+    if (!element || element.nodeType !== 1 || element.closest('[data-miu-lang-switcher]')) return;
+    var inputPlaceholder = element.matches('input[placeholder],textarea[placeholder]');
+    var requiredMessage = element.matches('[lay-reqText]');
+    if (isUiNode(element) || inputPlaceholder || requiredMessage) {
+      ['title', 'aria-label'].forEach(function (name) { translateAttribute(element, name); });
+      if (element.matches('.right-tips[data-tips]')) translateAttribute(element, 'data-tips');
+      if (element.matches('.quick-nav-item[data-title]')) translateAttribute(element, 'data-title');
+      if (inputPlaceholder) translateAttribute(element, 'placeholder');
+      if (requiredMessage) translateAttribute(element, 'lay-reqText');
+    }
+    if (element.matches('input[type="button"],input[type="submit"]')) translateAttribute(element, 'value');
+  }
+
+  function walk(root) {
+    if (!root) return;
+    if (root.nodeType === 3) {
+      translateTextNode(root);
+      return;
+    }
+    if (root.nodeType === 1) translateElement(root);
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (node) {
+        return insideSkip(node) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    while (walker.nextNode()) translateTextNode(walker.currentNode);
+    if (root.querySelectorAll) {
+      root.querySelectorAll('title, [title], [placeholder], [aria-label], [lay-reqText], input[type="button"], input[type="submit"], .right-tips[data-tips], .quick-nav-item[data-title]').forEach(function (element) {
+        translateElement(element);
+      });
+    }
+  }
+
+  function refreshPicker() {
+    document.querySelectorAll('[data-miu-lang-switcher]').forEach(function (picker) {
+      var current = picker.querySelector('[data-miu-lang-current]');
+      if (current) current.textContent = LABELS[locale];
+      var toggle = picker.querySelector('[data-miu-lang-toggle]');
+      if (toggle) toggle.setAttribute('aria-label', SWITCH_LABELS[locale]);
+      picker.querySelectorAll('[data-miu-lang-option]').forEach(function (option) {
+        var active = option.getAttribute('data-miu-lang-option') === locale;
+        option.classList.toggle('active', active);
+        option.setAttribute('aria-current', active ? 'true' : 'false');
+      });
+    });
+  }
+
+  function applyLocale(nextLocale, updateStorage) {
+    if (LOCALES.indexOf(nextLocale) < 0) return;
+    locale = nextLocale;
+    if (updateStorage !== false) {
+      try { window.localStorage.setItem(STORAGE_KEY, locale); } catch (e) {}
+    }
+    document.documentElement.lang = locale;
+    if (window.layui && window.layui.i18n) {
+      window.layui.i18n.set({ locale: locale });
+    }
+    walk(document.body || document.documentElement);
+    refreshPicker();
+    // 后台主体和各标签页 iframe 共用同源存储；直接更新文案，不重载页面，避免丢失未保存内容。
+    document.querySelectorAll('iframe').forEach(function (frame) {
+      try {
+        var api = frame.contentWindow && frame.contentWindow.MiuAdminI18n;
+        if (api) api.setLocale(locale, false);
+      } catch (e) {}
+    });
+    var localeEvent;
+    if (typeof window.CustomEvent === 'function') {
+      localeEvent = new window.CustomEvent('miu-admin-locale-change', { detail: { locale: locale } });
+    } else {
+      localeEvent = document.createEvent('CustomEvent');
+      localeEvent.initCustomEvent('miu-admin-locale-change', false, false, { locale: locale });
+    }
+    window.dispatchEvent(localeEvent);
+  }
+
+  function closePickers(except) {
+    document.querySelectorAll('[data-miu-lang-switcher].open').forEach(function (picker) {
+      if (picker !== except) {
+        picker.classList.remove('open');
+        var toggle = picker.querySelector('[data-miu-lang-toggle]');
+        if (toggle) toggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  document.addEventListener('click', function (event) {
+    var option = event.target.closest && event.target.closest('[data-miu-lang-option]');
+    if (option) {
+      event.preventDefault();
+      event.stopPropagation();
+      applyLocale(option.getAttribute('data-miu-lang-option'), true);
+      closePickers();
+      return;
+    }
+    var toggle = event.target.closest && event.target.closest('[data-miu-lang-toggle]');
+    if (toggle) {
+      event.preventDefault();
+      event.stopPropagation();
+      var picker = toggle.closest('[data-miu-lang-switcher]');
+      var willOpen = !picker.classList.contains('open');
+      closePickers(picker);
+      picker.classList.toggle('open', willOpen);
+      toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      return;
+    }
+    closePickers();
+  });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') closePickers();
+  });
+
+  function observe() {
+    var root = document.documentElement;
+    if (!root) return;
+    walk(root);
+    var observer = new MutationObserver(function (records) {
+      records.forEach(function (record) {
+        if (record.type === 'characterData') translateTextNode(record.target);
+        else {
+          record.addedNodes.forEach(function (node) { walk(node); });
+          if (record.type === 'attributes') translateElement(record.target);
+        }
+      });
+    });
+    observer.observe(root, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['title', 'placeholder', 'aria-label', 'value', 'data-tips', 'data-title', 'lay-reqText']
+    });
+    refreshPicker();
+  }
+
+  window.MiuAdminI18n = {
+    getLocale: function () { return locale; },
+    setLocale: applyLocale,
+    addMessages: function (messages) {
+      Object.keys(messages).forEach(function (language) {
+        if (!Object.prototype.hasOwnProperty.call(DICT, language) || !messages[language]) return;
+        Object.keys(messages[language]).forEach(function (source) {
+          var translation = messages[language][source];
+          if (source !== '__proto__' && typeof translation === 'string' &&
+              !Object.prototype.hasOwnProperty.call(DICT[language], source)) {
+            DICT[language][source] = translation;
+          }
+        });
+      });
+    },
+    translate: function (text) {
+      return locale === 'zh-CN' ? text : ((DICT[locale] && DICT[locale][text]) || text);
+    }
+  };
+
+  window.addEventListener('storage', function (event) {
+    if (event.key === STORAGE_KEY && LOCALES.indexOf(event.newValue) >= 0) applyLocale(event.newValue, false);
+  });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', observe, { once: true });
+  else observe();
+})(window, document);

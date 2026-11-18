@@ -1,0 +1,1210 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<div class="layui-fluid has-conf-submit-bar">
+	<div class="layui-card">
+		<div class="layui-card-body setting" style="padding: 15px;">
+			<style>
+				form.conf-layout .layui-form-item { max-width: 70%; }
+				form.conf-layout > .layui-tab > .layui-tab-title {
+					position: sticky;
+					top: 0;
+					z-index: 100;
+					background: #fff;
+				}
+				@media screen and (max-width: 767.98px) {
+					form.conf-layout .layui-form-item { max-width: 100%; }
+					form.conf-layout #logo { width: 100% !important; }
+				}
+				.layui-form-item {
+					margin-bottom: 15px;
+				}
+				/* 提交按钮一行固定到底部 */
+				.conf-submit-bar {
+					position: fixed;
+					left: 0;
+					right: 0;
+					bottom: 0;
+					z-index: 1000;
+					padding: 10px 15px;
+					background-color: #fff;
+					border-top: 1px solid #eceef0;
+					box-shadow: 0 -2px 8px rgba(0, 0, 0, .04);
+				}
+				.has-conf-submit-bar { padding-bottom: 80px; }
+				.conf-call-row > .layui-col-sm6 > .layui-form-item { max-width: 100%; }
+				.conf-call-tag {
+					padding: 0 16px;
+					line-height: 38px;
+					text-align: left;
+					font-size: 12px;
+					color: #8a8f99;
+					font-family: Consolas, Monaco, "Courier New", monospace;
+					user-select: all;
+					-webkit-user-select: all;
+					cursor: pointer;
+					word-break: break-all;
+					border-radius: 3px;
+					transition: color .2s, background-color .2s;
+				}
+				.conf-call-tag:hover { color: #1e9fff;  }
+			</style>
+			<form class="layui-form conf-layout" action="" lay-filter="globalform">
+				<div class="layui-tab layui-tab-brief" lay-filter="conftab">
+					<ul class="layui-tab-title">
+						<li lay-id="basic" class="layui-this">基本配置</li>
+						<li lay-id="core">核心配置</li>
+						<li lay-id="email">邮箱配置</li>
+						<!-- <li lay-id="wechat">微信配置</li> -->
+						<li lay-id="attachment">附件配置</li>
+						<li lay-id="api-token" style="display: none;">API Token配置</li>
+					</ul>
+					<div class="layui-tab-content">
+					<div class="layui-tab-item layui-show" lay-id="basic">
+						<!-- 基本配置 -->
+						<div class="layui-row conf-call-row">
+							<div class="layui-col-sm6">
+								<div style="padding: 4px 16px;" class="layui-bg-gray layui-font-gray layui-margin-2">基本设置</div>
+							</div>
+							<div class="layui-col-sm6">
+								<div style="padding: 4px 16px;" class="layui-bg-gray layui-font-gray layui-margin-2">调用标签</div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item" style="display: none;">
+							<label class="layui-form-label">系统名称<font>*</font></label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="admin_title" autocomplete="off" placeholder="请输入系统名称" class="layui-input" {notempty name="$config.admin_title" } value="{$config.admin_title}" {/notempty}>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+		
+						<div class="layui-row conf-call-row">
+							<div class="layui-col-sm6">
+								<div class="layui-form-item" style="display: none;">
+									<label class="layui-form-label">系统版本号<font>*</font></label>
+									<div class="layui-input-block">
+										<div class="layui-input-group" style="width:100%">
+											<input type="text" name="version" autocomplete="off" placeholder="请输入版本号" class="layui-input" {notempty name="$config.version" } value="{$config.version}" {/notempty}>
+											{tips tips="" /}
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+		
+						<div class="layui-row conf-call-row">
+							<div class="layui-col-sm6">
+								<div class="layui-form-item">
+									<label class="layui-form-label">网站名称<font>*</font></label>
+									<div class="layui-input-block">
+										<div class="layui-input-group" style="width:100%">
+											<input type="text" name="site_name" lay-verify="required" autocomplete="off" placeholder="请输入网站平台名称" lay-reqText="请输入网站名称" class="layui-input" {notempty name="$config.site_name" } value="{$config.site_name}" {/notempty}>
+											{tips tips="用于页面标题等位置显示，尽量简短" /}
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="layui-col-sm6">
+								<span class="conf-call-tag">{literal}{miu:global name='site_name'/}{/literal}</span>
+							</div>
+						</div>
+		
+						<div class="layui-row conf-call-row">
+							<div class="layui-col-sm6">
+								<div class="layui-form-item">
+									<label class="layui-form-label">网站域名<font>*</font></label>
+									<div class="layui-input-block">
+										<div class="layui-input-group" style="width:100%">
+											<input type="text" name="site_domain" lay-verify="required" autocomplete="off" placeholder="https://" lay-reqText="请输入网站域名" class="layui-input" {notempty name="$config.site_domain" } value="{$config.site_domain}" {/notempty}>
+											{tips tips="网站域名，包含http://或https://，后面不能带斜杠/。<br>例如：https://www.xxxx.com" /}
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="layui-col-sm6">
+								<span class="conf-call-tag">{literal}{miu:global name='site_domain'/}{/literal}</span>
+							</div>
+						</div>
+		
+						<div class="layui-row conf-call-row">
+							<div class="layui-col-sm6">
+								<div class="layui-form-item">
+									<label class="layui-form-label">网站LOGO</label>
+									<div class="layui-input-block">
+										<div class="layui-inline marginr-0">
+											<span style="display:inline-flex;align-items:center;">
+												<i class="layui-icon layui-icon-picture" style="margin-right:5px;cursor:pointer;" id="logo-preview-icon"></i>
+												<input type="text" id="site_logo" name="site_logo" lay-affix="clear" autocomplete="off" class="layui-input" style="width:370px;" placeholder="点击上传或输入图片地址" {notempty name="$config.site_logo" } value="{$config.site_logo}" {/notempty}>
+											</span>
+										</div>
+										<div class="layui-inline">
+											<button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue uploadBtn" data-bind="site_logo">选择上传</button>
+											{tips tips="网站LOGO图片，将显示在前台页面。建议使用PNG格式。" style="margin-left:5px;flex-shrink:0;" /}
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="layui-col-sm6">
+								<span class="conf-call-tag">{literal}{miu:global name='site_logo'/}{/literal}</span>
+							</div>
+						</div>
+		
+						<div class="layui-row conf-call-row">
+							<div class="layui-col-sm6">
+								<div class="layui-form-item">
+									<label class="layui-form-label">网站图标</label>
+									<div class="layui-input-block">
+										<div class="layui-inline marginr-0">
+											<span style="display:inline-flex;align-items:center;">
+												<i class="layui-icon layui-icon-picture" style="margin-right:5px;cursor:pointer;" id="ico-preview-icon"></i>
+												<input type="text" id="site_ico" name="site_ico" lay-affix="clear" autocomplete="off" class="layui-input" style="width:370px;" placeholder="点击上传或输入ico地址" {notempty name="$config.site_ico" } value="{$config.site_ico}" {/notempty}>
+											</span>
+										</div>
+										<div class="layui-inline">
+											<button type="button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue uploadBtn" data-bind="site_ico">选择上传</button>
+											{tips tips="网站图标，将显示在浏览器地址栏和标签页。支持ico/png/jpg格式正方形图片" style="margin-left:5px;flex-shrink:0;" /}
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="layui-col-sm6">
+								<span class="conf-call-tag">{literal}{miu:global name='site_ico'/}{/literal}</span>
+							</div>
+						</div>
+		
+						<div class="layui-row conf-call-row">
+							<div class="layui-col-sm6">
+								<div class="layui-form-item">
+									<label class="layui-form-label">ICP备案号</label>
+									<div class="layui-input-block">
+										<div class="layui-input-group" style="width:100%">
+											<input type="text" name="site_icp" autocomplete="off" placeholder="请输入ICP备案号" class="layui-input" {notempty name="$config.site_icp" } value="{$config.site_icp}" {/notempty}>
+											{tips tips="ICP备案号，即工信部备案号" /}
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="layui-col-sm6">
+								<span class="conf-call-tag">{literal}{miu:global name='site_icp'/}{/literal}</span>
+							</div>
+						</div>
+		
+						<div class="layui-row conf-call-row">
+							<div class="layui-col-sm6">
+								<div class="layui-form-item">
+									<label class="layui-form-label">公安备案号</label>
+									<div class="layui-input-block">
+										<div class="layui-input-group" style="width:100%">
+											<input type="text" name="site_beian" autocomplete="off" placeholder="请输入公安备案号" class="layui-input" {notempty name="$config.site_beian" } value="{$config.site_beian}" {/notempty}>
+											{tips tips="公安网备案号" /}
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="layui-col-sm6">
+								<span class="conf-call-tag">{literal}{miu:global name='site_beian'/}{/literal}</span>
+							</div>
+						</div>
+		
+						<div class="layui-row conf-call-row">
+							<div class="layui-col-sm6">
+								<div class="layui-form-item layui-form-text">
+									<label class="layui-form-label">站点自定义代码</label>
+									<div class="layui-input-block">
+										<div class="layui-input-group" style="width:100%">
+											<textarea name="site_code" placeholder="请输入完整的自定义代码" class="layui-textarea">{notempty name="$config.site_code"}{$config.site_code}{/notempty}</textarea>
+											{tips tips="用于保存需要通过模板输出的 HTML 或 JavaScript，例如客服代码和广告代码。" /}
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="layui-col-sm6">
+								<span class="conf-call-tag">{literal}{miu:global name='site_code'/}{/literal}</span>
+							</div>
+						</div>
+		
+						<div class="layui-row conf-call-row">
+							<div class="layui-col-sm6">
+								<div class="layui-form-item">
+									<label class="layui-form-label">版权信息</label>
+									<div class="layui-input-block">
+										<div class="layui-input-group" style="width:100%">
+											<input type="text" name="site_copyright" autocomplete="off" placeholder="请输入版权信息" class="layui-input" {notempty name="$config.site_copyright" } value="{$config.site_copyright}" {/notempty}>
+											{tips tips="网站版权信息，通常显示在网站底部。支持HTML代码。" /}
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="layui-col-sm6">
+								<span class="conf-call-tag">{literal}{miu:global name='site_copyright'/}{/literal}</span>
+							</div>
+						</div>
+
+
+						<div class="layui-row conf-call-row">
+							<div class="layui-col-sm6">
+								<div style="padding: 4px 16px;" class="layui-bg-gray layui-font-gray layui-margin-2">首页SEO信息</div>
+							</div>
+						</div>
+						<div class="layui-row conf-call-row">
+							<div class="layui-col-sm6">
+								<div class="layui-form-item">
+									<label class="layui-form-label">首页SEO标题<font>*</font></label>
+									<div class="layui-input-block">
+										<div class="layui-input-group" style="width:100%">
+											<input type="text" name="site_title" lay-verify="required" autocomplete="off" placeholder="请输入SEO标题" lay-reqText="请输入SEO标题" class="layui-input" {notempty name="$config.site_title" } value="{$config.site_title}" {/notempty}>
+											{tips tips="网站首页标题，是SEO优化的核心。建议80个字符以内，包含核心关键词。" /}
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="layui-col-sm6">
+								<span class="conf-call-tag">{literal}{miu:global name='site_title'/}{/literal}</span>
+							</div>
+						</div>
+		
+						<div class="layui-row conf-call-row">
+							<div class="layui-col-sm6">
+								<div class="layui-form-item">
+									<label class="layui-form-label">首页SEO关键词</label>
+									<div class="layui-input-block">
+										<div class="layui-input-group" style="width:100%">
+											<input type="text" name="site_keywords" autocomplete="off" placeholder="多个关键词用“,”隔开" lay-reqText="请输入SEO关键字" class="layui-input" {notempty name="$config.site_keywords" } value="{$config.site_keywords}" {/notempty}>
+											{tips tips="网站首页关键词，用于SEO优化。建议100个字符以内，用英文逗号隔开。" /}
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="layui-col-sm6">
+								<span class="conf-call-tag">{literal}{miu:global name='site_keywords'/}{/literal}</span>
+							</div>
+						</div>
+		
+						<div class="layui-row conf-call-row">
+							<div class="layui-col-sm6">
+								<div class="layui-form-item layui-form-text">
+									<label class="layui-form-label">首页SEO描述</label>
+									<div class="layui-input-block">
+										<div class="layui-input-group" style="width:100%">
+												<textarea name="site_desc" placeholder="请输入网站描述" lay-reqText="请输入网站描述" class="layui-textarea">{notempty name="$config.site_desc"}{$config.site_desc}{/notempty}</textarea>
+												{tips tips="网站首页描述，显示在搜索引擎搜索结果。建议200个字符以内。" /}
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="layui-col-sm6">
+								<span class="conf-call-tag">{literal}{miu:global name='site_desc'/}{/literal}</span>
+							</div>
+						</div>
+		
+						<div class="layui-form-item layui-layout-admin">
+							<div class="layui-input-block">
+							</div>
+						</div>
+					
+					</div>
+						<div class="layui-tab-item" lay-id="core">
+							<!-- 核心配置 -->
+							<div style="padding: 4px 16px;" class="layui-bg-gray layui-font-gray layui-margin-2">站点开关</div>
+							<div class="layui-form-item">
+								<label class="layui-form-label">站点状态开关</label>
+								<div class="layui-input-block">
+									<input type="radio" name="site_status" value="1" title="开启" lay-filter="siteStatus" {if condition="!isset($config['site_status']) or $config['site_status'] == 1"}checked{/if}>
+									<input type="radio" name="site_status" value="0" title="关闭" lay-filter="siteStatus" {if condition="isset($config['site_status']) and $config['site_status'] == 0"}checked{/if}>
+									{tips tips="控制网站是否对外开放，用于临时维护等用途。关闭后前台所有页面都会显示下面设置的关闭页，后台不受影响。" style="vertical-align: middle;" /}
+								</div>
+							</div>
+
+							<div id="siteStatusCloseBox" style="display:none;">
+								<div class="layui-form-item">
+									<label class="layui-form-label">关闭方式</label>
+									<div class="layui-input-block">
+										<input type="radio" name="site_status_mode" value="0" title="提示文字" lay-filter="siteStatusMode" {if condition="!isset($config['site_status_mode']) or $config['site_status_mode'] == 0"}checked{/if}>
+										<input type="radio" name="site_status_mode" value="1" title="跳转链接" lay-filter="siteStatusMode" {if condition="isset($config['site_status_mode']) and $config['site_status_mode'] == 1"}checked{/if}>
+										<input type="radio" name="site_status_mode" value="2" title="模板页面" lay-filter="siteStatusMode" {if condition="isset($config['site_status_mode']) and $config['site_status_mode'] == 2"}checked{/if}>
+										{tips tips="网站关闭时的展示方式：提示文字——显示一句提示文字；跳转链接——跳转到指定网址；模板页面——显示 public/ 目录下的自定义页面。" style="vertical-align: middle;" /}
+									</div>
+								</div>
+
+								<div class="layui-form-item site-status-mode" id="siteStatusMode0">
+									<label class="layui-form-label">提示文字</label>
+									<div class="layui-input-block">
+										<div class="layui-input-group" style="width:100%;max-width: 500px;">
+											<input type="text" name="site_status_text" autocomplete="off" placeholder="网站暂时关闭，维护中……" class="layui-input" value="{$config.site_status_text | default='网站暂时关闭，维护中……'}">
+										</div>
+										<p class="layui-word-aux" style="max-width: 500px;">网站关闭时显示的提示文字。</p>
+									</div>
+								</div>
+
+								<div class="layui-form-item site-status-mode" id="siteStatusMode1">
+									<label class="layui-form-label">跳转链接</label>
+									<div class="layui-input-block">
+										<div class="layui-input-group" style="width:100%;max-width: 500px;">
+											<input type="text" name="site_status_url" autocomplete="off" placeholder="必须以 http:// 或 https:// 开头" class="layui-input" value="{$config.site_status_url | default=''}">
+										</div>
+										<p class="layui-word-aux" style="max-width: 500px;">网站关闭时跳转的目标网址，必须以 http:// 或 https:// 开头。</p>
+									</div>
+								</div>
+
+								<div class="layui-form-item site-status-mode" id="siteStatusMode2">
+									<label class="layui-form-label">模板页面</label>
+									<div class="layui-input-block">
+										<div class="layui-input-group" style="width:100%;max-width: 500px;">
+											<input type="text" name="site_status_tpl" autocomplete="off" placeholder="public/tpl/close.html" class="layui-input" value="{$config.site_status_tpl | default='public/tpl/close.html'}">
+										</div>
+										<p class="layui-word-aux" style="max-width: 500px;">页面文件放在 public/ 目录下，默认 public/tpl/close.html，可自行替换内容。</p>
+									</div>
+								</div>
+							</div>
+
+							<div style="padding: 4px 16px;" class="layui-bg-gray layui-font-gray layui-margin-2">后台路径</div>
+
+							<div class="layui-form-item">
+								<label class="layui-form-label">后台管理路径</label>
+								<div class="layui-input-inline">
+									<div class="layui-input-group" style="width:100%">
+										<div class="layui-input-split layui-input-prefix" style="white-space:nowrap;background:#f5f7fa;color:#888;cursor:default;padding-right:2px;text-align:right;">{:htmlspecialchars(request()->domain())}/</div>
+										<input type="text" name="admin_path" autocomplete="off" placeholder="留空则使用默认入口" class="layui-input layui-input-inline" value="{$config.admin_path|default=''}">
+										{tips tips="安全设置，保护后台登录路径不被猜出。只能使用字母、数字、下划线，长度 2-32 位；不能与 api / crud / home / install / static / storage 等保留名冲突。保存后请用新路径访问后台。" color="red" /}
+									</div>
+								</div>
+							</div>
+							<div style="padding: 4px 16px;" class="layui-bg-gray layui-font-gray layui-margin-2">其他配置</div>
+							<div class="layui-form-item">
+								<label class="layui-form-label">去除index.php</label>
+								<div class="layui-input-block">
+									<input type="radio" name="url_no_index" value="1" title="开启" {if condition="$config.url_no_index eq 1"}checked{/if}>
+									<input type="radio" name="url_no_index" value="0" title="关闭" {if condition="$config.url_no_index eq 0"}checked{/if}>
+									{tips tips="开启后地址不带 index.php，需要服务器伪静态规则已生效。" style="vertical-align: middle;" /}
+								</div>
+							</div>
+
+							<div class="layui-form-item">
+								<label class="layui-form-label">发布/编辑文档时</label>
+								<div class="layui-input-block">
+									<input type="checkbox" name="url_del_home" value="1" title="清除首页缓存" lay-skin="primary" {if condition="$config.url_del_home eq 1"}checked{/if}>
+									<input type="checkbox" name="url_del_nav" value="1" title="清除相关栏目缓存" lay-skin="primary" {if condition="$config.url_del_nav eq 1"}checked{/if}>
+									<input type="checkbox" name="url_del_side" value="1" title="清除上下篇缓存" lay-skin="primary" {if condition="$config.url_del_side eq 1"}checked{/if}>
+									{tips tips="发布/编辑文档时，更新这些缓存，避免更新后前台内容不及时更新。" style="vertical-align: middle;" /}
+								</div>
+							</div>
+
+							<div class="layui-form-item">
+								<label class="layui-form-label">回收站开关</label>
+								<div class="layui-input-block">
+									<input type="radio" name="is_recycle" value="1" title="开启" {if condition="isset($config.is_recycle) && $config.is_recycle eq 1"}checked{/if}>
+									<input type="radio" name="is_recycle" value="0" title="关闭" {if condition="isset($config.is_recycle) && $config.is_recycle eq 0"}checked{/if}>
+									{tips tips="开启后，删除的文档、栏目将进入回收站，可以恢复。关闭后，删除的内容将直接永久删除，无法恢复。" style="vertical-align: middle;" /}
+								</div>
+							</div>
+
+							<div class="layui-form-item">
+								<label class="layui-form-label">上传附件限制(MB)<font>*</font></label>
+								<div class="layui-input-block">
+									<div class="layui-input-group" style="width:100%;max-width: 200px;">
+										<input type="number" name="upload_max_filesize" lay-verify="required | number" autocomplete="off" placeholder="请输入上传附件限制" lay-reqText="请输入上传附件限制" class="layui-input" value="{$config.upload_max_filesize | default='5'}">
+										<div class="layui-input-split layui-input-suffix" style="width:1%;white-space:nowrap;background:#f5f7fa;color:#888;cursor:default;padding-left:10px;text-align:left;">MB</div>
+										{tips tips="允许上传文件的大小限制，单位是MB，建议不要超过10MB；不能超过php.ini的upload_max_filesize值，否则无效。" /}
+									</div>
+								</div>
+							</div>
+
+							<div class="layui-form-item">
+								<label class="layui-form-label">系统文本编辑器</label>
+								<div class="layui-input-block">
+									<div class="layui-input-group" style="width:100%;max-width: 300px;">
+										<select name="editor" lay-filter="aihao">
+											<option value="1" {eq name="$config.editor" value="1"}selected{/eq}>富文本编辑器(TinyMCE)</option>
+											<option value="2" {eq name="$config.editor" value="2"}selected{/eq}>MarkDown编辑器</option>
+										</select>
+										{tips tips="注意：切换编辑器后，文章内容对应的文本内容可能需要重新编辑。" /}
+									</div>
+
+								</div>
+							</div>
+
+							<div class="layui-form-item">
+								<label class="layui-form-label">文章随机点击数</label>
+								<div class="layui-input-block">
+									<input type="radio" name="is_random_click" value="1" title="开启" {if condition="isset($config.is_random_click) && $config.is_random_click eq 1"}checked{/if}>
+									<input type="radio" name="is_random_click" value="0" title="关闭" {if condition="isset($config.is_random_click) && $config.is_random_click eq 0"}checked{/if}>
+									{tips tips="发布文章时是否默认打开文章随机点击数" style="vertical-align: middle;" /}
+
+								</div>
+							</div>
+
+							<div class="layui-form-item">
+								<label class="layui-form-label">随机数范围</label>
+								<div class="layui-input-block">
+									<div class="layui-inline">
+										<div class="layui-input-inline">
+											<input type="text" name="random_click_scope_start" value="{$config.random_click_scope_start | default='100'}" autocomplete="off" id="random_click_scope_start" class="layui-input" placeholder="">
+										</div>
+										<div class="layui-form-mid">&emsp;-</div>
+										<div class="layui-input-inline">
+											<input type="text" name="random_click_scope_end" value="{$config.random_click_scope_end | default='200'}" autocomplete="off" id="random_click_scope_end" class="layui-input" placeholder="">
+										</div>
+									</div>
+									{tips tips="如果开启文章随机点击数，此处必填；起始数值要小于结束数值；不能为负数。" /}
+								</div>
+							</div>
+
+							<div class="layui-form-item">
+								<label class="layui-form-label">远程图片本地化</label>
+								<div class="layui-input-block">
+									<input type="radio" name="editor_img_download_to_local" value="1" title="开启" {if condition="isset($config.editor_img_download_to_local) && $config.editor_img_download_to_local eq 1"}checked{/if}>
+									<input type="radio" name="editor_img_download_to_local" value="0" title="关闭" {if condition="isset($config.editor_img_download_to_local) && $config.editor_img_download_to_local eq 0"}checked{/if}>
+									{tips tips="发布文章时是否默认开启远程图片本地化" style="vertical-align: middle;" /}
+								</div>
+							</div>
+
+							<div class="layui-form-item">
+								<label class="layui-form-label">是否删除非站内链接</label>
+								<div class="layui-input-block">
+									<input type="radio" name="editor_img_clear_link" value="1" title="开启" lay-filter="editorImgClearLink" {if condition="isset($config.editor_img_clear_link) && $config.editor_img_clear_link eq 1"}checked{/if}>
+									<input type="radio" name="editor_img_clear_link" value="0" title="关闭" lay-filter="editorImgClearLink" {if condition="isset($config.editor_img_clear_link) && $config.editor_img_clear_link eq 0"}checked{/if}>
+									{tips tips="发布文章时是否默认开启删除非站内链接" style="vertical-align: middle;" /}
+								</div>
+							</div>
+
+							<div class="layui-form-item layui-hide" id="editorImgClearLinkWhitelist">
+								<label class="layui-form-label">域名白名单</label>
+								<div class="layui-input-block">
+									<div class="layui-input-group" style="width:100%">
+										<textarea name="editor_img_clear_link_whitelist" class="layui-textarea" rows="4" placeholder="sina.com
+baidu.com
+qq.com">{$config.editor_img_clear_link_whitelist|raw}</textarea>
+										{tips tips="每行一个，只填写域名，不带 http(s):// 和 / 后面部分；发布文档时，这些域名的外链不删除。" style="vertical-align: middle;" /}
+									</div>
+								</div>
+							</div>
+
+							<div class="layui-form-item">
+								<label class="layui-form-label">登录超时时间</label>
+								<div class="layui-input-block">
+									<div class="layui-input-group" style="width:100%;max-width: 200px;">
+										<input type="number" name="session_expire" autocomplete="off" placeholder="单位：秒" class="layui-input" value="{$config.session_expire | default='86400'}">
+										<div class="layui-input-split layui-input-suffix" style="width:1%;white-space:nowrap;background:#f5f7fa;color:#888;cursor:default;padding-left:10px;text-align:left;">秒</div>
+										{tips tips="后台多久没操作登录失效。单位：秒。例如 86400秒=1天" /}
+									</div>
+								</div>
+							</div>
+
+							<div class="layui-form-item">
+								<label class="layui-form-label">缓存方式</label>
+								<div class="layui-input-block">
+									<input type="radio" name="cache_driver" value="file" title="文件缓存" {if condition="($config['cache_driver'] ?? 'file') == 'file'"}checked{/if}>
+									<input type="radio" name="cache_driver" value="redis" title="Redis 缓存" {if condition="($config['cache_driver'] ?? 'file') == 'redis'"}checked{/if}>
+									{tips tips="未配置时默认使用文件缓存。选择 Redis 前请确保 Redis 服务已启动，且 PHP 已启用 Redis 扩展或安装 Predis；Redis 连接参数在 config/cache.php 中设置。Redis 不可用时系统会临时回退到文件缓存。" style="vertical-align: middle;" /}
+								</div>
+							</div>
+
+							<div class="layui-form-item">
+								<label class="layui-form-label">用户行为记录开关</label>
+								<div class="layui-input-block">
+									<input type="radio" name="user_log_open" value="1" title="开启" {if condition="($config['user_log_open'] ?? 0) == 1"}checked{/if}>
+									<input type="radio" name="user_log_open" value="0" title="关闭" {if condition="($config['user_log_open'] ?? 0) != 1"}checked{/if}>
+									{tips tips="开启后，前台页面访问、登录、注册、收藏等用户行为会写入 user_log 表；关闭后停止新增记录，已有记录不会删除。" style="vertical-align: middle;" /}
+								</div>
+							</div>
+
+							<div class="layui-form-item layui-layout-admin">
+								<div class="layui-input-block">
+								</div>
+							</div>
+
+						</div>
+					<div class="layui-tab-item" lay-id="email">
+						<!-- 邮箱配置 -->
+						<div class="layui-form-item">
+							<label class="layui-form-label">SMTP地址</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="smtp" autocomplete="off" placeholder="请输入SMTP服务器地址" class="layui-input" {notempty name="$config.smtp" } value="{$config.smtp}" {/notempty}>
+									{tips tips="如：QQ邮箱的SMTP服务器地址是smtp.qq.com，163邮箱的SMTP服务器地址是smtp.163.com" /}
+								</div>
+		
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">协议端口号</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="smtp_port" autocomplete="off" placeholder="请输入端口"  class="layui-input" {notempty name="$config.smtp_port" } value="{$config.smtp_port}" {/notempty}>
+									{tips tips="如：QQ邮箱的ssl协议方式端口号是465/587，163邮箱的ssl协议方式端口号是465/994" /}
+								</div>
+		
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">邮箱账户</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="smtp_user" autocomplete="off" placeholder="请输入邮箱用户名" class="layui-input" {notempty name="$config.smtp_user" } value="{$config.smtp_user}" {/notempty}>
+									{tips tips="如：miucms@qq.com" /}
+								</div>
+		
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">邮箱授权码</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="password" name="smtp_pwd" autocomplete="off" placeholder="请输入邮箱授权码" class="layui-input" {notempty name="$config.smtp_pwd" } value="{$config.smtp_pwd}" {/notempty}>
+									{tips tips="不一定是登录密码，如QQ邮箱的是第三方授权登录码，要自己去开启，在邮箱的设置->账户->POP3/IMAP/SMTP/Exchange/CardDAV/CalDAV服务" /}
+								</div>
+		
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">发送人</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="from" autocomplete="off" placeholder="请输入要显示的发送者" class="layui-input" {notempty name="$config.from" } value="{$config.from}" {/notempty}>
+									{tips tips="用于展示给发送方，如：米柚CMS系统管理员" /}
+								</div>
+		
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">显示的邮箱</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="email" autocomplete="off" placeholder="请输入要显示的发送者邮箱" class="layui-input" {notempty name="$config.email" } value="{$config.email}" {/notempty}>
+									{tips tips="可以不同于上面的账户，用于展示给发送方的邮箱，如：admin@miucms.com" /}
+								</div>
+		
+							</div>
+						</div>
+						<div class="layui-form-item layui-form-text">
+							<label class="layui-form-label">邮件模板</label>
+							<div class="layui-input-block">
+								<textarea name="email_template" placeholder="" class="layui-textarea" id="container">{notempty name="$config.email_template"}{$config.email_template}{/notempty}</textarea>
+							</div>
+						</div>
+						<div class="layui-form-item">
+							<label class="layui-form-label">邮件测试</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="display:flex;align-items:center;gap:10px;width:100%">
+									<button type="button" class="layui-btn layui-btn-primary layui-btn-sm" lay-event="email" style="flex:0 0 auto"><i class="layui-icon layui-icon-email"></i> 发送测试邮件</button>
+									<span class="layui-word-aux">请先保存 SMTP 配置，再发送测试邮件。</span>
+								</div>
+							</div>
+						</div>
+						<div class="layui-form-item layui-form-text">
+							<label class="layui-form-label">找回密码邮件模板</label>
+							<div class="layui-input-block">
+								<textarea name="password_reset_template" class="layui-textarea" id="password_reset_container">{$config.password_reset_template}</textarea>
+								<div class="layui-form-mid layui-word-aux">可用变量：%site_name% 网站名称、%username% 会员账号、%email% 收件邮箱、%reset_url% 重置链接按钮地址、%reset_url_text% 可复制的链接原文、%expire_minutes% 有效分钟数。</div>
+							</div>
+						</div>
+						<div class="layui-form-item">
+							<label class="layui-form-label">注册邮箱验证</label>
+							<div class="layui-input-block">
+								<input type="radio" name="register_email_verify" value="1" title="开启" {if condition="($config['register_email_verify'] ?? 0) == 1"}checked{/if}>
+								<input type="radio" name="register_email_verify" value="0" title="关闭" {if condition="($config['register_email_verify'] ?? 0) != 1"}checked{/if}>
+								{tips tips="开启后，会员注册必须填写邮箱验证码；验证码邮件使用下方模板和网站配置的 SMTP 邮箱。" /}
+							</div>
+						</div>
+						<div class="layui-form-item layui-form-text">
+							<label class="layui-form-label">邮箱验证码模板</label>
+							<div class="layui-input-block">
+								<textarea name="email_verify_template" class="layui-textarea" id="email_verify_template_container">{$config.email_verify_template}</textarea>
+								<div class="layui-form-mid layui-word-aux">注册及其他邮箱验证码场景共用此模板。可用变量：%site_name% 网站名称、%email% 收件邮箱、%code% 验证码、%expire_minutes% 有效分钟数。</div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item layui-layout-admin">
+							<div class="layui-input-block">
+							</div>
+						</div>
+					
+					</div>
+					<!-- 微信配置 -->
+					<!--<div class="layui-tab-item" lay-id="wechat">
+						<div class="layui-form-item">
+							<label class="layui-form-label">token<font>*</font></label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="token" lay-verify="required" autocomplete="off" placeholder="请输入Token" class="layui-input" {notempty name="$config.token" } value="{$config.token}" {/notempty}>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">登录回调地址<font>*</font></label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="login_back_url" lay-verify="required" autocomplete="off" placeholder="请输入微信登录回调地址" class="layui-input" {notempty name="$config.login_back_url" } value="{$config.login_back_url}" {/notempty}>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">公众号appid<font>*</font></label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="appid" lay-verify="required" autocomplete="off" placeholder="请输入appID" class="layui-input" {notempty name="$config.appid" } value="{$config.appid}" {/notempty}>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">公众号appsecret<font>*</font></label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="appsecret" lay-verify="required" autocomplete="off" placeholder="请输入secretey" class="layui-input" {notempty name="$config.appsecret" } value="{$config.appsecret}" {/notempty}>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">支付商户号</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="mchid" autocomplete="off" placeholder="请输入微信支付商户号" class="layui-input" {notempty name="$config.mchid" } value="{$config.mchid}" {/notempty}>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">支付API密钥</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="secrect_key" autocomplete="off" placeholder="请输入微信支付API密钥" class="layui-input" {notempty name="$config.secrect_key" } value="{$config.secrect_key}" {/notempty}>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">支付证书路径</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="cert_url" autocomplete="off" placeholder="请输入微信支付证书路径" class="layui-input" {notempty name="$config.cert_url" } value="{$config.cert_url}" {/notempty}>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">支付回调地址</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="pay_back_url" autocomplete="off" placeholder="请输入微信支付回调地址" class="layui-input" {notempty name="$config.pay_back_url" } value="{$config.pay_back_url}" {/notempty}>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">小程序appid<font>*</font></label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="xcx_appid" lay-verify="required" autocomplete="off" placeholder="请输入小程序appid" class="layui-input" {notempty name="$config.xcx_appid" } value="{$config.xcx_appid}" {/notempty}>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">小程序appsecret<font>*</font></label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="xcx_appsecret" lay-verify="required" autocomplete="off" placeholder="请输入小程序appsecret" class="layui-input" {notempty name="$config.xcx_appsecret" } value="{$config.xcx_appsecret}" {/notempty}>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item layui-layout-admin">
+							<div class="layui-input-block">
+							</div>
+						</div>
+					
+					</div>-->
+					<div class="layui-tab-item" lay-id="attachment">
+						<!-- 附件配置 -->
+						<div class="layui-form-item">
+							<label class="layui-form-label">存储类型</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="radio" name="storage_type" value="local" title="本地存储" lay-filter="storage_type" {if condition="($config['storage_type'] ?? 'local') == 'local'"}checked{/if}>
+									<input type="radio" name="storage_type" value="oss" title="阿里云 OSS" lay-filter="storage_type" {if condition="($config['storage_type'] ?? 'local') == 'oss'"}checked{/if}>
+									<input type="radio" name="storage_type" value="cos" title="腾讯云 COS" lay-filter="storage_type" {if condition="($config['storage_type'] ?? 'local') == 'cos'"}checked{/if}>
+									{tips tips="新上传文件使用所选存储；已有附件仍按 file 表记录的存储位置管理。" /}
+								</div>
+							</div>
+						</div>
+						<div id="ossSettings" {if condition="($config['storage_type'] ?? 'local') != 'oss'"}class="layui-hide"{/if}>
+							<div class="layui-form-item">
+								<label class="layui-form-label">OSS 地域</label>
+								<div class="layui-input-block"><input type="text" name="oss_region" value="{$config.oss_region|default=''}" autocomplete="off" placeholder="例如 cn-hangzhou" class="layui-input"></div>
+							</div>
+							<div class="layui-form-item">
+								<label class="layui-form-label">Bucket 名称</label>
+								<div class="layui-input-block"><input type="text" name="oss_bucket" value="{$config.oss_bucket|default=''}" autocomplete="off" placeholder="请输入 OSS Bucket 名称" class="layui-input"></div>
+							</div>
+							<div class="layui-form-item">
+								<label class="layui-form-label">AccessKey ID</label>
+								<div class="layui-input-block"><input type="text" name="oss_access_key_id" value="{$config.oss_access_key_id|default=''}" autocomplete="off" placeholder="请输入 AccessKey ID" class="layui-input"></div>
+							</div>
+							<div class="layui-form-item">
+								<label class="layui-form-label">AccessKey Secret</label>
+								<div class="layui-input-block">
+									<input type="password" name="oss_access_key_secret" value="{$config.oss_access_key_secret|default=''}" autocomplete="new-password" placeholder="请输入 AccessKey Secret" class="layui-input">
+									<div class="layui-form-mid layui-word-aux">清空后保存会删除当前密钥。请为该 RAM 用户仅授予此 Bucket 所需的读写权限。</div>
+								</div>
+							</div>
+							<div class="layui-form-item">
+								<label class="layui-form-label">OSS Endpoint</label>
+								<div class="layui-input-block"><input type="text" name="oss_endpoint" value="{$config.oss_endpoint|default=''}" autocomplete="off" placeholder="可留空自动使用地域默认地址" class="layui-input"><div class="layui-form-mid layui-word-aux">可填写 oss-cn-hangzhou.aliyuncs.com 或 https:// 开头的域名。</div></div>
+							</div>
+							<div class="layui-form-item">
+								<label class="layui-form-label">访问域名</label>
+								<div class="layui-input-block"><input type="text" name="oss_domain" value="{$config.oss_domain|default=''}" autocomplete="off" placeholder="可留空，使用 Bucket 默认域名" class="layui-input"><div class="layui-form-mid layui-word-aux">可填写绑定到 Bucket 的 HTTPS 自定义域名；上传文件将设置为公共读，请确认 Bucket 允许公网读取。</div></div>
+							</div>
+						</div>
+						<div id="cosSettings" {if condition="($config['storage_type'] ?? 'local') != 'cos'"}class="layui-hide"{/if}>
+							<div class="layui-form-item">
+								<label class="layui-form-label">COS 地域</label>
+								<div class="layui-input-block"><input type="text" name="cos_region" value="{$config.cos_region|default=''}" autocomplete="off" placeholder="例如 ap-beijing" class="layui-input"></div>
+							</div>
+							<div class="layui-form-item">
+								<label class="layui-form-label">存储桶名称</label>
+								<div class="layui-input-block"><input type="text" name="cos_bucket" value="{$config.cos_bucket|default=''}" autocomplete="off" placeholder="例如 miucms-1250000000" class="layui-input"><div class="layui-form-mid layui-word-aux">填写完整存储桶名称，包含末尾的 APPID。</div></div>
+							</div>
+							<div class="layui-form-item">
+								<label class="layui-form-label">SecretId</label>
+								<div class="layui-input-block"><input type="text" name="cos_secret_id" value="{$config.cos_secret_id|default=''}" autocomplete="off" placeholder="请输入 SecretId" class="layui-input"></div>
+							</div>
+							<div class="layui-form-item">
+								<label class="layui-form-label">SecretKey</label>
+								<div class="layui-input-block">
+									<input type="password" name="cos_secret_key" value="{$config.cos_secret_key|default=''}" autocomplete="new-password" placeholder="请输入 SecretKey" class="layui-input">
+									<div class="layui-form-mid layui-word-aux">清空后保存会删除当前密钥。请使用权限仅限此存储桶的子账号密钥。</div>
+								</div>
+							</div>
+							<div class="layui-form-item">
+								<label class="layui-form-label">访问域名</label>
+								<div class="layui-input-block"><input type="text" name="cos_domain" value="{$config.cos_domain|default=''}" autocomplete="off" placeholder="可留空，使用 COS 默认域名" class="layui-input"><div class="layui-form-mid layui-word-aux">可填写绑定到存储桶的 HTTPS 自定义域名；上传对象会设置为公有读，请确认存储桶权限允许访问。</div></div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-tab-item" lay-id="api-token">
+						<!-- API Token配置 -->
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">Token签发组织</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="iss" autocomplete="off" placeholder="请输入签发组织" lay-reqText="请输入签发组织" class="layui-input" {notempty name="$config.iss" } value="{$config.iss}" {/notempty}>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">Token签发作者</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="aud" autocomplete="off" placeholder="请输入签发作者" lay-reqText="请输入签发作者" class="layui-input" {notempty name="$config.aud" } value="{$config.aud}" {/notempty}>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">Token Secrect</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="secrect" autocomplete="off" placeholder="请输入secrect" lay-reqText="请输入secrect" class="layui-input" {notempty name="$config.secrect" } value="{$config.secrect}" {/notempty}>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">Token过期时间</label>
+							<div class="layui-input-block">
+								<div class="layui-input-group" style="width:100%">
+									<input type="text" name="exptime" autocomplete="off" placeholder="请输入过期时间" lay-reqText="请输入过期时间" class="layui-input" {notempty name="$config.exptime" } value="{$config.exptime}" {/notempty}>
+									{tips tips="" /}
+								</div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<div class="layui-input-block">
+								<button type="button" class="layui-btn layui-btn-sm" onclick="testReg();">Api测试注册</button>
+								<button type="button" class="layui-btn layui-btn-sm" onclick="testLogin();">Api测试登录</button>
+								<button type="button" class="layui-btn layui-btn-sm" onclick="testToken();">Token测试</button>
+							</div>
+						</div>
+		
+						<div class="layui-form-item">
+							<label class="layui-form-label">测试结果</label>
+							<div class="layui-input-block">
+								<div id="res" style="padding: 12px 0; word-wrap: break-word;"></div>
+							</div>
+						</div>
+		
+						<div class="layui-form-item layui-layout-admin">
+							<div class="layui-input-block">
+							</div>
+						</div>
+					
+					</div>
+					</div>
+				</div>
+				<div class="conf-submit-bar">
+					<div class="layui-input-block">
+						<button class="layui-btn layui-bg-blue" lay-submit="" lay-filter="globalform">立即提交</button>
+						<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+{/block}
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+window.__MIU_URLS = {
+	filesIndex: "{:url('admin/files/index')}"
+};
+
+layui.use(['element','form','tool','tinymce'], function(){
+	var element = layui.element, form = layui.form, tool = layui.tool, tinymce = layui.tinymce;
+
+	// 5 个面板合成一个表单，tab 和表单元素都要渲染一次
+	element.render('tab');
+	var confTabStorageKey = 'miucms-admin-conf-active-tab';
+	var confTabIds = ['basic', 'core', 'email', 'wechat', 'attachment'];
+	try {
+		var savedConfTab = JSON.parse(localStorage.getItem(confTabStorageKey) || 'null');
+		if (savedConfTab && confTabIds.indexOf(savedConfTab.id) !== -1 && Number(savedConfTab.expiresAt) > Date.now()) {
+			element.tabChange('conftab', savedConfTab.id);
+		} else if (savedConfTab) {
+			localStorage.removeItem(confTabStorageKey);
+		}
+	} catch (e) {
+		try { localStorage.removeItem(confTabStorageKey); } catch (ignored) {}
+	}
+	element.on('tab(conftab)', function (data) {
+		if (confTabIds.indexOf(data.id) === -1) return;
+		try {
+			localStorage.setItem(confTabStorageKey, JSON.stringify({
+				id: data.id,
+				expiresAt: Date.now() + 24 * 60 * 60 * 1000
+			}));
+		} catch (e) {}
+	});
+	form.render();
+	var refreshStorageFields = function () {
+		var storageType = $('input[name="storage_type"]:checked').val();
+		$('#ossSettings').toggleClass('layui-hide', storageType !== 'oss');
+		$('#cosSettings').toggleClass('layui-hide', storageType !== 'cos');
+	};
+	form.on('radio(storage_type)', refreshStorageFields);
+	refreshStorageFields();
+
+	// 删除非站内链接开启时才显示域名白名单配置。
+	var refreshOutboundLinkWhitelist = function (enabled) {
+		$('#editorImgClearLinkWhitelist').toggleClass('layui-hide', !enabled);
+	};
+	form.on('radio(editorImgClearLink)', function (data) {
+		refreshOutboundLinkWhitelist(String(data.value) === '1');
+	});
+	refreshOutboundLinkWhitelist($('input[name="editor_img_clear_link"]:checked').val() === '1');
+
+	// 邮箱正文用编辑器
+	tinymce.render({
+		selector: "#container",
+		height: 160,
+		menubar: false,
+		plugins: 'lists link image media',
+		toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | link myimage myvideo',
+		setup: function(inst){
+			inst.ui.registry.addButton('myimage', {
+				icon: 'image',
+				tooltip: '插入图片',
+				onAction: function(){ openFileManagerForTinymce(inst, 'image'); }
+			});
+			inst.ui.registry.addButton('myvideo', {
+				icon: 'embed',
+				tooltip: '插入媒体',
+				onAction: function(){ openFileManagerForTinymce(inst, 'video'); }
+			});
+		}
+	});
+	tinymce.render({
+		selector: "#password_reset_container",
+		height: 300,
+		menubar: false,
+		plugins: 'lists link code',
+		toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | link code'
+	});
+	tinymce.render({
+		selector: "#email_verify_template_container",
+		height: 300,
+		menubar: false,
+		plugins: 'lists link code',
+		toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | link code'
+	});
+
+	// 站点状态：关闭时才显示「关闭方式」，关闭方式决定显示哪个输入项
+	var refreshSiteStatus = function(){
+		var closed = $('input[name="site_status"]:checked').val() === '0';
+		$('#siteStatusCloseBox').toggle(closed);
+		if(!closed) return;
+		var mode = $('input[name="site_status_mode"]:checked').val() || '0';
+		$('.site-status-mode').hide();
+		$('#siteStatusMode' + mode).show();
+	};
+	form.on('radio(siteStatus)', refreshSiteStatus);
+	form.on('radio(siteStatusMode)', refreshSiteStatus);
+	refreshSiteStatus();
+
+	// 选择 LOGO / 图标 —— 打开文件管理器
+	$('.uploadBtn').on('click', function(){
+		openFileManager($(this).attr('data-bind'));
+		return false;
+	});
+	initThumbPreview('site_logo', 'logo-preview-icon');
+	initThumbPreview('site_ico', 'ico-preview-icon');
+
+	// 发送测试邮件
+	$('body').on('click', '[lay-event="email"]', function () {
+		layer.prompt({
+			formType: 0,
+			value: '',
+			title: '输入接收测试邮件的邮箱',
+			id: 'email_to'
+		}, function (value, index, elem) {
+			var isEmail = /^\w+([-+.] \w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
+			if (value.length < 6 || !(isEmail.test(value))) {
+				layer.tips('请正确输入邮箱', elem);
+				return false;
+			}
+			$.ajax({
+				url: "{:url('admin/api/email_test')}",
+				data: { email: value },
+				type: "post",
+				beforeSend: function () {
+					// 禁用按钮防止重复提交
+					$("#email_to input").val('');
+				},
+				success: function (e) {
+					layer.msg(e.msg);
+					if (e.code == 0) {
+						layer.close(index);
+					}
+				}
+			})
+		});
+		return false;
+	})
+
+	// ===== API 测试（token 面板的按钮是 onclick 调的，必须挂到 window 上） =====
+	window.testToken = function () {
+		layer.prompt({formType: 2, title: '输入登录接口返回的 Token'}, function (token, index) {
+			$.ajax({
+				headers: {Token: token},
+				url: "/api/index/demo",
+				type: "get",
+				success: function (res) {
+					$('#res').html(JSON.stringify(res));
+					layer.close(index);
+					if (res.code !== 0) layer.msg(res.msg || 'Token 验证失败');
+				}
+			});
+		});
+	}
+
+	window.testReg = function () {
+		var content = '<form class="layui-form" style="width:400px"><div style="padding:10px 15px">\
+						<p style="padding:10px 0">用户名：</p>\
+						<p><input name="username" type="text" class="layui-input" value=""/></p>\
+						<p style="padding:10px 0">邮箱：</p>\
+						<p><input name="email" type="email" class="layui-input" value=""/></p>\
+						<p style="padding:10px 0">密 码：</p>\
+						<p><input name="password" type="password" class="layui-input" value=""/></p>\
+						<p style="padding:10px 0">重复密码：</p>\
+						<p><input name="newpassword" type="password" class="layui-input" value=""/></p>\
+						</div>\
+					</form>';
+		layer.open({
+			type: 1,
+			title: 'API测试用户注册',
+			area: ['432px', '360px'],
+			content: content,
+			btnAlign: 'c',
+			btn: ['注册'],
+			yes: function (idx) {
+				var username = $('[name="username"]').val();
+				var password = $('[name="password"]').val();
+				var newpassword = $('[name="newpassword"]').val();
+				if (username == '') {
+					layer.msg('请填写用户名');
+					return;
+				}
+				if (password == '') {
+					layer.msg('请填写密码');
+					return;
+				}
+				if (password != newpassword) {
+					layer.msg('两次密码填写不一致');
+					return;
+				}
+				$.ajax({
+					url: "/api/index/reg",
+					type: 'post',
+					data: { username: username, email: $('[name="email"]').val(), pwd: password },
+					success: function (res) {
+						$('#res').html(JSON.stringify(res));
+						layer.msg(res.msg);
+						if (res.code == 0) {
+							layer.close(idx);
+						}
+					}
+				})
+			}
+		})
+	}
+
+	window.testLogin = function () {
+		var content = '<form class="layui-form" style="width:400px"><div style="padding:10px 15px">\
+							<p style="padding:10px 0">用户名：</p>\
+							<p><input name="username" type="text" class="layui-input" value="hdm58"/></p>\
+							<p style="padding:10px 0">密 码：</p>\
+							<p><input name="password" type="password" class="layui-input" value="123456"/></p>\
+							</div>\
+						</form>';
+		layer.open({
+			type: 1,
+			title: 'API测试用户登录',
+			area: ['432px', '300px'],
+			content: content,
+			btnAlign: 'c',
+			btn: ['登录'],
+			yes: function (idx) {
+				var username = $('[name="username"]').val();
+				var password = $('[name="password"]').val();
+				if (username == '') {
+					layer.msg('请填写用户名');
+					return;
+				}
+				if (password == '') {
+					layer.msg('请填写密码');
+					return;
+				}
+				$.ajax({
+					url: "{:url('api/index/login')}",
+					type: 'post',
+					data: { username: username, password: password },
+					success: function (res) {
+						$('#res').html(JSON.stringify(res));
+						layer.msg(res.msg);
+						if (res.code == 0) {
+							token = res.data.token;
+							layer.close(idx);
+						}
+					}
+				})
+			}
+		})
+	}
+
+	// 每个配置项后面的「调用标签」：点一下选中文字并复制
+	$(document).on('click', '.conf-call-tag', function () {
+		var el = this;
+		var text = (el.textContent || '').trim();
+		if (!text) { return; }
+
+		// 先选中可见的文字（用户能看到选中效果）
+		var range = document.createRange();
+		range.selectNodeContents(el);
+		var sel = window.getSelection();
+		sel.removeAllRanges();
+		sel.addRange(range);
+
+		var ok = function () { layer.msg('已复制：' + text, { icon: 1, time: 1200 }); };
+		var fail = function () { layer.msg('复制失败，请手动选中后 Ctrl+C', { icon: 2 }); };
+
+		// 能用新接口就用（https 或 localhost 下才有），否则退回复制「当前选中的内容」
+		if (navigator.clipboard && window.isSecureContext) {
+			navigator.clipboard.writeText(text).then(ok, fail);
+		} else {
+			try {
+				document.execCommand('copy') ? ok() : fail();
+			} catch (e) {
+				fail();
+			}
+		}
+	});
+
+	// 监听提交：5 个页面合并成一个表单，提交时整份 content 一起写回
+	form.on('submit(globalform)', function (data) {
+		// 邮箱正文在编辑器里，提交前同步回表单
+		if (window.tinyMCE && tinyMCE.editors && tinyMCE.editors['container']) {
+			data.field.email_template = tinyMCE.editors['container'].getContent();
+		}
+		if (window.tinyMCE && tinyMCE.editors && tinyMCE.editors['password_reset_container']) {
+			data.field.password_reset_template = tinyMCE.editors['password_reset_container'].getContent();
+		}
+		if (window.tinyMCE && tinyMCE.editors && tinyMCE.editors['email_verify_template_container']) {
+			data.field.email_verify_template = tinyMCE.editors['email_verify_template_container'].getContent();
+		}
+		// 复选框未勾选时不会出现在 data.field，提交 URL 开关时补成 0。
+		if (data.field.url_no_index !== undefined) {
+			['url_del_home', 'url_del_nav', 'url_del_side'].forEach(function (key) {
+				if (data.field[key] === undefined) data.field[key] = 0;
+			});
+		}
+		var loadIndex = layer.msg('正在提交...', { icon: 16, shade: 0.01,time:0 });
+		var callback = function(e){
+			layer.close(loadIndex);
+			if(e.code != 0){
+				layer.msg(e.msg,{icon:2});
+				return;
+			}
+			//改了后台路径就提示用户，点确定后用新入口打开后台；否则刷新当前页
+			var newPath = ($.trim(data.field.admin_path) || '').replace(/^\//, '');
+			var oldPath = (window.MIU_ADMIN || '').replace(/^\//, '');
+			if(newPath && newPath !== oldPath){
+				layer.alert('<span class="layui-font-red">后台路径已更改！请牢记！</span><br/>请使用【<a href="{:htmlspecialchars(request()->domain())}/'+ newPath + '" target="_top">{:htmlspecialchars(request()->domain())}/'+ newPath + '</a>】打开后台',{
+					icon: 1,
+					title: '提示',
+					closeBtn: 0,
+					btnAlign: 'c',
+					btn: ['我已牢记新后台路径']
+				}, function(index){
+					layer.close(index);
+					top.location.href = '{:htmlspecialchars(request()->domain())}/' + newPath + '/index/index.html';
+				});
+			}else{
+				layer.msg(e.msg,{icon:1});
+			}
+		}
+		tool.post("{:url('admin/conf/index')}", data.field, callback);
+		return false;
+	});
+});
+</script>
+{/block}

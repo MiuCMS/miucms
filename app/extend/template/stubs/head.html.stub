@@ -1,0 +1,7 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{empty name="page_title"}{miu:global name='site_title' /}{else/}{$page_title}{/empty}</title>
+<meta name="keywords" content="{$page_keywords|default=''}">
+<meta name="description" content="{$page_description|default=''}">
+{notempty name="page_url"}<link rel="canonical" href="{$page_url}">{/notempty}
+<link rel="stylesheet" href="{__CSS__}/style.css">

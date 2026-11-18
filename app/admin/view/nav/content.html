@@ -1,0 +1,178 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+
+<div class="layui-layer-title" style="font-size: 16px;">编辑-{$info.title|default=''}</div>
+
+<form class="layui-form p-page">
+	<div class="layui-container">
+
+		<div class="layui-row layui-col-space16">
+			<!--自定义字段开始-->
+			{include file="common/customfields" /}
+			<!--自定义字段结束-->
+			<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+			<div class="layui-col-md12">
+				<label class="layui-form-label">内容 </label>
+				<input type="checkbox" value="1" name="editor_img_download_to_local" title="远程图片本地化" {if condition="$otherCFG.editor_img_download_to_local eq 1"}checked{/if}>
+				<input type="checkbox" value="1" name="editor_img_clear_link" title="删除非站内链接" {if condition="$otherCFG.editor_img_clear_link eq 1"}checked{/if}>
+			</div>
+			<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+			<div class="layui-col-md12">
+				<div class="layui-form-item" style="margin:0 100px;">
+					<div id="editor—wrapper">
+						<!--$editor 1为tinymce编辑器 2为markdown编辑器-->
+						<textarea id="mdContent" style="display:none;">{$markdown_content|default=''}</textarea>
+						<div id="docContent"></div>
+						<div id="editor-container" style="{if condition="$editor eq '2'"}display:none;{else/}height:500px;min-height:300px;{/if}"><!-- 编辑器 --></div>
+						<textarea id="content" name="content" style="display:none;">{$info.content|default=''}</textarea>
+					</div>
+				</div>
+			</div>
+			<div class="layui-col-md12">
+				<label class="layui-form-label"></label>
+				<i id="text-number" style="margin-left:12px;position:relative;top:-16px;"></i>
+			</div>
+		</div>
+		{include file="common/i18n_fields" /}
+
+
+		<div class="py-3">
+			<input type="hidden" name="id" value="{$info.id}" />
+			<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+			<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+		</div>
+	</div>
+</form>
+
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script src="{__ADMIN__}/js/document-i18n-editors.js?v={:CMS_VERSION}-5"></script>
+<script>
+	const editorType = '{$editor}';
+	window.__MIU_URLS = {
+		filesIndex: "{:url('admin/files/index')}",
+		savePreset: "{:url('admin/api/save_preset')}",
+		i18nEditorUpload: "{:url('admin/api/upload')}?sourse=tinymce&type=image"
+	};
+	var arr=['form','tool','tagpicker','tabs'];
+	if (editorType == 1) {
+		arr.push('tinymce');
+	} else if(editorType == 2) {
+		arr.push('editormd');
+	}
+	layui.use(arr,function(){
+		var form = layui.form, tool = layui.tool, markdownEditor = null;
+		form.verify({
+			title_en:function(value, elem) {
+				if(value.length>0){
+					if (!/^[a-z][a-z0-9]{0,64}$/.test(value)) {
+						return '必须是拼音或数字，以字母开头';
+					}
+				}
+			},
+		})
+
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			window.syncDocumentI18nEditors(data.field);
+			if (typeof window.syncCustomFieldEditors === 'function') {
+				window.syncCustomFieldEditors(data.field);
+			}
+			// Layui 不会提交未勾选的复选框，显式传 0/1，避免后端把“关闭”误判为未设置。
+			var imageLocalizeOption = document.querySelector('input[name="editor_img_download_to_local"]');
+			if (imageLocalizeOption) {
+				data.field.editor_img_download_to_local = imageLocalizeOption.checked ? '1' : '0';
+			}
+			// TinyMCE 内容同步到 textarea
+			// tinymce 不会把内容写回隐藏的 #content，必须在这里手动取一次，
+			// 否则后端拿不到 content
+			if (editorType == 1 && typeof tinymce !== 'undefined' && tinymceEditor) {
+				data.field.content = tinymceEditor.getContent();
+				delete data.field['editor-container'];
+			}
+			if (editorType == 2) {
+				if (!markdownEditor) {
+					layer.msg('MarkDown编辑器未初始化');
+					return false;
+				}
+				var markdownContent = markdownEditor.getMarkdown();
+				if (!markdownContent.trim()) {
+					layer.msg('请先完善单页内容');
+					return false;
+				}
+				markdownEditor.save();
+				data.field['docContent-markdown-doc'] = markdownContent;
+				data.field['docContent-html-code'] = markdownEditor.getHTML();
+			}
+			var loadIndex = layer.msg('正在提交...', { icon: 16, shade: 0.01, time: 0 });
+			let callback = function (e) {
+				layer.close(loadIndex);
+				if (e.code == 0) {
+					parent.layui.layer.closeAll();
+					parent.layui.trees.reloadData()
+					parent.layer.msg(e.msg, {icon: 1});
+				}else{
+					layer.msg(e.msg, {icon: 2});
+				}
+			}
+			tool.post("{:url('admin/nav/content')}", data.field, callback, {
+				timeout: 660000,
+				error: function (xhr, status) {
+					layer.close(loadIndex);
+					var errorMessage = status === 'timeout'
+						? '提交等待超时，请先确认内容是否已保存，再决定是否重试。'
+						: tool.responseMessage(xhr);
+					if (!errorMessage) {
+						errorMessage = xhr && xhr.status
+							? '提交失败（HTTP ' + xhr.status + '），请检查服务器日志后重试。'
+							: '提交失败，请检查网络后重试。';
+					}
+					layer.msg(errorMessage, { icon: 2, time: 6000 });
+				}
+			});
+			return false;
+		});
+		// 图片上传
+		$('.uploadBtn').on('click', function(){
+			openFileManager($(this).attr('data-bind'));
+			return false;
+		});
+		// 缩略图预览
+		initThumbPreview();
+
+		if (editorType == 1) {
+			// tinymce 编辑器
+			var editor = layui.tinymce, tinymceEditor = null;
+			editor.render({
+				selector: "#editor-container",
+				height: 500,
+				toolbar: 'code undo redo | forecolor backcolor bold italic underline strikethrough removeformat | alignleft aligncenter alignright alignjustify outdent indent | bullist numlist table blockquote myimage myvideo codesample | formatselect fontselect fontsizeselect',
+				setup: function(inst){
+					inst.ui.registry.addButton('myimage', { icon: 'image', tooltip: '插入图片', onAction: function(){ openFileManagerForTinymce(inst, 'image'); } });
+					inst.ui.registry.addButton('myvideo', { icon: 'embed', tooltip: '插入视频', onAction: function(){ openFileManagerForTinymce(inst, 'video'); } });
+				},
+				init_instance_callback: function(inst){
+					tinymceEditor = inst;
+					var val = document.getElementById('content').value || '';
+					if(val) inst.setContent(val);
+				}
+			});
+
+		} else if(editorType == 2){
+			// markdown 编辑器
+			markdownEditor = layui.editormd.render('docContent', {
+				width: "100%",
+				height: 700,
+				markdown: document.getElementById('mdContent').value
+			});
+
+		}
+		window.initDocumentI18nEditors($('.miu-i18n-fields'));
+	})
+</script>
+{/block}
+<!-- /脚本 -->

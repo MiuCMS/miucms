@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body>
+{include file="header" /}
+<main id="main"><section class="page-intro"><div class="container">{miu:position /}<h1>{miu:lang key='searchResults' /}</h1><p>{$keyword|default=''}</p></div></section><section class="section container">
+    <!-- 搜索条件由控制器处理；直接循环结果并使用同一套 page_html 分页。 -->
+    <div class="document-grid document-grid--rows">{volist name="list" id="vo"}{include file="card" /}{/volist}</div>
+    {empty name="list"}<p class="empty-state">{miu:lang key='empty' /}</p>{/empty}
+    {$page_html|raw}
+</section></main>
+{include file="footer" /}
+</body>
+</html>

@@ -1,0 +1,235 @@
+{extend name="common/base"/}
+{block name="style"}
+<style>
+	/* 后台全局样式 miu.css 里 html,body 是 height:100%，
+	   layer.iframeAuto 量的正是 iframe 里 <html> 的高度，
+	   html 是 100% 时量出来永远等于 iframe 当前高度，弹窗就不会自适应。
+	   本页只是个表单，放开成 auto，高度才能跟着内容走。 */
+	html, body { height: auto;background: #fff; }
+	.p-3{padding-right: 30px;}
+	.plugin-help-area{line-height:1.9;color:#333;overflow-wrap:anywhere;}
+	.plugin-help-area h1,.plugin-help-area h2,.plugin-help-area h3{font-size:15px;margin:14px 0 8px;}
+	.plugin-help-area p,.plugin-help-area ul,.plugin-help-area ol{margin:0 0 8px;}
+	.plugin-help-area ul,.plugin-help-area ol{padding-left:22px;}
+	.plugin-help-area code{padding:2px 5px;background:#f2f4f7;border-radius:3px;}
+	.plugin-help-area pre{padding:10px;background:#f7f8fa;overflow:auto;}
+	.plugin-help-area a{overflow-wrap:anywhere;}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-3">
+	<form class="layui-form" lay-filter="pluginConfigForm">
+		<input type="hidden" name="name" value="{$plugin.name}">
+
+		<div class="layui-row layui-col-space16">
+			{notempty name="fields"}
+			{volist name="fields" id="field"}
+			{php}$fname = $field['name'] ?? ''; $fval = $config[$fname] ?? ($field['default'] ?? ''); $ftype = $field['type'] ?? 'text'; $passwordValue = !empty($field['preserve_empty']) ? '' : $fval; $placeholder = $field['placeholder'] ?? ''; $savedValue = $config[$fname] ?? ''; if ($ftype === 'password' && !empty($field['configured_placeholder']) && is_scalar($savedValue) && trim((string)$savedValue) !== '') $placeholder = $field['configured_placeholder']; $dependsOn = $field['depends_on'] ?? []; $dependsField = is_array($dependsOn) ? (string)($dependsOn['field'] ?? '') : ''; $dependsValue = is_array($dependsOn) ? (string)($dependsOn['value'] ?? '') : ''; $dependsField = htmlspecialchars($dependsField, ENT_QUOTES, 'UTF-8'); $dependsValue = htmlspecialchars($dependsValue, ENT_QUOTES, 'UTF-8');{/php}
+			{if $ftype == 'help_area'}
+			<div class="layui-col-md12">
+				<div class="layui-collapse" lay-filter="pluginHelpCollapse">
+					<div class="layui-colla-item">
+						<h2 class="layui-colla-title">{$field.title|default='帮助说明'}</h2>
+						<div class="layui-colla-content ">
+							<div class="plugin-help-area">{$field.rendered|raw}</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			{else /}
+			<div class="layui-col-md12" {if $dependsField}data-plugin-depends-on="{$dependsField}" data-plugin-depends-value="{$dependsValue}"{/if}>
+				<div class="layui-form-item">
+					<label class="layui-form-label" style="width:180px;">{$field.title|default=$fname}</label>
+					<div class="layui-input-block" style="margin-left:200px;">
+						{if $ftype == 'textarea'}
+						<div class="layui-input-group" style="width:100%">
+							<textarea name="{$fname}" class="layui-textarea" style="resize:none;height:80px;" placeholder="{$field.placeholder|default=''}">{$fval}</textarea>
+							{tips tips="$field.tips|default=''" /}
+						</div>
+						{elseif $ftype == 'switch' /}
+						<div class="layui-input-group" style="width:100%">
+							<input type="checkbox" name="{$fname}" value="1" lay-skin="switch" lay-text="开|关" {if $fval}checked{/if}>
+							{tips tips="$field.tips|default=''" /}
+						</div>
+						{elseif $ftype == 'number' /}
+						<div class="layui-input-group" style="width:100%">
+							<input type="number" name="{$fname}" value="{$fval}" class="layui-input" placeholder="{$field.placeholder|default=''}">
+							{tips tips="$field.tips|default=''" /}
+						</div>
+						{elseif $ftype == 'radio' /}
+						<div class="layui-input-group" style="width:100%">
+							{volist name="field.options" id="opt"}
+							<input type="radio" name="{$fname}" value="{$opt.value}" title="{$opt.label}" {if $fval == $opt.value}checked{/if}>
+							{/volist}
+							{tips tips="$field.tips|default=''" /}
+						</div>
+						{elseif $ftype == 'select' /}
+						<div class="layui-input-group" style="width:100%">
+							<select name="{$fname}" {if !empty($field.options_depend_on)}data-plugin-options-depend-on="{$field.options_depend_on}"{/if}>
+								{volist name="field.options" id="opt"}
+								<option value="{$opt.value}" data-plugin-option-value="{$opt.depends_value|default=''}" {if $fval == $opt.value}selected{/if}>{$opt.label}</option>
+								{/volist}
+							</select>
+							{tips tips="$field.tips|default=''" /}
+						</div>
+						{elseif $ftype == 'password' /}
+						<div class="layui-input-group" style="width:100%">
+							<input type="password" name="{$fname}" value="{$passwordValue}" class="layui-input" placeholder="{$placeholder}" autocomplete="new-password">
+							{tips tips="$field.tips|default=''" /}
+						</div>
+						{else /}
+						<div class="layui-input-group" style="width:100%">
+							<input type="text" name="{$fname}" value="{$fval}" class="layui-input" placeholder="{$field.placeholder|default=''}">
+							{tips tips="$field.tips|default=''" /}
+						</div>
+						{/if}
+					</div>
+				</div>
+			</div>
+			{/if}
+			<div class="layui-col-md12" style="height:0;padding:0;"></div>
+			{/volist}
+			{/notempty}
+
+			{empty name="fields"}
+			<div class="layui-col-md10">
+				<div class="layui-form-item">
+					<label class="layui-form-label" style="width:180px;">配置</label>
+					<div class="layui-input-block" style="margin-left:200px;">
+						<div class="layui-input-group" style="width:100%">
+							<div class="layui-form-mid layui-word-aux">此插件没有配置项</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="layui-col-md12" style="height:0;padding:0;"></div>
+			{/empty}
+		</div>
+
+		<div class="layui-form-item plugin-config-actions" style="margin:20px 0 0 200px;">
+			<button type="submit" class="layui-btn">保存配置</button>
+		</div>
+	</form>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+layui.use(['form', 'element'], function () {
+	var form = layui.form;
+	var element = layui.element;
+	element.render('collapse');
+	var $configForm = $('form[lay-filter="pluginConfigForm"]');
+	var configDialogIndex = window.parent !== window && window.parent.layer ? window.parent.layer.getFrameIndex(window.name) : undefined;
+	var inConfigDialog = configDialogIndex !== undefined && configDialogIndex !== null && configDialogIndex !== '';
+	var $parentDialog = inConfigDialog ? $(window.frameElement).closest('.layui-layer-iframe') : $();
+	var hasParentSaveButton = $parentDialog.children('.layui-layer-btn').find('a, button').length > 0;
+	$configForm.find('.plugin-config-actions').toggle(!hasParentSaveButton);
+	$('.plugin-help-area a').attr({
+		target: '_blank',
+		rel: 'noopener noreferrer'
+	});
+
+	function updateDependentOptions() {
+		$configForm.find('select[data-plugin-options-depend-on]').each(function () {
+			var $select = $(this), selected = $select.val();
+			var options = $select.data('plugin-all-options');
+			if (!options) {
+				options = $select.find('option').clone();
+				$select.data('plugin-all-options', options);
+			}
+			var controller = $select.attr('data-plugin-options-depend-on');
+			var value = $configForm.find(':input').filter(function () { return this.name === controller; }).first().val();
+			var filtered = options.filter(function () {
+				var depends = $(this).attr('data-plugin-option-value');
+				return !depends || depends === String(value);
+			}).clone().prop('selected', false);
+			$select.empty().append(filtered);
+			var valid = filtered.filter(function () { return this.value === selected; }).length;
+			$select.val(valid ? selected : filtered.first().val());
+		});
+		form.render('select', 'pluginConfigForm');
+	}
+	function updateDependentFields() {
+		$configForm.find('[data-plugin-depends-on]').each(function () {
+			var $field = $(this);
+			var controllerName = $field.attr('data-plugin-depends-on');
+			var expectedValue = $field.attr('data-plugin-depends-value');
+			var $controllers = $configForm.find(':input').filter(function () {
+				return this.name === controllerName;
+			});
+			var $checked = $controllers.filter(':checked');
+			var currentValue = $checked.length ? $checked.val() : ($controllers.length ? $controllers.first().val() : '');
+			var visible = String(currentValue) === String(expectedValue);
+			$field.toggle(visible).attr('aria-hidden', visible ? 'false' : 'true');
+		});
+		window.setTimeout(resizeConfigDialog, 50);
+	}
+
+	function resizeConfigDialog() {
+		if (!inConfigDialog) return;
+		if (window.parent && window.parent.layer && window.parent.layer.iframeAuto) {
+			var index = window.parent.layer.getFrameIndex(window.name);
+			var layerElement = window.parent.$ && window.parent.$('#layui-layer' + index);
+			if (layerElement && layerElement.data('maxminStatus') === 'max') return;
+			var resizeParentDialog = window.parent.pluginConfigDialogResizers && window.parent.pluginConfigDialogResizers[index];
+			if (typeof resizeParentDialog === 'function') {
+				resizeParentDialog();
+				return;
+			}
+			window.parent.layer.iframeAuto(index);
+		}
+	}
+	form.render(null, 'pluginConfigForm');
+	updateDependentOptions();
+	updateDependentFields();
+	$configForm.on('change', 'input, select, textarea', function () { updateDependentOptions(); updateDependentFields(); });
+	form.on('select', function (data) {
+		if (!$.contains($configForm[0], data.elem)) return;
+		updateDependentOptions(); updateDependentFields();
+	});
+	$configForm.on('click', '.layui-form-radio', function () {
+		window.setTimeout(updateDependentFields, 0);
+	});
+	element.on('collapse(pluginHelpCollapse)', function () {
+		window.setTimeout(resizeConfigDialog, 350);
+	});
+
+	var configSaving = false;
+	function savePluginConfig(data) {
+		if (configSaving) return;
+		configSaving = true;
+		$configForm.find('.plugin-config-actions button').prop('disabled', true);
+		$.post("{:url('admin/plugin/save_config')}", data || form.val('pluginConfigForm'), function (res) {
+			layer.msg(res.msg, { icon: res.code === 0 ? 1 : 2 });
+			if (res.code === 0) {
+				setTimeout(function () {
+					//关掉父窗口里打开的配置弹层
+					if (inConfigDialog) parent.layer.close(configDialogIndex);
+				}, 1000);
+			}
+		}).fail(function () {
+			layer.msg('保存失败，请检查网络后重试', { icon: 2 });
+		}).always(function () {
+			configSaving = false;
+			$configForm.find('.plugin-config-actions button').prop('disabled', false);
+		});
+	}
+	window.submitPluginConfig = function () {
+		savePluginConfig(form.val('pluginConfigForm'));
+	};
+	$('.layui-form').on('submit', function (event) {
+		event.preventDefault();
+		savePluginConfig(form.val('pluginConfigForm'));
+	});
+
+	//内容撑高弹窗：渲染完主动告诉父窗口按内容重新量一次 iframe 高度
+	//（弹层是用 layer 打开的；直接访问本页时 parent 里没有 layer，跳过即可）
+	setTimeout(resizeConfigDialog, 50);
+});
+</script>
+{/block}
+<!-- /脚本 -->

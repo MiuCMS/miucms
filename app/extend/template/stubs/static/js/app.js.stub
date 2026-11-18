@@ -1,0 +1,110 @@
+/* 基础交互独立于模板标签；文案通过 HTML 数据属性传入，静态 JS 不解析模板语法。 */
+(function () {
+    'use strict';
+    var toggle = document.querySelector('.menu-toggle');
+    var navigation = document.querySelector('.main-navigation');
+    if (toggle && navigation) {
+        toggle.addEventListener('click', function () {
+            var open = toggle.getAttribute('aria-expanded') !== 'true';
+            toggle.setAttribute('aria-expanded', String(open));
+            navigation.classList.toggle('is-open', open);
+        });
+    }
+    // 头部搜索：默认收起，点按钮展开并聚焦；再点（已展开）才是提交。点外面或 Esc 收起。
+    var search = document.querySelector('.header-search');
+    if (search) {
+        var field = search.querySelector('input');
+        var submit = search.querySelector('button');
+        var setSearch = function (open) {
+            search.classList.toggle('is-open', open);
+            submit.setAttribute('aria-expanded', String(open));
+            if (open) window.setTimeout(function () { field.focus(); }, 0);
+        };
+        submit.addEventListener('click', function (event) {
+            if (!search.classList.contains('is-open')) {
+                event.preventDefault();
+                setSearch(true);
+            }
+        });
+        document.addEventListener('click', function (event) {
+            if (!search.contains(event.target)) setSearch(false);
+        });
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') setSearch(false);
+        });
+    }
+
+    document.addEventListener('click', function (event) {
+        document.querySelectorAll('.navigation-group[open],.language-switch[open]').forEach(function (details) {
+            if (!details.contains(event.target)) details.removeAttribute('open');
+        });
+    });
+
+    var page = document.querySelector('[data-video-page]');
+    if (!page) return;
+    var video = document.getElementById('starter-video');
+    var dplayerRoot = document.getElementById('starter-dplayer');
+    var groupSelect = document.getElementById('starter-line');
+    var error = page.querySelector('.player-error');
+    var hls = null, dplayer = null;
+    function failed() { error.textContent = page.dataset.error || ''; error.hidden = false; }
+    function destroy() {
+        if (hls) { hls.destroy(); hls = null; }
+        if (dplayer) { dplayer.destroy(); dplayer = null; }
+        video.pause();
+        video.removeAttribute('src');
+        video.load();
+    }
+    function attach(target, url) {
+        if (/\.m3u8(?:[?#]|$)/i.test(url) && !target.canPlayType('application/vnd.apple.mpegurl') && window.Hls && window.Hls.isSupported()) {
+            hls = new window.Hls();
+            hls.on(window.Hls.Events.ERROR, function (_, data) { if (data.fatal) failed(); });
+            hls.attachMedia(target);
+            hls.loadSource(url);
+            hls.on(window.Hls.Events.MANIFEST_PARSED, function () { target.play().catch(function () {}); });
+        } else {
+            target.src = url;
+            target.play().catch(function () {});
+        }
+    }
+    function play(button) {
+        var url = button.dataset.src || '';
+        if (!url) return;
+        destroy();
+        error.hidden = true;
+        page.querySelectorAll('[data-src]').forEach(function (item) {
+            item.classList.toggle('active', item === button);
+            item.setAttribute('aria-pressed', String(item === button));
+        });
+        var useDplayer = button.dataset.player === 'dplayer' && window.DPlayer;
+        video.hidden = Boolean(useDplayer);
+        dplayerRoot.hidden = !useDplayer;
+        if (useDplayer) {
+            dplayer = new window.DPlayer({container: dplayerRoot, autoplay: true, video: {
+                url: url, type: 'starter', customType: {starter: function (target) { attach(target, url); }}
+            }});
+            dplayer.video.addEventListener('error', failed);
+        } else attach(video, url);
+    }
+    video.addEventListener('error', failed);
+    page.addEventListener('click', function (event) {
+        var button = event.target.closest('button[data-src]');
+        if (button) play(button);
+    });
+    if (groupSelect) groupSelect.addEventListener('change', function () {
+        var selected = null;
+        page.querySelectorAll('.episode-group').forEach(function (group) {
+            group.hidden = group.dataset.group !== groupSelect.value;
+            if (!group.hidden) selected = group.querySelector('button[data-src]');
+        });
+        if (selected) play(selected);
+    });
+    var first = page.querySelector('.episode-group:not([hidden]) button[data-src]');
+    if (first) play(first);
+    window.addEventListener('pagehide', destroy, {once: true});
+    window.addEventListener('pageshow', function (event) {
+        if (!event.persisted) return;
+        var current = page.querySelector('.episode-group:not([hidden]) button.active') || page.querySelector('.episode-group:not([hidden]) button[data-src]');
+        if (current) play(current);
+    });
+})();

@@ -1,0 +1,37 @@
+<footer class="site-footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a class="brand brand-light" href="{:home_url()}">
+        <img src="{miu:global name='site_logo'/}" alt="{miu:global name='site_name'/}" />
+        <span>{miu:global name='site_name'/}</span>
+      </a>
+      <p>{miu:custom name='bottom_desc' raw='1'/}</p>
+    </div>
+    <div class="footer-links">
+      <div>
+        <b>{miu:lang key='footer.explore_products' /}</b>
+        {miu:nav navid="22,23,24"}
+        <a class="" href="{$vo.url}">{$vo.title}</a>
+        {/miu:nav}
+      </div>
+      <div>
+        <b>{miu:lang key='footer.about_us' /}</b>
+        {miu:nav navid="16,17,18"}
+        <a class="" href="{$vo.url}">{$vo.title}</a>
+        {/miu:nav}
+      </div>
+      <div>
+        <b>{miu:lang key='footer.contact_support' /}</b>
+        <a href="mailto:{miu:custom name='kefu_email'/}">{miu:lang key='footer.partnership' /}{miu:custom name='kefu_email'/}</a>
+        <a href="mailto:{miu:custom name='zc_email'/}">{miu:lang key='footer.user_support' /}{miu:custom name='zc_email'/}</a>
+        <span>{miu:custom name='gzsj'/}</span>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+        <span>{miu:global name='site_copyright'/}</span><span>{miu:lang key='footer.disclaimer' /}</span>
+  </div>
+</footer>
+<div id="template-i18n" hidden data-purchase-notice="{miu:lang key='js.purchase_notice' /}" data-favorited="{miu:lang key='js.favorited' /}" data-favorite="{miu:lang key='js.favorite' /}" data-login-first="{miu:lang key='js.login_first' /}" data-favorite-failed="{miu:lang key='js.favorite_failed' /}" data-operation-success="{miu:lang key='js.operation_success' /}" data-network-failed="{miu:lang key='js.network_failed' /}" data-dplayer-failed="{miu:lang key='js.dplayer_failed' /}" data-autoplay-failed="{miu:lang key='js.autoplay_failed' /}" data-hls-failed="{miu:lang key='js.hls_failed' /}" data-page-summary="{miu:lang key='js.page_summary' /}" data-required="{miu:lang key='js.required' /}" data-invalid-email="{miu:lang key='js.invalid_email' /}" data-min-length="{miu:lang key='js.min_length' /}" data-check-form="{miu:lang key='js.check_form' /}" data-demo-feedback="{miu:lang key='js.demo_feedback' /}" data-layout-toggle="{miu:lang key='common.layout_toggle' /}" data-user-location-failed="{miu:lang key='user_js.location_failed' /}" data-user-country-placeholder="{miu:lang key='user_js.country_placeholder' /}" data-user-province-placeholder="{miu:lang key='user_js.province_placeholder' /}" data-user-city-placeholder="{miu:lang key='user_js.city_placeholder' /}" data-user-avatar-too-large="{miu:lang key='user_js.avatar_too_large' /}" data-user-avatar-not-square="{miu:lang key='user_js.avatar_not_square' /}" data-user-avatar-invalid="{miu:lang key='user_js.avatar_invalid' /}" data-user-avatar-uploading="{miu:lang key='user_js.avatar_uploading' /}" data-user-avatar-upload-failed="{miu:lang key='user_js.avatar_upload_failed' /}" data-user-avatar-alt="{miu:lang key='user_js.avatar_alt' /}" data-user-avatar-uploaded="{miu:lang key='user_js.avatar_uploaded' /}" data-user-email-captcha-required="{miu:lang key='user_js.email_captcha_required' /}" data-user-sending-code="{miu:lang key='user_js.sending_code' /}" data-user-code-sent="{miu:lang key='user_js.code_sent' /}" data-user-code-failed="{miu:lang key='user_js.code_failed' /}" data-user-network-failed="{miu:lang key='user_js.network_failed' /}" data-user-submitting="{miu:lang key='user_js.submitting' /}" data-user-operation-success="{miu:lang key='user_js.operation_success' /}" data-user-submit-failed="{miu:lang key='user_js.submit_failed' /}" data-user-logout-confirm="{miu:lang key='user_js.logout_confirm' /}" data-user-logout-failed="{miu:lang key='user_js.logout_failed' /}" data-user-invite-copied="{miu:lang key='user_js.invite_copied' /}" data-user-copy-failed="{miu:lang key='user_js.copy_failed' /}"></div>
+<div class="toast" role="status" aria-live="polite"></div>
+<button class="back-to-top" type="button" title="{miu:lang key='footer.back_to_top' /}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" /></svg></button>

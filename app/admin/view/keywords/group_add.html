@@ -1,0 +1,58 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<style>
+	body{background: #fff;}
+	.layui-card{padding-bottom: 50px;}
+	.layui-form-item{margin-bottom: 20px;}
+</style>
+<div class="layui-card">
+	<form class="layui-form conf-layout p-page" lay-filter="webform">
+	<h3 class="pb-3">标签分组</h3>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">分组名称<font>*</font></label>
+		<div class="layui-input-block">
+			<input type="text" name="title" lay-verify="required" lay-reqText="请输入分组名称" placeholder="请输入分组名称" autocomplete="off" class="layui-input" value="{$group.title|default=''}">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">排序</label>
+		<div class="layui-input-block">
+			<input type="text" name="sort" placeholder="请输入排序，数字，越大越靠前" autocomplete="off" class="layui-input" value="{$group.sort|default='0'}">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<div class="layui-input-block">
+			<input type="hidden" name="id" value="{$id}" />
+			<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+			<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+		</div>
+	</div>
+	</form>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['tool'],function(){
+		var form = layui.form,tool=layui.tool;
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			let callback = function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.sideClose(1000);
+				}
+			}
+			tool.post("{:url('admin/keywords/group_add')}", data.field, callback);
+			return false;
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

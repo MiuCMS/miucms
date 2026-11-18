@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body>
+{include file="header" /}
+<main id="main" class="section container reading-layout">
+    {miu:position /}
+    <header class="document-heading"><h1>{$doc.title}</h1><p>{$doc.title_ext_1|default=''}</p></header>
+    {include file="document_body" /}
+    <!-- 专题节点保持原始 JSON：先解码，再按实际文档获取链接，不公开草稿和受限文档。 -->
+    {php}$specialNodes = json_decode((string) ($doc['special_nodes'] ?? ''), true); $specialNodes = is_array($specialNodes) ? $specialNodes : [];{/php}
+    {volist name="specialNodes" id="vo"}
+    {if condition="is_array($vo)"}
+    <section class="topic-section"><h2>{$vo.name|default=''}</h2>
+        {php}$nodeDocs = is_array($vo['docs'] ?? null) ? $vo['docs'] : [];{/php}
+        {foreach $nodeDocs as $nodeItem}
+        {php}
+        $nodeId = is_array($nodeItem) ? (int) ($nodeItem['id'] ?? 0) : 0;
+        $linkedDoc = $nodeId > 0 ? miu_cached_document($nodeId) : [];
+        $linkedNav = $linkedDoc ? nav_by_id((int) $linkedDoc['nav_id']) : [];
+        $canShow = $linkedDoc && $linkedNav && (int) ($linkedDoc['is_del'] ?? 0) === 0 && (int) ($linkedDoc['status'] ?? 0) === 1 && (int) ($linkedDoc['arcrank'] ?? 0) === 0 && (int) ($linkedDoc['restric_type'] ?? 0) === 0;
+        if ($canShow) { $linkedDoc = miu_doc_row($linkedDoc, $linkedNav); }
+        {/php}
+        {if condition="$canShow"}<a class="topic-link" href="{$linkedDoc.url}">{$linkedDoc.title} <span aria-hidden="true">→</span></a>{/if}
+        {/foreach}
+    </section>
+    {/if}
+    {/volist}
+    {include file="detail_end" /}
+</main>
+{include file="footer" /}
+</body>
+</html>

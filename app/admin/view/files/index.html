@@ -1,0 +1,998 @@
+{extend name="common/base"/}
+{block name="style"}
+<style>
+    body { display: flex; overflow: hidden; height: 100vh; }
+    ::-webkit-scrollbar { display: none; width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { border-radius: 10px; background-color: #e1e1e1; }
+	.layui-tab{margin:0;}
+	.file-header .layui-tab{position:relative;}
+	.file-header .layui-tab-title{padding-right:112px;}
+	.file-header .file-recycle-btn{position:absolute;top:4px;right:12px;z-index:5;}
+	@media(max-width:560px){.file-header .layui-tab-title{padding-right:94px;}.file-header .file-recycle-btn{right:6px;padding:0 8px;}}
+	.file-recycle-warning{display:flex;gap:12px;padding:14px;line-height:1.8;color:#63302b;background:#fff5f4;border:1px solid #f1c5c1;border-left:5px solid #d93025;border-radius:4px;}
+	.file-recycle-warning .layui-icon{flex:none;margin-top:2px;font-size:25px;color:#d93025;}
+	.file-recycle-warning strong{display:block;margin-bottom:5px;font-size:15px;color:#b42318;}
+	.file-recycle-danger-confirm .layui-layer-title{font-weight:700;color:#a61b16;background:#fff5f4;border-bottom-color:#f1c5c1;}
+	.file-recycle-danger-confirm .layui-layer-btn .layui-layer-btn0{border-color:#c5221f;background:#c5221f;}
+	.file-recycle-layer .layui-layer-content{display:flex;flex-direction:column;min-height:0;overflow:hidden!important;}
+	.file-recycle-layer .file-recycle-toolbar{flex:none;}
+	.file-recycle-layer .layui-table-view{position:relative;display:flex;flex:1;flex-direction:column;height:auto!important;min-height:0;padding-bottom:40px;box-sizing:border-box;}
+	.file-recycle-layer .layui-table-box{flex:1;height:auto;min-height:0;}
+	.file-recycle-layer .layui-table-page{position:absolute;right:0;bottom:0;left:0;z-index:2;flex:none;height:40px;margin:0;background:#fff;}
+	.file-recycle-layer .layui-table-main::-webkit-scrollbar{display:block;width:8px;height:8px;}
+	.container { display: flex; flex: 1; flex-direction: column; overflow: hidden; padding:12px;}
+    .file-container { display: flex; flex: 1; flex-direction: column; overflow: hidden; border-radius: 2px; background: #ffffff; box-shadow: rgba(0, 0, 0, 0.05) 0 1px 2px 0; }
+    .file-item {display: flex; flex: 1; justify-content: space-between; overflow: hidden; }
+    .file-header {padding-top: 4px; }
+
+    /** 分组 **/
+    .file-item .group { position: relative; display: flex; flex-direction: column; padding-top: 8px; width: 200px; border-right: 1px solid #f6f6f6; }
+    .file-item .group ul::-webkit-scrollbar { display: block; }
+    .file-item .group ul { flex: 1; overflow: hidden; overflow-y: auto; }
+    .file-item .group ul li {display: flex; align-items: center; justify-content: space-between; cursor:pointer; padding: 0 12px; height: 38px; font-size: 13px; color: #666666; }
+    .file-item .group ul li i.iconfont{ margin-right:8px; font-size:24px; color:#E1AF1A; font-weight:800;}
+    .file-item .group ul li > span { display: flex; flex: 1; overflow: hidden; margin-right: 0.5rem; text-overflow: ellipsis; white-space: nowrap; }
+    .file-item .group ul li.active { background: #edefff; }
+    .file-item .group ul li:hover { background: #f5f7fa; }
+    .file-item .group ul li .dropdown:hover dl { display: block; }
+    .file-item .group ul li .dropdown dl { position: absolute; top: 36px; right: -15px; z-index: 10000; display: none; padding: 5px 0; width: 88px; border-radius: 2px; text-align: center; background-color: #ffffff; box-shadow: #cccccc 0 0 10px; }
+    .file-item .group ul li .dropdown dl dd { height: 32px; line-height: 32px; }
+    .file-item .group ul li .dropdown dl dd:hover { color: #4a5dff; background-color: #edefff; }
+    .file-item .group ul li .dropdown dl::before { position: absolute; top: -16px; left: 44px; z-index: 12; display: block; padding: 0; width: 0; height: 0; border-top: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 8px solid #ffffff; border-left: 8px solid transparent; content: ""; box-sizing: content-box; }
+    .file-item .group .footer { display: flex; align-items: center; justify-content: center; width: 100%; height: 50px; border-top: 1px solid #f2f2f2; border-right: 1px solid #f2f2f2; }
+
+    /** 菜单 **/
+    .file-item .attach #move:hover { position: relative; opacity: 1; }
+    .file-item .attach #move:hover .dropdown { display: block; background-color: #ffffff; }
+    .file-item .attach .dropdown { position: absolute; top: 38px; z-index: 100000; display: none; padding: 5px 0; width: 150px; border: 1px solid #dddddd; text-align: left; background-color: #ffffff; line-height: 1.6; }
+    .file-item .attach .dropdown em { font-size: 13px; font-weight: 400; color: #333333; font-style: normal; }
+    .file-item .attach .dropdown em { display: block; clear: both; padding: 6px 20px; white-space: nowrap; }
+    .file-item .attach .dropdown em:hover { background: #eeeeee; }
+    .file-item .attach .dropdown em:first-child { font-size: 12px; color: #999999; }
+    .file-item .attach .dropdown::before { position: absolute; top: -16px; left: 21px; z-index: 12; display: block; padding: 0; width: 0; height: 0; border-top: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 8px solid #ffffff; border-left: 8px solid transparent; content: ""; box-sizing: content-box; }
+    .file-item .attach .dropdown::after { position: absolute; top: -18px; left: 20px; z-index: 10; display: block; padding: 0; width: 0; height: 0; border-top: 9px solid transparent; border-right: 9px solid transparent; border-bottom: 9px solid #cccccc; border-left: 9px solid transparent; content: ""; box-sizing: content-box; }
+
+    /** 文件 **/
+    .file-item .attach { position: relative; display: flex; flex: 1; flex-direction: column; }
+    .file-item .attach .header { display: flex; align-items: center; justify-content: space-between; padding:12px 15px; margin:0;}
+    .file-item .attach .header .search{ display: flex; }
+    .file-item .attach .header .search input { height: 30px; border-color: #eeeeee; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+    .file-item .attach .header .search button { border-color: #eeeeee; background: #f5f7fa; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+    .file-item .attach .header .search button:hover { background-color: #eeeeef; }
+    .file-item .attach .subject { position: relative; flex: 1; overflow: hidden; overflow-y: auto; margin: 10px; box-sizing: border-box; }
+    .file-item .attach .subject:hover::-webkit-scrollbar { display: block; }
+    ::selection, *::selection { color: inherit !important; background: transparent !important; }
+    ::-moz-selection, *::-moz-selection { color: inherit !important; background: transparent !important; }
+    .file-selection-box { position: absolute; z-index: 10; display: none; border: 1px solid rgba(0, 150, 255, .85); background: rgba(0, 150, 255, .14); pointer-events: none; }
+    .file-item .attach .subject ul { display: flex; flex-wrap: wrap; }
+    .file-item .attach .subject ul li { position: relative; height: 120px; margin: 5px; padding: 9px; border: 1px solid rgba(0, 0, 0, 0.05); border-radius: 3px; transition: all 0.2s ease-in-out; }
+    .file-item .attach .subject ul li:hover {border: 1px solid #cccccc; }
+    .file-item .attach .subject ul li.on {border: 1px solid #ff5722; }
+    .file-item .attach .subject ul li img { width: 100px; height: 100px; border-radius: 2px; }
+    .file-item .attach .subject ul li video { width: 100px; height: 100px; border-radius: 3px; }
+    .file-item .attach .subject ul li p { overflow: hidden; margin: 5px 0 0; width: 98px; font-size: 13px; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+    .file-item .attach .subject ul li::after {position: absolute; width:22px; height:22px; right: -1px; bottom: -1px; display: none; font-size: 14px; font-family: layui-icon, serif; border-radius:3px 0 3px 0; text-align: center; color: #ffffff; background: #ff5722; content: "\e605"; line-height: 24px; }
+    .file-item .attach .subject ul li.on::after { display: block; }
+	.file-item .attach .subject ul li .layui-btn-group{position:absolute; top:3px; right:3px; display:none;}
+	.file-item .attach .subject ul li:hover .layui-btn-group{display:block}
+	
+	.file-item .attach .footer { display: flex; flex: 0 0 45px; align-items: center; justify-content: end; padding: 5px 15px 0; height: 45px; border-top: 1px solid #f2f2f2; text-align: center; background: #ffffff; }
+
+    /** 无数据 **/
+    .file-item .empty { display: flex; flex: 1; align-items: center; flex-direction: column; justify-content: center; overflow: hidden; text-align: center; color: #cccccc; }
+    .file-item .empty i { font-size: 180px; }
+    .file-item .empty p { width: 180px; text-align: center; }
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="container">
+	<div class="file-container">
+		<div class="file-header">
+			<div class="layui-tab layui-tab-brief" lay-filter="tab">
+				<ul class="layui-tab-title">
+					<li class="layui-this" data-filter="">全部</li>
+					<li data-filter="image">图片</li>
+					<li data-filter="video">视频</li>
+					<li data-filter="audio">音频</li>
+					<li data-filter="doc">文档</li>
+					<li data-filter="zip">压缩包</li>
+				</ul>
+				<button type="button" class="layui-btn layui-btn-sm layui-btn-primary file-recycle-btn" id="fileRecycle"><i class="layui-icon layui-icon-delete"></i>回收站</button>
+			</div>
+		</div>
+		<div class="file-item">
+			<!-- 分组 -->
+			<div class="group">
+				<ul id="group" class="groups">					
+					<li data-id="" class="active"><i class="layui-icon layui-icon-folder-open"></i><span class="layui-padding-1">全部</span></li>
+					<li data-id="0"><i class="layui-icon layui-icon-folder"></i><span class="layui-padding-1">未分组</span></li>
+				</ul>
+				<div class="footer">
+					<span class="layui-btn layui-btn-primary layui-btn-sm add-new"><i class="layui-icon layui-icon-addition"></i> 添加分组</span>
+				</div>
+			</div>
+			<!-- 文件 -->
+			<div class="attach">
+				<!-- 工具 -->
+				<form class="layui-form" lay-filter="barsearchform" style="display:block; margin:0;padding:0;">
+					<div class="header">
+						<div class="layui-btn-group">
+							<span class="layui-btn layui-btn-sm layui-btn-normal" id="fileUpload">上传文件</span>
+							<span class="layui-btn layui-btn-sm layui-btn-danger" id="fileDelete">批量删除</span>
+							<span class="layui-btn layui-btn-sm layui-btn-warm" id="fileMove">移动至 <i class="layui-icon layui-icon-triangle-d"></i></span>
+							<span style="margin-left:36px;"><input type="checkbox" name="select_all" lay-filter="all" title="全选"></span>
+						</div>
+
+						<div class="search">
+							<input type="hidden" name="limit" value="30" />
+							<input type="hidden" name="page" value="1" />
+							<!-- filter 文件类型过滤参数，后端识别值：image/video/audio/doc/zip，空值=全部 -->
+							<input type="hidden" name="filter" value="" />
+							<input type="hidden" name="group_id" value="" />
+							<label><input type="text" name="keywords" placeholder="请输入名称" autocomplete="off" class="layui-input"></label>
+							<button type="button" class="layui-btn layui-btn-sm layui-btn-primary" lay-submit="" lay-filter="webform"><i class="layui-icon layui-icon-search"></i></button>
+						</div>
+					</div>
+				</form>
+				<!-- 主体 -->
+				<div class="subject">
+					<ul id="filesBox"></ul>
+				</div>
+				<!-- 页脚 -->
+				<div class="footer">
+					<div id="laypage"></div>
+				</div>
+			</div>
+		</div>
+        </div>
+</div>
+<script type="text/html" id="toolbarDemo">
+<h3 class="h3-title" style="height:28px;">审批列表</h3>
+</script>						
+<script type="text/html" id="fileRecycleRowBar">
+	<div class="layui-btn-group">
+		<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="restore">还原</a>
+		<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="permanent-delete">彻底删除</a>
+	</div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	// 父页面回填目标输入框 ID（由父页面在弹层 success 中注入）
+	var THUMB_BIND_ID = '';
+
+	// 从 URL 参数读取配置：filter 为文件类型过滤，target 为回调目标标识
+	(function(){
+		var params = new URLSearchParams(location.search);
+		window.FM_FILTER = params.get('filter') || 'all';
+		window.FM_TARGET = params.get('target') || '';
+		// 如果 URL 携带了 filter，同步到表单隐藏字段，并仅显示对应的标签卡
+		if(window.FM_FILTER && window.FM_FILTER !== 'all'){
+			$('[name="filter"]').val(window.FM_FILTER);
+			// 只保留与 filter 匹配的标签，隐藏其余（含"全部"）
+			$('.layui-tab-title li').each(function(){
+				if($(this).attr('data-filter') === window.FM_FILTER){
+					$(this).show().addClass('layui-this');
+				} else {
+					$(this).hide().removeClass('layui-this');
+				}
+			});
+		}
+	})();
+
+	layui.use(['tool','table'],function(){
+		var table = layui.table, tool = layui.tool ,form = layui.form,laypage = layui.laypage,upload = layui.upload, element=layui.element, dropdown=layui.dropdown ;
+		var currentFilePage = 1;
+		var currentFileCount = 0;
+		$('#fileRecycle').on('click', function(){
+			var width = $(window).width() < 760 ? '96%' : '860px';
+			var height = $(window).height() < 700 ? '92%' : '620px';
+			layer.open({
+				type: 1,
+				title: '文件回收站',
+				area: ['90%', '90%'],
+				maxmin: true,
+				skin: 'file-recycle-layer',
+				content: '<div class="file-recycle-toolbar" style="display:flex;justify-content:space-between;gap:10px;padding:12px 15px;"><div class="layui-btn-container"><button type="button" class="layui-btn layui-btn-sm layui-btn-normal" id="fileRecycleRestoreBatch"><i class="layui-icon layui-icon-refresh-3"></i>批量还原</button><button type="button" class="layui-btn layui-btn-sm layui-btn-danger" id="fileRecycleDeleteBatch"><i class="layui-icon layui-icon-delete"></i>批量删除</button></div><button type="button" class="layui-btn layui-btn-sm layui-btn-danger" id="fileRecycleClear"><i class="layui-icon layui-icon-fire"></i>清空回收站</button></div><table id="fileRecycleTable" lay-filter="fileRecycleTable"></table>',
+				success: function(layero){
+					var $layerContent = layero.find('.layui-layer-content');
+					var tableHeight = Math.max(240, $layerContent.innerHeight() - layero.find('.file-recycle-toolbar').outerHeight(true));
+					var recycleImageExts = ['jpg','jpeg','png','gif','bmp','webp','svg'];
+					table.render({
+						id: 'recycleFileTable',
+						elem: '#fileRecycleTable',
+						url: "{:url('admin/files/index')}",
+						where: {recycle: 1},
+						page: true,
+						limit: 20,
+						height: tableHeight,
+						cols: [[
+							{type: 'checkbox', fixed: 'left', align: 'center', rowspan: 2},
+							{field:'id', title:'ID', width:75, align:'center'},
+							{field:'preview', title:'预览图', width:90, align:'center', templet:function(d){
+								var ext = String(d.fileext || '').toLowerCase();
+								if ($.inArray(ext, recycleImageExts) < 0 || !d.filepath) return '<span class="layui-font-gray">无预览</span>';
+								return $('<img>').attr({src:d.filepath, alt:d.name || '文件预览', loading:'lazy'}).css({width:'52px',height:'38px',objectFit:'cover',borderRadius:'3px'}).prop('outerHTML');
+							}},
+							{field:'name', title:'文件名称', minWidth:220, templet:function(d){return $('<span>').text(d.name || '').html();}},
+							{field:'filepath', title:'文件路径', minWidth:280, templet:function(d){return $('<span>').text(d.filepath || '').html();}},
+							{field:'fileext', title:'类型', width:90, align:'center', templet:function(d){return $('<span>').text(d.fileext || '').html();}},
+							{field:'delete_time', title:'删除时间', width:175, align:'center'},
+							{title:'操作', width:150, fixed:'right', align:'center', toolbar:'#fileRecycleRowBar'}
+						]]
+					});
+				}
+			});
+		});
+		table.on('row(fileRecycleTable)', function(obj){
+			obj.setRowChecked({type:'checkbox'});
+		});
+
+		table.on('tool(fileRecycleTable)', function(obj){
+			if (obj.event === 'restore') {
+				tool.post("{:url('admin/files/edit')}", {id:obj.data.id, recycle_action:'restore'}, function(res){
+					layer.msg(res.msg);
+					if (Number(res.code) === 0) {
+						table.reload('recycleFileTable', {where:{recycle:1}});
+						var data = form.val('barsearchform');
+						data.page = currentFilePage;
+						get_files(data);
+					}
+				});
+				return;
+			}
+			if (obj.event === 'permanent-delete') {
+				layer.confirm('确定永久删除该文件记录及未被正常附件引用的源文件吗？此操作不可恢复。', {icon:3, title:'确认删除'}, function(index){
+					tool.delete("{:url('admin/files/delete')}", {ids:obj.data.id, recycle_action:'delete'}, function(res){
+						layer.close(index);
+						layer.msg(res.msg);
+						if (Number(res.code) === 0) table.reload('recycleFileTable', {where:{recycle:1}});
+					});
+				});
+			}
+		});
+
+		$('body').on('click', '#fileRecycleRestoreBatch', function(){
+			var rows = table.checkStatus('recycleFileTable').data || [];
+			if (!rows.length) return layer.msg('请先单击选择要还原的文件');
+			var ids = $.map(rows, function(row){ return row.id; });
+			layer.confirm('确认还原选中的 <strong class="layui-font-blue">' + ids.length + '</strong> 个文件吗？还原后会重新出现在正常文件列表中。', {
+				icon:3,
+				title:'批量还原确认',
+				btn:['确认还原','取消']
+			}, function(index){
+				tool.post("{:url('admin/files/edit')}", {ids:ids.join(','), recycle_action:'restore'}, function(res){
+					layer.close(index);
+					layer.msg(res.msg);
+					if (Number(res.code) === 0) {
+						table.reload('recycleFileTable', {where:{recycle:1}});
+						var data = form.val('barsearchform');
+						data.page = currentFilePage;
+						get_files(data);
+					}
+				});
+			});
+		});
+
+		$('body').on('click', '#fileRecycleDeleteBatch', function(){
+			var rows = table.checkStatus('recycleFileTable').data || [];
+			if (!rows.length) return layer.msg('请先单击选择要删除的文件');
+			var ids = $.map(rows, function(row){ return row.id; });
+			layer.confirm('<div class="file-recycle-warning"><i class="layui-icon layui-icon-tips"></i><div><strong>确认永久删除选中的 ' + ids.length + ' 个文件吗？</strong>对应的回收站记录将被删除，未被正常附件引用的源文件也会物理删除。此操作不可恢复。</div></div>', {
+				icon:0,
+				title:'批量永久删除确认',
+				btn:['确认永久删除','取消'],
+				btnAlign:'c',
+				skin:'file-recycle-danger-confirm'
+			}, function(index){
+				tool.delete("{:url('admin/files/delete')}", {ids:ids.join(','), recycle_action:'delete'}, function(res){
+					layer.close(index);
+					layer.msg(res.msg);
+					if (Number(res.code) === 0) table.reload('recycleFileTable', {where:{recycle:1}});
+				});
+			});
+		});
+
+		$('body').on('click', '#fileRecycleClear', function(){
+			var warning = '<div class="file-recycle-warning"><i class="layui-icon layui-icon-tips"></i><div><strong>危险操作：清空后无法恢复</strong>将永久删除回收站中的附件数据库记录，并删除未被正常附件引用的源文件。仍被正常附件引用的源文件会保留。</div></div>';
+			layer.confirm(warning, {icon:0, title:'清空文件回收站', btn:['继续下一步','取消'], btnAlign:'c', skin:'file-recycle-danger-confirm'}, function(firstIndex){
+				layer.close(firstIndex);
+				layer.confirm('<div class="file-recycle-warning"><i class="layui-icon layui-icon-tips"></i><div><strong>最后一次确认</strong>你即将永久清空整个文件回收站。此操作不可撤销，请确认后再继续。</div></div>', {icon:0, title:'最后确认：永久删除', btn:['确认永久清空','我再检查'], btnAlign:'c', skin:'file-recycle-danger-confirm'}, function(secondIndex){
+					tool.delete("{:url('admin/files/delete')}", {recycle_action:'clear'}, function(res){
+						layer.close(secondIndex);
+						layer.msg(res.msg);
+						if (Number(res.code) === 0) table.reload('recycleFileTable', {where:{recycle:1}, page:{curr:1}});
+					});
+				});
+			});
+		});
+
+		element.on('tab(tab)', function(data){
+			var filter = $(this).attr('data-filter') || '';
+			$('[name="filter"]').val(filter);
+			$('[lay-filter="webform"]').click();
+			return false;
+		});	
+		
+		//监听多选框点击事件  通过 lay-filter="menu"来监听
+		form.on('checkbox(all)', function (data) {
+		　　let val = data.value;
+			if(data.elem.checked){
+				//判断当前多选框是选中还是取消选中
+				$('#filesBox li').addClass('on');
+			}
+			else{
+				$('#filesBox li').removeClass('on');
+			}
+		});
+
+		{php}$canUploadSourceFiles = (int) get_login_admin('id') === 1;{/php}
+		var uploadInst = upload.render({
+			elem: '#fileUpload'
+			,url: "{:url('admin/api/upload')}"
+			,multiple: true
+			, accept: 'file' //普通文件
+			, exts: window.FM_FILTER === 'video' ? 'mp4|avi|mov|wmv|flv|mkv|webm' : 'jpeg|jpg|png|gif|bmp|webp|ico|doc|docx|ppt|pptx|xls|xlsx|pdf|zip|gz|rar|7z|txt|mp4|psd|mp3|iso|api|ipa'{if condition="$canUploadSourceFiles"} + '|svg|html|js|css'{/if} //视频筛选场景只允许上传视频
+			, data: {
+				group_id:function(){
+					return $('[name="group_id"]').val() || 0
+				},
+				type:function(){
+					return window.FM_FILTER === 'video' ? 'video' : '';
+				}
+			}
+			, before: function (obj) {
+				layer.msg('上传中...', { time: 3600000 });
+			}
+			,done: function (res) {
+				layer.msg(res.msg);
+				$('[lay-filter="webform"]').click();
+			}, error: function (index, upload) {
+				layer.msg('上传失败');
+			}
+		});
+		
+		// 搜索框回车触发搜索
+		$('[name="keywords"]').on('keydown', function(e){
+			if(e.keyCode === 13){
+				e.preventDefault();
+				$('[lay-filter="webform"]').click();
+			}
+		});
+
+		$('body').on('click','.add-new',function(){
+			add_group(0,'');	
+		});
+		
+		$('#group').on('click','li',function(){
+			let id=$(this).data('id');
+			$(this).siblings().removeClass('active');
+			$(this).siblings().find('i').removeClass('layui-icon-folder-open').addClass('layui-icon-folder');
+			$(this).addClass('active');
+			$(this).find('i').removeClass('layui-icon-folder').addClass('layui-icon-folder-open');
+			$('[name="group_id"]').val(id);
+			$('[lay-filter="webform"]').click();
+		});
+
+		function confirmFileDelete(ids, message) {
+			var content = '<div style="padding:4px 8px;line-height:1.8;">' + message
+				+ '<div style="margin-top:10px;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;">'
+				+ '<input type="checkbox" class="file-delete-source" style="width:16px;height:16px;margin:0;">同时删除源文件'
+				+ '</label></div></div>';
+			layer.confirm(content, { icon: 3, title: '提示' }, function (index, layero) {
+				var $dialog = layero ? $(layero) : $('#layui-layer' + index);
+				var deleteSource = $dialog.find('.file-delete-source').prop('checked') ? 1 : 0;
+				var callback = function (e) {
+					layer.close(index);
+					layer.msg(e.msg);
+					if (Number(e.code) !== 0) {
+						return;
+					}
+					var requestedIdMap = {};
+					var requestedIds = Array.isArray(ids) ? ids : String(ids).split(',');
+					$.each(requestedIds, function (_, id) {
+						requestedIdMap[String(id).trim()] = true;
+					});
+					var deletedIdMap = {};
+					var deletedIds = e.data && Array.isArray(e.data.deleted_ids)
+						? e.data.deleted_ids
+						: requestedIds;
+					var retainedIds = e.data && Array.isArray(e.data.retained_ids) ? e.data.retained_ids : [];
+					$.each(deletedIds, function (_, id) {
+						deletedIdMap[String(id).trim()] = true;
+					});
+					$.each(retainedIds, function (_, id) {
+						deletedIdMap[String(id).trim()] = true;
+					});
+					var removedCount = 0;
+					$('#filesBox > li').each(function () {
+						var id = String($(this).data('id'));
+						if (deletedIdMap[id]) {
+							$(this).remove();
+							removedCount++;
+						} else if (requestedIdMap[id]) {
+							$(this).removeClass('on');
+						}
+					});
+					$('[name="select_all"]').prop('checked', false);
+					form.render('checkbox');
+					currentFileCount = Math.max(0, currentFileCount - removedCount);
+					var data = form.val('barsearchform');
+					var limit = parseInt(data.limit, 10) || 30;
+					var lastPage = currentFileCount > 0 ? Math.ceil(currentFileCount / limit) : 1;
+					currentFilePage = Math.min(currentFilePage, lastPage);
+					data.page = currentFilePage;
+					get_files(data);
+				};
+				tool.delete("{:url('admin/files/delete')}", {
+					ids: ids,
+					delete_source: deleteSource
+				}, callback);
+			});
+		}
+			
+		$('#fileDelete').on('click',function(){
+			let select_array = [];
+			$('#filesBox').find('li.on').each(function(index,item){
+				select_array.push($(item).data('id'));			
+			})
+			if(select_array.length<1){
+				layer.msg('请先选择文件');
+			}
+			else{
+				confirmFileDelete(select_array.join(','), '<span class="layui-font-red">确定要删除选中的 ' + select_array.length + ' 个文件吗？请慎重!<br/>不可恢复，请谨慎操作！</span>');
+			}
+		});
+					
+		function add_group(id,val){
+			var title = '新增分组';
+			if(id>0){
+				title = '编辑分组';
+			}
+			layer.prompt({
+				title: title,
+				value: val,
+				yes: function(index, layero) {
+					// 获取文本框输入的值
+					var value = layero.find(".layui-layer-input").val();
+					if (value!='') {
+						let callback = function (e) {
+							layer.msg(e.msg);
+							if(e.code==0){
+								location.reload();
+							}
+						}
+						tool.post("{:url('admin/files/add_group')}", {id: id,title: value}, callback);
+						layer.close(index);
+					} else {
+						layer.msg('请填写分组名称');
+					}
+				}
+			})
+		}
+			
+		var data = form.val('barsearchform');
+		get_files(data);
+		get_group();
+		
+		function get_group(param){
+			$.ajax({
+				url:"{:url('admin/files/get_group')}",
+				success:function(res){
+					if(res.code==0){
+						var group=res.data,item='';
+						if(group.length>0){
+							for(var a=0;a<group.length;a++){
+								var groupId = parseInt(group[a].id, 10) || 0;
+								var groupTitle = tool.xss(String(group[a].title || ''));
+								item+='<li data-id="'+groupId+'" data-title="'+groupTitle+'"><i class="layui-icon layui-icon-folder"></i><span class="layui-padding-1">'+groupTitle+'</span><i class="layui-icon layui-icon-more-vertical dropdown-on"></i></li>';
+							}
+							$('#group').append(item);
+							// 自定义事件
+							dropdown.render({
+								elem: '.dropdown-on',
+								trigger: 'hover',
+								align: 'right',
+								data: [{
+								  title: '重命名分组',
+								  id: 100
+								},{
+								  title: '删除该分组',
+								  id: 101
+								}],
+								click: function(data, othis){
+									let id = $(this.elem).parent().data('id');
+									let title = $(this.elem).parent().data('title');
+									if(data.id==100){
+										add_group(id,title);
+									}else{
+										del_group(id);
+									}							
+								}
+							});
+						}
+						group.push({id:0,title:'未分组'});
+						dropdown.render({
+							elem: '#fileMove',
+							data: group,
+							click: function(obj){
+								let select_array = [];
+								$('#filesBox').find('li.on').each(function(index,item){
+									select_array.push($(item).data('id'));			
+								})
+								if(select_array.length<1){
+									layer.msg('请先选择文件');
+								}
+								else{				
+					layer.confirm('确定要把选中的 ' + select_array.length + ' 个文件移动到『'+obj.title+'』分组吗？', { icon: 3, title: '提示' }, function (index) {
+										let callback = function (e) {
+											layer.closeAll();
+											layer.msg(e.msg);
+											$('[lay-filter="webform"]').click();
+										}
+										tool.delete("{:url('admin/files/move')}", {group_id:obj.id,ids:select_array.join(',')}, callback);
+									});
+								}
+							}
+						});
+					}
+				}
+			});
+		}
+		
+		function del_group(id) {
+			layer.confirm('确定要删除该分组吗？请慎重', { icon: 3, title: '提示' }, function (index) {
+				let callback = function (e) {
+					layer.closeAll();
+					//$('#group').find('[data-id="'+id+'"]').remove();
+					if(e.code==0){
+						layer.msg(e.msg,{icon:1});
+						setTimeout(function(){
+							location.reload();
+						},500)
+					}else{
+						layer.msg(e.msg,{icon:2});
+					}
+				}
+				tool.delete("{:url('admin/files/del_group')}", {id:id}, callback);
+			});
+		}
+		
+		
+		function renderFilePager(count, param) {
+			laypage.render({
+				elem: 'laypage',
+				limit: param.limit,
+				curr: param.page,
+				count: count,
+				jump: function (obj, first) {
+					if (!first) {
+						var data = form.val('barsearchform');
+						data.page = obj.curr;
+						get_files(data);
+					}
+				}
+			});
+		}
+
+		function get_files(param){
+			var requestedPage = parseInt(param.page, 10);
+			if (!isNaN(requestedPage) && requestedPage > 0) {
+				currentFilePage = requestedPage;
+			}
+			var loadIndex = layer.load(0);
+			// 注意：filter 参数由表单隐藏字段携带（标签点击时更新），后端 Files.php 负责按类型过滤；
+			// 这里不再强制用 URL 中的 filter 覆盖，否则点击标签切换类型会失效。
+			$.ajax({
+				url:"{:url('admin/files/index')}",
+				data:param,
+				complete:function(){
+					setTimeout(function(){
+						layer.close(loadIndex)
+					}, 200);
+				},
+				success:function(res){
+					$('[name="select_all"]').prop('checked', false);
+					form.render('checkbox');
+					if(res.code==0){
+						currentFileCount = parseInt(res.count, 10) || 0;
+						renderFilePager(currentFileCount, param);
+					
+						var item=res.data,li='';
+						if(item.length>0){
+							for(var a=0;a<item.length;a++){
+								var fileId = parseInt(item[a].id, 10) || 0;
+								var fileName = tool.xss(String(item[a].name || ''));
+								var fileOriginalName = tool.xss(String(item[a].filename || ''));
+								var fileExtension = tool.xss(String(item[a].fileext || ''));
+								var fileUrl = String(item[a].filepath || '');
+								if (!/^(https?:\/\/|\/\/|\/(?!\/))/i.test(fileUrl)) fileUrl = '';
+								fileUrl = tool.xss(fileUrl);
+								var fileSize = parseInt(item[a].filesize, 10) || 0;
+								let image = ['jpg','jpeg','png','gif','bmp','webp','svg'];
+								let video = ['mp4','avi','mov','wmv','flv','mkv','webm'];
+								let audio = ['mp3','wav','wma','flac','midi'];
+								let office = ['doc','docx','xls','xlsx','txt'];
+								let doc = ['doc','docx','xls','xlsx','ppt','pptx','txt','pdf','zip','rar','7z'];
+								let down = '<a href="'+fileUrl+'" target="_blank" rel="noopener noreferrer" class="layui-btn layui-btn-xs layui-btn-normal" download="'+fileName+'">下载</a>';
+								let fileType = '';
+								// 判断元素是否在数组中
+								let path='/static/admin/images/icon/file.png';
+								if (image.includes(item[a].fileext)) {
+									path=fileUrl;
+									fileType = 'image';
+									down = '<span data-href="'+fileUrl+'" class="layui-btn layui-btn-xs layui-btn-normal file-view-img">预览</span>';
+								} else if (video.includes(item[a].fileext)) {
+									path=fileUrl;
+									fileType = 'video';
+									down = '<span data-href="'+fileUrl+'" class="layui-btn layui-btn-xs layui-btn-normal file-view-video">预览</span>';
+								} else if (audio.includes(item[a].fileext)) {
+									fileType = 'audio';
+									down = '<span data-href="'+fileUrl+'" class="layui-btn layui-btn-xs layui-btn-normal file-view-audio">预览</span>';
+								} else if (office.includes(item[a].fileext)) {
+									path='/static/admin/images/icon/'+fileExtension+'.png';
+									fileType = 'office';
+									down = '<span data-fileid="'+fileId+'" data-mode="view" class="layui-btn layui-btn-xs layui-btn-normal file-view-office">预览</span>';
+								} else if (doc.includes(item[a].fileext)){
+									path='/static/admin/images/icon/'+fileExtension+'.png';
+								}
+
+								if(item[a].fileext == 'pdf'){
+									down = '<span data-href="'+fileUrl+'" class="layui-btn layui-btn-xs layui-btn-normal file-view-pdf">预览</span>';
+								}
+								path = tool.xss(String(path));
+								var safeFileType = tool.xss(String(fileType));
+								// 视频文件用 video 标签渲染，音频和其他文件显示文件图标
+								var mediaTag = fileType === 'video'
+									? '<video src="'+path+'" class="file-item" title="'+fileName+'" style="width:100px;height:100px;object-fit:cover;"></video>'
+									: '<img src="'+path+'" alt="'+fileOriginalName+'" style="object-fit: contain;" class="file-item" title="'+fileName+'">';
+								li+='<li data-id="'+fileId+'" data-title="'+fileName+'" data-ext="'+fileExtension+'" data-src="'+fileUrl+'" data-type="'+safeFileType+'" data-filesize="'+fileSize+'">'+mediaTag+'<p title="'+fileName+'">'+fileName+'</p><div class="layui-btn-group"><span class="layui-btn layui-btn-xs file-edit">重命名</span>'+down+'<span class="layui-btn layui-btn-xs layui-btn-danger file-del">删除</span></div></li>';
+							}
+							$('#filesBox').html(li);
+							$('#laypage').show();
+						}else{
+								$('#filesBox').html('<div class="empty"><i class="layui-icon layui-icon-upload"></i><p>暂无文件，赶紧去上传吧!</p></div>');
+								$('#laypage').hide();
+						}
+					}	
+				}				
+			});
+		}
+
+		var $fileSubject = $('.file-item .attach .subject');
+		var $fileSelectionBox = $('<div class="file-selection-box"></div>').appendTo($fileSubject);
+		var fileSelection = null;
+		var ignoreFileItemClick = false;
+		var ignoreFileSelectionClearClick = false;
+		var boxSelectionActive = false;
+		$fileSubject.on('mousedown', function(e){
+			var $target = $(e.target);
+			if (e.which !== 1 || $target.closest('button, a, input').length) return;
+			if ($target.closest('#filesBox > li').length && !$target.closest('#filesBox > li > .file-item, #filesBox > li > p').length) return;
+			fileSelection = {x:e.clientX, y:e.clientY, bounds:this.getBoundingClientRect(), dragged:false};
+			$fileSelectionBox.css({left:e.clientX - fileSelection.bounds.left + this.scrollLeft, top:e.clientY - fileSelection.bounds.top + this.scrollTop, width:0, height:0}).show();
+			e.preventDefault();
+		});
+		$(document).on('mousemove.fileSelection', function(e){
+			if (!fileSelection) return;
+			var bounds = fileSelection.bounds;
+			var x = Math.max(bounds.left, Math.min(e.clientX, bounds.right));
+			var y = Math.max(bounds.top, Math.min(e.clientY, bounds.bottom));
+			if (Math.abs(x - fileSelection.x) < 4 && Math.abs(y - fileSelection.y) < 4) return;
+			if (!fileSelection.dragged) {
+				fileSelection.dragged = true;
+				$('#filesBox > li').removeClass('on');
+			}
+			var left = Math.min(fileSelection.x, x);
+			var top = Math.min(fileSelection.y, y);
+			var right = Math.max(fileSelection.x, x);
+			var bottom = Math.max(fileSelection.y, y);
+			$fileSelectionBox.css({
+				left:left - bounds.left + $fileSubject.scrollLeft(),
+				top:top - bounds.top + $fileSubject.scrollTop(),
+				width:right - left,
+				height:bottom - top
+			});
+			$('#filesBox > li[data-id]').each(function(){
+				var item = this.getBoundingClientRect();
+				$(this).toggleClass('on', item.right >= left && item.left <= right && item.bottom >= top && item.top <= bottom);
+			});
+		});
+		$(document).on('mouseup.fileSelection', function(){
+			if (!fileSelection) return;
+			if (fileSelection.dragged) {
+				boxSelectionActive = true;
+				ignoreFileItemClick = true;
+				ignoreFileSelectionClearClick = true;
+				setTimeout(function(){
+					ignoreFileItemClick = false;
+					ignoreFileSelectionClearClick = false;
+				}, 0);
+			}
+			fileSelection = null;
+			$fileSelectionBox.hide();
+		});
+		document.addEventListener('click', function(e){
+			if (!boxSelectionActive || ignoreFileSelectionClearClick) return;
+			var $target = $(e.target);
+			if ($target.closest('#fileDelete, #fileMove, [name="select_all"], .layui-form-checkbox, .layui-dropdown, .layui-dropdown-menu, .layui-layer-dialog').length) return;
+			boxSelectionActive = false;
+			$('#filesBox > li').removeClass('on');
+			$('[name="select_all"]').prop('checked', false);
+			form.render('checkbox');
+			if ($target.closest('#filesBox > li > .file-item').length) {
+				ignoreFileItemClick = true;
+				setTimeout(function(){ ignoreFileItemClick = false; }, 0);
+			}
+		}, true);
+		
+		$('#filesBox').on('click','.file-item',function(e){
+			if (ignoreFileItemClick) {
+				ignoreFileItemClick = false;
+				e.preventDefault();
+				e.stopImmediatePropagation();
+				return false;
+			}
+			e.stopPropagation();
+			$(this).parent().toggleClass("on");
+		})
+
+		// 预览当前页全部图片，并从点击的图片开始播放。
+		// 在 #filesBox 层处理并阻止冒泡，避免公共 tool.js 将预览改成单图。
+		$('#filesBox').on('click', '.file-view-img', function(e){
+			e.preventDefault();
+			e.stopPropagation();
+			var $current = $(this).closest('li');
+			var $images = $('#filesBox > li[data-type="image"]');
+			var photos = [];
+			var start = -1;
+			$images.each(function(index){
+				var $image = $(this);
+				var src = $image.attr('data-src') || '';
+				if (!src) return;
+				if (this === $current[0]) start = photos.length;
+				photos.push({
+					alt: $image.attr('data-title') || '',
+					src: src,
+					thumb: src
+				});
+			});
+			if (photos.length && start > -1) {
+				layer.photos({photos: {data: photos, start: start}, anim: 5});
+			}
+		});
+		$('#filesBox').on('click', '.file-view-video', function(e){
+			var videoUrl = $(this).data('href') || '';
+			if (!videoUrl) {
+				layer.msg('视频地址为空');
+				return;
+			}
+			layer.open({
+				type: 2,
+				title: false,
+				area: ['630px', '360px'],
+				shade: 0.8,
+				closeBtn: 0,
+				shadeClose: true,
+				content: videoUrl
+			});
+		});
+		$('#filesBox').on('click', '.file-view-audio', function(e){
+			e.preventDefault();
+			e.stopPropagation();
+			var audioUrl = $(this).attr('data-href') || '';
+			if (!audioUrl) {
+				layer.msg('音频地址为空');
+				return;
+			}
+			tool.audioView(audioUrl);
+		});
+		$('#filesBox').on('click', '.file-view-office', function(e){
+			e.preventDefault();
+			e.stopPropagation();
+			var fileId = parseInt($(this).attr('data-fileid'), 10);
+			if (!fileId) {
+				layer.msg('文件记录不存在');
+				return;
+			}
+			tool.officeView(fileId, $(this).attr('data-mode') || 'view');
+		});
+
+		// 可插入编辑器的媒体扩展名白名单（图片 + 视频）
+		var imageExts = ['jpg','jpeg','png','gif','bmp','webp','svg'];
+		var videoExts = ['mp4','avi','mov','wmv','flv','mkv','webm'];
+		function isImage(ext){
+			return imageExts.indexOf(String(ext||'').toLowerCase()) > -1;
+		}
+		function isVideo(ext){
+			return videoExts.indexOf(String(ext||'').toLowerCase()) > -1;
+		}
+
+		// 辅助：关闭当前弹层
+		function closeFileManagerLayer(){
+			if(window.THUMB_LAYER_INDEX){
+				window.parent.layer.close(window.THUMB_LAYER_INDEX);
+			}else{
+				window.parent.layer.closeAll();
+			}
+		}
+
+		// 双击媒体项：传回图片/视频地址并关闭弹层
+		$('#filesBox').on('dblclick','.file-item',function(e){
+			e.stopPropagation();
+			var $li = $(this).closest('li');
+			var ext = String($li.data('ext')||'').toLowerCase();
+			var src = $li.data('src');
+			var name = $li.data('title') || '';
+			if(!src){
+				layer.msg('未找到文件路径');
+				return;
+			}
+
+			var target = window.FM_TARGET;
+			if(!target){
+				//layer.msg('未设置目标（target参数缺失）');
+				return;
+			}
+		var fileType = isVideo(ext) ? 'video' : (isImage(ext) ? 'image' : '');
+
+		// 编辑器插入场景
+		if(target === 'editor'){
+			if(!fileType){
+				layer.msg('仅支持图片和视频双击插入');
+				return;
+			}
+			if(window.parent && window.parent._editorImageCallback){
+				window.parent._editorImageCallback(src, fileType, name);
+				closeFileManagerLayer();
+			} else {
+				layer.msg('编辑器回调函数不存在');
+			}
+			return;
+		}
+			// 多图上传场景：target 格式为 "multi-img-字段名"
+			if(target && target.indexOf('multi-img-') === 0){
+				var fieldName = target.replace('multi-img-', '');
+				var fileType = isImage(ext) ? 'image' : '';
+				if(!fileType){
+					layer.msg('仅支持图片双击插入');
+					return;
+				}
+				if(window.parent && window.parent._insertMultiImages){
+					window.parent._insertMultiImages(fieldName, [{src: src, type: 'image', name: name}]);
+					closeFileManagerLayer();
+				} else {
+					layer.msg('多图上传回调函数不存在');
+				}
+				return;
+			}
+			// 输入框回填场景：target 格式为 "input:输入框ID"
+			if(target.indexOf('input:') === 0){
+				var inputId = target.replace('input:', '');
+				if(window.parent && window.parent.$){
+					window.parent.$('#'+inputId).val(src).trigger('input');
+					closeFileManagerLayer();
+				}
+				return;
+			}
+			// 下载资源场景：target 格式为 "download-字段名"
+		if(target && target.indexOf('download-') === 0){
+			var fieldName = target.replace('download-', '');
+			if(window.parent && window.parent._insertDownloadFiles){
+				window.parent._insertDownloadFiles(fieldName, [{src: src, name: name, ext: ext, size: $li.data('filesize') || '', btn_name: '本地下载'}]);
+				closeFileManagerLayer();
+			} else {
+				layer.msg('下载资源回调函数不存在');
+			}
+			return;
+		}
+		// 视频播放组场景：双击视频直接追加到对应播放组的文本框。
+		if(target && target.indexOf('video-group-') === 0){
+			var textareaId = target.substring('video-group-'.length);
+			if(fileType !== 'video'){
+				layer.msg('只能选择视频文件');
+				return;
+			}
+			if(window.parent && window.parent._insertVideoGroupFiles){
+				window.parent._insertVideoGroupFiles(textareaId, [{src: src, name: name, ext: ext}]);
+				closeFileManagerLayer();
+			} else {
+				layer.msg('视频播放组回调函数不存在');
+			}
+			return;
+		}
+		// 兼容旧格式：target 直接等于输入框 ID（如 litpic）
+			if(target && target !== 'editor'){
+				if(window.parent && window.parent.$){
+					window.parent.$('#'+target).val(src).trigger('input');
+					closeFileManagerLayer();
+				}
+				return;
+			}
+		})
+
+		// 暴露获取选中媒体地址的方法，供父页面确定按钮调用（单选校验用）
+		window.getThumbSrc = function(){
+			var $selected = $('#filesBox').find('li.on');
+			if($selected.length === 1){
+				var $li = $selected.eq(0);
+				// 文件类型过滤已由后端 Files.php 完成，这里直接返回
+				return $li.data('src') || '';
+			}
+			return '';
+		};
+
+		// 暴露获取所有选中媒体文件的方法，供编辑器批量插入用（返回对象数组，含 src 与 type）
+		window.getMultiThumbSrc = function(){
+			var $selected = $('#filesBox').find('li.on');
+			var result = [];
+			$selected.each(function(){
+				var $li = $(this);
+				var ext = String($li.data('ext')||'').toLowerCase();
+				if(isImage(ext) || isVideo(ext)){
+					var src = $li.data('src') || '';
+					var name = $li.data('title') || '';
+					if(src) result.push({src: src, type: isVideo(ext) ? 'video' : 'image', name: name});
+				}
+			});
+			return result;
+		};
+
+		// 暴露获取所有选中文件的方法（通用，支持所有文件类型）
+		window.getMultiSelectedFiles = function(){
+			var $selected = $('#filesBox').find('li.on');
+			var result = [];
+			$selected.each(function(){
+				var $li = $(this);
+				var src = $li.data('src') || '';
+				var name = $li.data('title') || '';
+				var ext = String($li.data('ext')||'').toLowerCase();
+				var size = $li.data('filesize') || '';
+				if(src) result.push({src: src, name: name, ext: ext, size: size});
+			});
+			return result;
+		};
+
+		$('#filesBox').on('click','.file-del',function(){
+			let id = $(this).parent().parent().data('id');
+			confirmFileDelete(id, '<span class="layui-font-red">确定要删除该文件吗？请慎重!</span>');
+		})
+		
+		$('#filesBox').on('click','.file-edit',function(){
+			let id = $(this).parent().parent().data('id');
+			let title = $(this).parent().parent().data('title');
+			let ext = $(this).parent().parent().data('ext');
+			layer.prompt({
+				title: '重命名',
+				value: title,
+				yes: function(index, layero) {
+					// 获取文本框输入的值
+					var value = layero.find(".layui-layer-input").val();
+					if (value!='') {
+						let callback = function (e) {
+							layer.msg(e.msg);
+							$('[lay-filter="webform"]').click();
+						}
+						tool.post("{:url('admin/files/edit')}", {id: id,title: value+'.'+ext}, callback);
+						layer.close(index);
+					} else {
+						layer.msg('请填写分组名称');
+					}
+				}
+			})
+		})
+		
+		//监听搜索提交
+		form.on('submit(webform)', function(data) {
+			get_files(data.field);
+			return false;
+		});
+
+	})
+</script>
+{/block}
+<!-- /脚本 -->

@@ -1,0 +1,14 @@
+*.log
+*.env
+*.lock
+*.ini
+/.idea
+/.vscode
+/.gitee
+/docs
+/runtime/*
+/public/storage/*
+/public/backup/*
+/plugins/AIwriting/*
+/plugins/AItranslation/*
+AGENTS.*

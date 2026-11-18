@@ -1,0 +1,229 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+
+<div class="p-3">
+	<div>
+		<table class="layui-hide" id="treeTable" lay-filter="treeTable"></table>
+	</div>
+</div>
+<script type="text/html" id="target">
+	<input type="checkbox" name="target" value="{{= d.id }}" title="是|否" lay-skin="switch" lay-filter="fieldEdit" {{= d.target == 1 ? "checked" : "" }}>
+</script>
+<script type="text/html" id="status">
+	<input type="checkbox" name="status" value="{{= d.id }}" title="正常|禁用" lay-skin="switch" lay-filter="fieldEdit" {{= d.status == 1 ? "checked" : "" }}>
+</script>
+<script type="text/html" id="is_url">
+	<i class="layui-icon {{#  if(d.is_url == 1){ }}layui-icon-ok{{#  } else { }}layui-icon-close{{#  } }}"></i>
+</script>
+<script type="text/html" id="is_show">
+	<i class="layui-icon {{#  if(d.is_show == 1){ }}layui-icon-ok{{#  } else { }}layui-icon-close{{#  } }}"></i>
+</script>
+<script type="text/html" id="handle">
+	<span class="layui-btn-group">
+		{{#  if(d.nid == 'single' || d.nid == 'clue'){ }}
+		<button class="layui-btn layui-btn-normal layui-btn-xs" lay-event="content">内容</button>
+		{{#  } }}
+		{{#  if(d.nid == 'clue') { }}
+		<button class="layui-btn layui-btn-normal layui-btn-xs" lay-event="clue">留言</button>
+		{{#  } }}
+		{{#  if(d.nid != 'single' && d.nid != 'clue') { }}
+		<button class="layui-btn layui-btn-normal layui-btn-xs tab-a" data-href="{:url('admin/document/index')}?nav_id={{= d.id}}" data-title="内容" data-id="1000">文档</button>
+		{{#  } }}
+		<button class="layui-btn layui-btn-xs" lay-event="edit">编辑</button>
+		<button class="layui-btn layui-btn-normal layui-btn-xs" lay-event="add">添加子栏目</button>
+		{volist name="navListActions" id="action"}
+		<button class="layui-btn {$action.class|default='layui-btn-primary'} layui-btn-xs" lay-event="{$action.event}">{$action.title}</button>
+		{/volist}
+		<button class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</button>
+	</span>
+</script>
+<!-- 表头 -->
+<script type="text/html" id="table_header">
+	<div class="layui-btn-container">
+
+			<button type="button" class="layui-btn layui-btn-sm layui-btn-color layui-btn-radius" lay-event="add-menu">
+				<i class="layui-icon layui-icon-add-1"></i>新增栏目
+			</button>
+<!--			<button type="button" class="layui-btn layui-btn-danger layui-btn-sm" lay-event="delete">-->
+<!--				<i class="layui-icon layui-icon-delete"></i>删除-->
+<!--			</button>-->
+			<button type="button" class="layui-btn layui-btn-normal layui-btn-sm layui-btn-color layui-btn-radius" lay-event="expand">
+				<i class="layui-icon layui-icon-down"></i>展开
+			</button>
+			{volist name="listToolbarActions" id="action"}
+			<button type="button" class="layui-btn {$action.class|default='layui-btn-primary'} layui-btn-sm layui-btn-color layui-btn-radius" data-admin-list-action="{$action.event}" data-list-type="{$listToolbarType}">{if condition="$action.icon neq ''"}<i class="layui-icon {$action.icon}" style="margin-right:4px;"></i>{/if}{$action.title}</button>
+			{/volist}
+			<button class="layui-btn layui-btn-sm layui-btn-primary layui-btn-color table-btn-pull-right" lay-event="recycleBtn" style="margin-right: 12px!important;">
+				<span>回收站</span>
+			</button>
+		</div>
+
+</script>
+<!-- /表头 -->
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['tool','form'],function(){
+		var treeTable = layui.treeTable, tool = layui.tool,form = layui.form;
+		var isExpand=false;
+		layui.trees = treeTable.render({
+			elem: '#treeTable',
+			toolbar: '#table_header',
+			tree: { // treeTable 特定属性集
+				customName: {name:'title'},
+				data: {},
+				view: {showIcon:false},
+				async: {},
+				callback: {}
+			},
+			url: "{:url('admin/admin/nav/index')}", //数据接口
+			cellMinWidth: 100,
+			cols: [[
+				{type: 'checkbox', fixed: 'left'},
+				{field: 'id',width: 80,title: 'ID',align: 'center'},
+				{field: 'sort', width: 80, title: '排序', align: 'center',edit:true},
+				{field: 'title',  title: '栏目标题',},
+				{field: 'title_en', width: 220, title: '别名',},
+				{field: 'channel_title', title: '所属模型', width: 120, align: 'center'},
+				{field: 'is_url', title: '是否外链',width: 80, toolbar: '#is_url', align: 'center'},
+				{field: 'is_show', title: '隐藏栏目',width: 80, toolbar: '#is_show', align: 'center'},
+				{field: 'target', title: '新窗口打开', toolbar: '#target', align: 'center', width: 100},
+				{field: 'status', title: '状态', toolbar: '#status', align: 'center', width: 60},
+				{ title: '操作', align: 'left', toolbar: '#handle'}]
+			],
+			page: false
+		});
+		// 表头工具栏工具事件
+		treeTable.on("toolbar(treeTable)", function (obj) {
+			if (obj.event === "add-menu") {
+				tool.side("{:url('admin/nav/add')}");
+			}
+			if (obj.event === "delete") {
+				var data = treeTable.checkStatus(obj.config.id).data,arr=[];
+				for(var i=0; i<data.length;i++){
+					arr.push(data[i]['id']);
+				}
+				if(arr.length<=0){
+					layer.msg('未选择任何数据');
+					return false;
+				}
+				layer.confirm('删除所有选定数据，删除后不可恢复！你确定吗?', { icon: 3, title: '提示' }, function (index) {
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							setTimeout(function(){
+								layui.trees.reloadData();
+							},300)
+						}
+					}
+					tool.delete("{:url('admin//admin/nav/delete')}", { id: arr }, callback);
+					layer.close(index);
+				});
+			}
+			if (obj.event === "expand") {
+				if(isExpand==false){
+					isExpand=true;
+					treeTable.expandAll('treeTable', true);
+					$(this).html('<i class="layui-icon layui-icon-up"></i>收缩');
+				}else{
+					isExpand=false;
+					treeTable.expandAll('treeTable', false);
+					$(this).html('<i class="layui-icon layui-icon-down"></i>展开');
+				}
+			}
+			if (obj.event === "recycleBtn") {
+				layer.open({
+					type: 2,
+					area: ['80%','90%'],
+					content: "{:url('admin/nav/recycle')}",
+					maxmin: true,
+					title:['栏目回收站', 'font-size: 16px;'],
+					shade:0.3,
+					shadeClose: false,
+					scrollbar: true,
+					end: function(){
+						//关闭回收站后刷新栏目列表（可能恢复了一些栏目）
+						layui.trees.reloadData();
+					}
+				});
+			}
+		})
+		// 行单击事件：设置当前行为单选选中状态（包含固定列时同步高亮）
+		treeTable.on("row(treeTable)", function (obj) {
+			obj.setRowChecked({
+				type: 'checkbox' // radio | checkbox
+			});
+		});
+		//删除
+		treeTable.on('tool(treeTable)', function (obj) {
+			if (obj.event === 'add') {
+				tool.side("{:url('admin/nav/add')}?pid="+obj.data.id+"&id="+obj.data.id);
+				return;
+			}
+			if (obj.event === 'edit') {
+				tool.side("{:url('admin/nav/edit')}?pid="+obj.data.id+"&id="+obj.data.id);
+				return;
+			}
+			if (obj.event === 'content') {
+				tool.side("{:url('admin/nav/content')}?pid="+obj.data.id+"&id="+obj.data.id);
+				return;
+			}
+			if (obj.event === 'clue') {
+				if(!obj.data.form_id){
+					layer.msg('请在 留言-表单管理 新建表单并关联该栏目');
+					return;
+				}
+				tool.side("{:url('admin/form/message')}?form_id="+obj.data.form_id);
+				return;
+			}
+			if (obj.event === 'del') {
+				layer.confirm('确定要删除吗?', {
+					icon: 3,
+					title: '提示'
+				}, function (index) {
+					let callback = function (e) {
+						if (e.code == 0) {
+							obj.del();
+						}else{
+							layer.msg(e.msg, {icon: 2});
+						}
+					}
+					tool.delete("{:url('admin/nav/delete')}", { id: obj.data.id }, callback);
+					layer.close(index);
+				});
+			}
+		});
+		// 单元格编辑后的事件
+		treeTable.on('edit(treeTable)', function(obj){
+			var field = obj.field; // 得到修改的字段
+			var value = obj.value // 得到修改后的值
+			var data = obj.data // 得到所在行所有键值
+			// 值的校验
+			if(value.replace(/\s/g, '') === ''){
+				layer.tips('值不能为空', this, {tips: 1});
+				return obj.reedit(); // 重新编辑 -- v2.8.0 新增
+			}
+			// 编辑后续操作，如提交更新请求，以完成真实的数据更新
+			$.post("{:url('admin//admin/nav/edit_field')}", { field: field,value:value,id:data.id }, function(data) {
+				layer.msg(data.msg);
+			});
+
+		});
+		// 状态 - 开关操作
+		form.on('switch(fieldEdit)', function(obj){
+			var id = this.value;
+			var name = this.name;
+			var value = obj.elem.checked==true?1:0;
+			// 编辑后续操作，如提交更新请求，以完成真实的数据更新
+			$.post("{:url('admin//admin/nav/edit_field')}", { field: name,value:value,id:id }, function(data) {
+				layer.tips(data.msg,obj.othis);
+			});
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

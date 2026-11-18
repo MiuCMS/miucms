@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="{miu:locale name='current'/}">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{miu:lang key='account.register_title' /} - {miu:global name='site_name'/}</title>
+    {include file="head" /}
+    <link rel="stylesheet" href="/static/home/user/css/user.css" />
+    <script defer src="/static/home/user/js/user.js"></script>
+</head>
+<body data-page="member-register">
+{include file="header" /}
+<main id="main" class="account-page">
+    <div class="account-layout">
+        <section class="account-story" aria-label="{miu:lang key='account.member_service' /}">
+            <div>
+                <p class="eyebrow">CREATE AN ACCOUNT</p>
+                <h1>{miu:lang key='account.join' /}</h1>
+                <p>{miu:lang key='account.register_hero_copy' /}</p>
+            </div>
+            <div class="account-story-note">{miu:lang key='account.register_note' /}</div>
+        </section>
+        <section class="account-card" aria-labelledby="account-title">
+            <h2 id="account-title">{miu:lang key='account.create_member_account' /}</h2>
+            <p class="account-card-intro">{miu:lang key='account.register_intro' /}</p>
+            {if condition="$registerInviterName neq ''"}<p class="account-inviter-note">{miu:lang key='account.invitation_prefix' /}<strong>{$registerInviterName}</strong>{miu:lang key='account.invitation_suffix' /}</p>{/if}
+            <form class="account-form" data-account-form action="{:url_entry()}/reg_submit" method="post" autocomplete="off" data-success-url="{:url_entry()}/login">
+                <div class="account-field account-float-field">
+                    <label for="register-username">{miu:lang key='account.username' /}</label>
+                    <input id="register-username" name="username" type="text" autocomplete="off" data-no-autofill minlength="5" maxlength="20" pattern="[A-Za-z][A-Za-z0-9_-]{4,19}" placeholder="{miu:lang key='account.username_placeholder' /}" required />
+                </div>
+                <div class="account-field account-float-field">
+                    <label for="register-email">{miu:lang key='member.email' /}</label>
+                    <input id="register-email" name="email" type="email" autocomplete="off" data-no-autofill maxlength="50" placeholder="{miu:lang key='account.email_placeholder' /}" required />
+                </div>
+                <div class="account-field account-float-field">
+                    <label for="register-password">{miu:lang key='account.password' /}</label>
+                    <input id="register-password" name="pwd" type="password" autocomplete="off" data-no-autofill minlength="6" placeholder="{miu:lang key='account.password_min' /}" required />
+                </div>
+                <div class="account-field account-float-field">
+                    <label for="register-password-confirm">{miu:lang key='account.confirm_password' /}</label>
+                    <input id="register-password-confirm" name="pwd_confirm" type="password" autocomplete="off" data-no-autofill minlength="6" placeholder="{miu:lang key='account.confirm_password_placeholder' /}" required />
+                </div>
+                {if condition="$registerEmailVerify eq 1"}
+                <div class="account-captcha account-field">
+                    <div class="account-float-field">
+                        <label for="register-captcha">{miu:lang key='account.image_captcha' /}</label>
+                        <input id="register-captcha" name="captcha" type="text" autocomplete="off" maxlength="8" placeholder="{miu:lang key='account.image_captcha_placeholder' /}" required />
+                    </div>
+                    <button class="captcha-refresh" type="button" data-captcha-refresh aria-label="{miu:lang key='account.captcha_refresh' /}"><img src="{:captcha_src()}" alt="{miu:lang key='account.captcha' /}" title="{miu:lang key='account.captcha_title' /}" /></button>
+                </div>
+                <div class="account-field account-float-field">
+                    <label for="register-email-code">{miu:lang key='account.email_code' /}</label>
+                    <div class="account-email-code">
+                        <input id="register-email-code" name="email_code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="{miu:lang key='account.email_code_placeholder' /}" required />
+                        <button type="button" data-register-email-code data-url="{:url_entry()}/send_register_code">{miu:lang key='account.send_code' /}</button>
+                    </div>
+                </div>
+                {else/}
+                <div class="account-captcha account-field">
+                    <div class="account-float-field">
+                        <label for="register-captcha">{miu:lang key='account.captcha' /}</label>
+                        <input id="register-captcha" name="captcha" type="text" autocomplete="off" maxlength="8" placeholder="{miu:lang key='account.captcha_placeholder' /}" required />
+                    </div>
+                    <button class="captcha-refresh" type="button" data-captcha-refresh aria-label="{miu:lang key='account.captcha_refresh' /}"><img src="{:captcha_src()}" alt="{miu:lang key='account.captcha' /}" title="{miu:lang key='account.captcha_title' /}" /></button>
+                </div>
+                {/if}
+                <button class="button button-dark account-submit" type="submit">{miu:lang key='account.create_account' /} <span aria-hidden="true">→</span></button>
+                <p class="account-feedback" data-form-feedback role="status" aria-live="polite"></p>
+            </form>
+            <p class="account-foot">{miu:lang key='account.have_account' /} <a href="{:url_entry()}/login">{miu:lang key='account.return_login_short' /}</a></p>
+            <p class="account-privacy">{miu:lang key='account.register_privacy' /}</p>
+        </section>
+    </div>
+</main>
+{include file="footer" /}
+</body>
+</html>

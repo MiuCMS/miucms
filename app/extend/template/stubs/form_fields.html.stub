@@ -1,0 +1,13 @@
+<!-- 将表单变量中的 itemname_N 按实际字段 ID 展开，不写死安装数据中的编号。 -->
+{foreach $vo as $fieldKey => $fieldValue}
+{if condition="strpos($fieldKey, 'itemname_') === 0"}
+{php}$fieldId = substr($fieldKey, 9); $fieldType = (int) ($vo['type_' . $fieldId] ?? 0); $fieldName = $vo['attr_' . $fieldId] ?? ''; $required = (int) ($vo['required_' . $fieldId] ?? 0) === 1; $options = $vo['options_' . $fieldId] ?? [];{/php}
+<div class="message-field"><label for="field-{$fieldId}">{$fieldValue}{if condition="$required"}<span aria-hidden="true"> *</span>{/if}</label>
+    {if condition="$fieldType eq 2"}<textarea id="field-{$fieldId}" name="{$fieldName}" rows="5" {if condition="$required"}required{/if}></textarea>
+    {elseif condition="$fieldType eq 1" /}<select id="field-{$fieldId}" name="{$fieldName}" {if condition="$required"}required{/if}><option value="">{miu:lang key='choose' /}</option>{foreach $options as $option}<option value="{$option}">{$option}</option>{/foreach}</select>
+    {elseif condition="$fieldType eq 3 or $fieldType eq 4" /}<div class="choice-options">{foreach $options as $option}<label><input type="{if condition='$fieldType eq 3'}radio{else/}checkbox{/if}" name="{$fieldName}{if condition='$fieldType eq 4'}[]{/if}" value="{$option}" {if condition="$required and $fieldType eq 3"}required{/if}> {$option}</label>{/foreach}</div>
+    {else/}<input id="field-{$fieldId}" type="{if condition='$fieldType eq 7'}email{elseif condition='$fieldType eq 6' /}tel{elseif condition='$fieldType eq 10' /}datetime-local{else/}text{/if}" name="{$fieldName}" {if condition="$required"}required{/if}>
+    {/if}
+</div>
+{/if}
+{/foreach}

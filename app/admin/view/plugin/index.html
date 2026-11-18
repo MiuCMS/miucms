@@ -1,0 +1,461 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<style>
+	.layui-table-tool-temp{padding-right: 0;}
+</style>
+<div class="p-3">
+	<!-- 统计 -->
+	<div class="layui-row layui-col-space15" style="margin-bottom:12px;">
+		<div class="layui-col-md3">
+			<div class="layui-card"><div class="layui-card-body" style="text-align:center;padding:16px;">
+				<i class="layui-icon layui-icon-app" style="font-size:26px;color:#1e9fff;"></i>
+				<div style="font-size:24px;font-weight:700;margin-top:6px;">{$total}</div>
+				<div class="layui-text">插件总数</div>
+			</div></div>
+		</div>
+		<div class="layui-col-md3">
+			<div class="layui-card"><div class="layui-card-body" style="text-align:center;padding:16px;">
+				<i class="layui-icon layui-icon-ok-circle" style="font-size:26px;color:#009688;"></i>
+				<div style="font-size:24px;font-weight:700;margin-top:6px;">{$installedCount}</div>
+				<div class="layui-text">已安装</div>
+			</div></div>
+		</div>
+		<div class="layui-col-md3">
+			<div class="layui-card"><div class="layui-card-body" style="text-align:center;padding:16px;">
+				<i class="layui-icon layui-icon-play" style="font-size:26px;color:#5fb878;"></i>
+				<div style="font-size:24px;font-weight:700;margin-top:6px;">{$enabledCount}</div>
+				<div class="layui-text">已启用</div>
+			</div></div>
+		</div>
+		<div class="layui-col-md3">
+			<div class="layui-card"><div class="layui-card-body" style="text-align:center;padding:16px;">
+				<i class="layui-icon layui-icon-util" style="font-size:26px;color:#ff5722;"></i>
+				<div style="font-size:24px;font-weight:700;margin-top:6px;">{$total - $installedCount}</div>
+				<div class="layui-text">待安装</div>
+			</div></div>
+		</div>
+	</div>
+
+	<table class="layui-hide" id="pluginTable" lay-filter="pluginTable"></table>
+</div>
+
+<!-- 工具栏 -->
+<script type="text/html" id="toolbarDemo">
+	<div class="layui-btn-container">
+		<button class="layui-btn layui-btn-sm layui-btn-color layui-btn-radius" lay-event="upload"><i class="layui-icon layui-icon-upload mr-1"></i>上传插件包</button>
+		<button class="layui-btn layui-btn-sm layui-btn-color layui-btn-radius" lay-event="market"><i class="layui-icon layui-icon-cart mr-1"></i>在线插件市场</button>
+		<button class="layui-btn layui-btn-sm layui-btn-color layui-btn-radius" lay-event="refresh"><i class="layui-icon layui-icon-refresh mr-1"></i>刷新</button>
+		<button class="layui-btn layui-btn-sm layui-btn-color layui-btn-radius" lay-event="dev" style="float:right;"><i class="layui-icon layui-icon-console mr-1"></i>插件开发</button>
+	</div>
+</script>
+
+<!-- 状态列 -->
+<script type="text/html" id="statusTpl">
+	{{# if(d.missing){ }}
+		<span class="layui-badge layui-bg-gray">文件丢失</span>
+	{{# } else if(!d.installed && !d.cms_compatible){ }}
+		<span class="layui-badge layui-bg-orange" title="{{= d.cms_compatibility_error }}">CMS版本不兼容</span>
+	{{# } else if(!d.installed){ }}
+		<span class="layui-badge layui-bg-gray">未安装</span>
+	{{# } else if(d.status){ }}
+		<span class="layui-badge layui-bg-green">已启用</span>
+	{{# } else { }}
+		<span class="layui-badge layui-bg-orange">已禁用</span>
+	{{# } }}
+</script>
+
+<!-- 主菜单列 -->
+<script type="text/html" id="menuTpl">
+	{{# if(!d.missing && d.installed && d.has_admin){ }}
+		{{# if(d.has_menu){ }}
+		<button class="layui-btn layui-btn-xs layui-btn-primary" lay-event="removemenu" title="删除左侧菜单快捷入口"><i class="layui-icon layui-icon-subtraction"></i> 删除</button>
+		{{# } else { }}
+		<button class="layui-btn layui-btn-xs layui-btn-normal" lay-event="addmenu" title="添加到左侧菜单快捷入口"><i class="layui-icon layui-icon-addition"></i> 添加</button>
+		{{# } }}
+	{{# } }}
+</script>
+
+<script type="text/html" id="titleTpl">
+	<span style="font-weight: 700">{{= d.title }}</span>
+</script>
+
+<!-- 版本列同时显示官网更新入口 -->
+<script type="text/html" id="versionTpl">
+	<span>{{= d.version || '-' }}</span>
+	{{# if(d.update_available && d.update_compatible){ }}
+		<button class="layui-btn layui-btn-xs" style="background-color:#16b777;border-color:#16b777;" lay-event="update_plugin" title="更新至 v{{= d.update_version }}">更新</button>
+	{{# } else if(d.update_available){ }}
+		<button class="layui-btn layui-btn-xs layui-btn-disabled" title="{{= d.update_reason }}">更新</button>
+	{{# } }}
+</script>
+
+<!-- 操作列 -->
+<script type="text/html" id="actionTpl">
+	<div class="layui-btn-group">
+	{{# if(d.missing){ }}
+		<button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="uninstall">清除记录</button>
+	{{# } else if(!d.installed){ }}
+		{{# if(!d.cms_compatible){ }}
+		<button class="layui-btn layui-btn-xs layui-btn-disabled" lay-event="install" title="{{= d.cms_compatibility_error }}">版本不兼容</button>
+		{{# } else { }}
+		<button class="layui-btn layui-btn-xs layui-btn-normal" lay-event="install">安装</button>
+		{{# } }}
+	{{# } else { }}
+
+		{{# if(d.status && d.has_admin){ }}
+			<button class="layui-btn layui-btn-xs layui-btn-normal" lay-event="pluginhome">概览</button>
+		{{# } }}
+		<button class="layui-btn layui-btn-xs" lay-event="config">配置</button>
+		{{# if(d.status){ }}
+			<button class="layui-btn layui-btn-xs layui-btn-warm" lay-event="disable">禁用</button>
+		{{# } else { }}
+			<button class="layui-btn layui-btn-xs layui-btn-normal" lay-event="enable">启用</button>
+		{{# } }}
+
+		<button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="uninstall">卸载</button>
+	{{# } }}
+	{{# if(!d.missing){ }}
+		<button class="layui-btn layui-btn-xs layui-btn-primary" lay-event="export" title="导出为 ZIP 插件包"><i class="layui-icon layui-icon-download-circle"></i> 导出</button>
+	{{# } }}
+	</div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+layui.use(['table', 'upload','tool'], function () {
+	var table = layui.table, upload = layui.upload;
+
+	table.render({
+		elem: '#pluginTable',
+		toolbar: '#toolbarDemo',
+		defaultToolbar: [],
+		cols: [[
+			{ field: 'title', title: '名称', width: 180 , align: 'left', templet: '#titleTpl'},
+			{ field: 'name', title: '标识', width: 130 },
+			{ field: 'version', title: '插件版本', width: 150, align: 'left', templet: '#versionTpl' },
+			{ field: 'min_cms_version', title: '最低 CMS 版本', width: 125, align: 'center', templet: function (d) { return d.min_cms_version || '不限'; } },
+			{ field: 'author', title: '作者', width: 110 },
+			{ field: 'description', title: '描述', minWidth: 200 },
+			{ title: '状态', width: 120, align: 'center', templet: '#statusTpl' },
+			{ title: '添加到主菜单', width: 150, align: 'center', toolbar: '#menuTpl' },
+			{ title: '操作', width: 380, align: 'left', toolbar: '#actionTpl', fixed: 'right' }
+		]],
+		page: false,
+		data: {:json_encode($list)}
+	});
+
+	//上传插件包（只允许 zip：acceptMime 让文件选择框只显示 zip，exts 再校验一次，后端还会验文件头）
+	upload.render({
+		elem: '.layui-btn-container [lay-event="upload"]',
+		url: "{:url('admin/plugin/upload')}",
+		accept: 'file',
+		acceptMime: '.zip',
+		exts: 'zip',
+		field: 'file',
+		done: function (res) {
+			layer.msg(res.msg, { icon: res.code === 0 ? 1 : 2 });
+			if (res.code === 0) {
+				setTimeout(function () { location.reload(); }, 1200);
+			}
+		},
+		error: function () {
+			layer.msg('上传失败', { icon: 2 });
+		}
+	});
+
+	table.on('toolbar(pluginTable)', function (obj) {
+		if (obj.event === 'market') {
+			var marketHeight = Math.round($(window).height() * 0.94);
+			layer.open({
+				type: 2,
+				title: '在线插件市场',
+				content: "{:url('admin/plugin/market')}",
+				area: ['92%', marketHeight + 'px'],
+				maxHeight: marketHeight,
+				shadeClose: false,
+				maxmin: true
+			});
+		} else if (obj.event === 'refresh') {
+			location.reload();
+		} else if (obj.event === 'dev') {
+			function submitPluginScaffold(index, layero) {
+				var iframe = layero.find('iframe')[0];
+				if (!iframe || typeof iframe.contentWindow.submitPluginScaffold !== 'function') {
+					layer.msg('创建插件页面尚未加载完成，请稍后再试', { icon: 2 });
+					return false;
+				}
+				iframe.contentWindow.submitPluginScaffold();
+				return false;
+			}
+
+			var createResizeEvent = null;
+			layer.open({
+				type: 2,
+				title: '创建插件',
+				content: "{:url('admin/plugin/dev')}",
+				btn: [],
+				btnAlign: 'c',
+				//高度自适应：内容撑高弹窗，超过 maxHeight 由 layer 截断并出滚动条
+				//注意 maxHeight 必须是「数字」：layer.iframeAuto 内部要拿它做减法，写成 '100%' 会算出 NaN
+				area: ['80%', 'auto'],
+				maxHeight: Math.min(800, Math.round($(window).height() * 0.98)),
+				shadeClose: false,
+				maxmin: true,
+				success: function (layero, index) {
+					var iframe = layero.find('iframe')[0];
+					if (!iframe) return;
+					createResizeEvent = 'resize.pluginDevDialog' + index;
+					$(window).on(createResizeEvent, function () {
+						if (layero.data('maxminStatus') === 'max') return;
+						var options = layero.data('config');
+						if (options) options.maxHeight = Math.min(800, Math.round($(window).height() * 0.98));
+						layer.iframeAuto(index);
+					});
+					var buttonFooter = layero.find('.layui-layer-btn');
+					var createButton = $('<button type="button" class="layui-btn layui-btn-sm layui-btn-normal">生成骨架</button>');
+					buttonFooter.empty().append(createButton);
+					createButton.on('click', function () {
+						submitPluginScaffold(index, layero);
+					});
+					iframe.contentWindow.updateScaffoldDialogButton = function (visible) {
+						createButton.toggle(!!visible);
+						layer.iframeAuto(index);
+					};
+				},
+				end: function () {
+					if (createResizeEvent) $(window).off(createResizeEvent);
+				}
+			});
+		}
+	});
+
+	table.on('tool(pluginTable)', function (obj) {
+		var d = obj.data, event = obj.event;
+
+		if (event === 'pluginhome') {
+			var href = "{:url('admin/plugin/run')}?name=" + encodeURIComponent(d.name) + "&c=Index&a=index";
+			if (window.parent && typeof window.parent.openPluginHome === 'function') {
+				window.parent.openPluginHome(d, href);
+			} else {
+				layer.msg('后台菜单面板尚未加载，请刷新后台后重试', { icon: 2 });
+			}
+		} else if (event === 'config') {
+			var configResizeEvent = null;
+			var configDialogIndex = null;
+			var configTitle = $('<div>').text('插件配置 - ' + d.title + ' v' + (d.version || '1.0.0') + (d.author ? ' / ' + d.author : '')).html();
+			layer.open({
+				type: 2,
+				title: configTitle,
+				content: "{:url('admin/plugin/config')}?name=" + encodeURIComponent(d.name),
+				btn: ['保存配置'],
+				btnAlign: 'c',
+				area: ['80%', 'auto'],
+				maxHeight: Math.round($(window).height() * 0.98),
+				shadeClose: true,
+				maxmin: true,
+				yes: function (index, layero) {
+					var iframe = layero.find('iframe')[0];
+					if (!iframe || !iframe.contentWindow || typeof iframe.contentWindow.submitPluginConfig !== 'function') {
+						layer.msg('配置页面尚未加载完成，请稍后再试', { icon: 2 });
+						return;
+					}
+					iframe.contentWindow.submitPluginConfig();
+				},
+				success: function (layero, index) {
+					var iframe = layero.find('iframe')[0];
+					if (!iframe) return;
+					configDialogIndex = index;
+					window.pluginConfigDialogResizers = window.pluginConfigDialogResizers || {};
+					var resizeConfigDialog = function () {
+						if (layero.data('maxminStatus') === 'max' || layero.data('maxminStatus') === 'min') return;
+						layer.iframeAuto(index);
+						var viewportHeight = $(window).height();
+						var minHeight = Math.min(400, Math.round(viewportHeight * 0.98));
+						if (layero.outerHeight() >= minHeight) return;
+						var titleHeight = layero.find('.layui-layer-title').outerHeight() || 0;
+						var footerHeight = layero.find('.layui-layer-btn').outerHeight() || 0;
+						var iframeHeight = Math.max(0, minHeight - titleHeight - footerHeight - 2);
+						layero.find('iframe').css('height', iframeHeight + 'px');
+						layero.css({
+							height: minHeight + 'px',
+							top: ($(window).scrollTop() + (viewportHeight - minHeight) / 2) + 'px'
+						});
+					};
+					window.pluginConfigDialogResizers[index] = resizeConfigDialog;
+					configResizeEvent = 'resize.pluginConfigDialog' + index;
+					$(window).on(configResizeEvent, function () {
+						if (layero.data('maxminStatus') === 'max') return;
+						var options = layero.data('config');
+						if (options) options.maxHeight = Math.round($(window).height() * 0.98);
+						resizeConfigDialog();
+					});
+					resizeConfigDialog();
+				},
+				end: function () {
+					if (configResizeEvent) $(window).off(configResizeEvent);
+					if (window.pluginConfigDialogResizers && configDialogIndex !== null) delete window.pluginConfigDialogResizers[configDialogIndex];
+				}
+			});
+		} else if (event === 'export') {
+			layer.confirm('导出插件不会导出插件产生的数据！<br>点击确定执行导出。', { icon: 3, title: '导出确认' }, function (idx) {
+				layer.close(idx);
+				exportPlugin(d.name);
+			});
+		} else if (event === 'update_plugin') {
+			if (!d.update_available || !d.update_compatible) return;
+			var updateContent = $('<div>').text('确定将插件【' + d.title + '】从 v' + d.version + ' 更新至 v' + d.update_version + '？').html();
+			if (!d.installed) updateContent += '<br><span style="color:#999;">该插件尚未安装，更新后仍需点击“安装”。</span>';
+			if (d.update_changelog) {
+				updateContent += '<br><br><div style="color:#666;white-space:pre-wrap;">' + $('<div>').text(d.update_changelog).html() + '</div>';
+			}
+			layer.confirm(updateContent, { icon: 3, title: '插件更新确认' }, function (idx) {
+				layer.close(idx);
+				updateOfficialPlugin(d.name);
+			});
+		} else if (event === 'install') {
+			if (!d.cms_compatible) {
+				layer.alert(d.cms_compatibility_error || '当前 MiuCMS 版本过低，请升级后再安装。', { icon: 2, title: '无法安装' });
+				return;
+			}
+			layer.confirm('确定要安装插件【' + d.title + '】吗？', { icon: 3, title: '提示' }, function (idx) {
+				post("{:url('admin/plugin/install')}", { name: d.name });
+				layer.close(idx);
+			});
+		} else if (event === 'uninstall') {
+			//文件丢失的插件：只清残留记录（插件文件不在了，不会执行卸载脚本）
+			var tip = d.missing
+				? '确定要清除【' + d.title + '】的残留记录吗？<br><span style="color:#999;">插件文件已经丢失，只会删掉数据库记录和它注册的后台菜单。</span>'
+				: '确定要卸载插件【' + d.title + '】吗？<br><span style="color:#ff5722;">注意：会执行插件的卸载脚本，相关数据可能被删除！</span>';
+			layer.confirm(tip, { icon: 3, title: '提示' }, function (idx) {
+				layer.close(idx);
+				var secondTip = d.missing
+					? '请再次确认清除【' + d.title + '】的残留记录？'
+					: '请再次确认卸载插件【' + d.title + '】？此操作可能删除插件数据。<br><span style="color:#ff5722;">点击确定按钮将立即卸载插件，以及清除插件数据！</span>';
+				layer.confirm(secondTip, { icon: 0, title: '二次确认' }, function (secondIdx) {
+					post("{:url('admin/plugin/uninstall')}", { name: d.name });
+					layer.close(secondIdx);
+				});
+			});
+		} else if (event === 'enable') {
+			post("{:url('admin/plugin/enable')}", { name: d.name });
+		} else if (event === 'disable') {
+			post("{:url('admin/plugin/disable')}", { name: d.name });
+		} else if (event === 'addmenu') {
+			var hasChildMenus = Array.isArray(d.admin_menu) && d.admin_menu.some(function (menu) {
+				return menu && Array.isArray(menu.list) && menu.list.length > 0;
+			});
+			if (!hasChildMenus) {
+				layer.msg('该插件没有配置菜单', { icon: 2 });
+				return;
+			}
+			layer.confirm('确定要把【' + d.title + '】添加到后台菜单吗？', { icon: 3, title: '提示' }, function (idx) {
+				post("{:url('admin/plugin/add_menu')}", { name: d.name });
+				layer.close(idx);
+			});
+		} else if (event === 'removemenu') {
+			layer.confirm('确定要删除【' + d.title + '】的后台菜单吗？<br><span style="color:#999;">只删菜单，插件和数据不受影响。</span>', { icon: 3, title: '提示' }, function (idx) {
+				post("{:url('admin/plugin/remove_menu')}", { name: d.name });
+				layer.close(idx);
+			});
+		}
+	});
+
+	//获取 ZIP 响应后触发浏览器下载，并显示接口错误信息。
+	function exportPlugin(name) {
+		var loadingIndex = layer.msg('正在生成插件压缩包…', { icon: 16, shade: 0.2, time: 0 });
+		var url = "{:url('admin/plugin/export')}?name=" + encodeURIComponent(name);
+		fetch(url, { credentials: 'same-origin' })
+			.then(function (response) {
+				var contentType = (response.headers.get('Content-Type') || '').toLowerCase();
+				if (!response.ok || contentType.indexOf('application/zip') === -1) {
+					return response.text().then(function (text) {
+						var message = '插件导出失败';
+						try {
+							var result = JSON.parse(text);
+							if (result.msg) message = result.msg;
+						} catch (e) {}
+						throw new Error(message);
+					});
+				}
+				return response.blob().then(function (blob) {
+					var objectUrl = URL.createObjectURL(blob);
+					var link = document.createElement('a');
+					link.href = objectUrl;
+					link.download = name + '.zip';
+					document.body.appendChild(link);
+					link.click();
+					link.remove();
+					setTimeout(function () { URL.revokeObjectURL(objectUrl); }, 60000);
+					layer.close(loadingIndex);
+					layer.msg('插件压缩包已开始下载', { icon: 1 });
+				});
+			})
+			.catch(function (error) {
+				layer.close(loadingIndex);
+				layer.msg(error.message || '插件导出失败', { icon: 2 });
+			});
+	}
+
+	//统一的提交封装
+	function post(url, data) {
+		$.post(url, data, function (res) {
+			layer.msg(res.msg, { icon: res.code === 0 ? 1 : 2 });
+			if (res.code === 0) {
+				setTimeout(function () { location.reload(); }, 1000);
+			}
+		});
+	}
+
+	//异步读取官网签名清单，网络异常时不影响插件列表和其他操作。
+	function checkPluginUpdates() {
+		$.get("{:url('admin/plugin/check_updates')}", {}, function (res) {
+			if (!res || Number(res.code) !== 0) return;
+			var updates = res.data && res.data.updates ? res.data.updates : {};
+			var rows = table.cache.pluginTable || [];
+			$.each(rows, function (_, row) {
+				var update = updates[row.name];
+				if (!update) return;
+				row.update_available = true;
+				row.update_compatible = !!update.compatible;
+				row.update_reason = update.reason || '';
+				row.update_version = update.version || '';
+				row.update_changelog = update.changelog || '';
+			});
+			table.reload('pluginTable', { data: rows });
+		}, 'json');
+	}
+
+	function updateOfficialPlugin(name) {
+		var loading = layer.msg('正在下载并更新插件，请稍候…', { icon: 16, shade: 0.08, time: 0 });
+		$.ajax({
+			url: "{:url('admin/plugin/update_plugin')}",
+			type: 'post',
+			dataType: 'json',
+			data: { name: name },
+			success: function (res) {
+				layer.close(loading);
+				if (res && Number(res.code) === 0) {
+					layer.alert(res.msg || '插件更新成功', { icon: 1, title: '更新完成' }, function (index) {
+						layer.close(index);
+						location.reload();
+					});
+				} else {
+					layer.alert((res && res.msg) || '插件更新失败', { icon: 2, title: '更新失败' });
+				}
+			},
+			error: function () {
+				layer.close(loading);
+				layer.alert('插件更新请求失败，请检查服务器连接和日志', { icon: 2, title: '更新失败' });
+			}
+		});
+	}
+
+	checkPluginUpdates();
+});
+</script>
+{/block}
+<!-- /脚本 -->

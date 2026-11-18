@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="{miu:global name='site_desc'/}"/>
+    <meta name="keywords" content="{miu:global name='site_keywords'/}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="{miu:global name='site_name'/}" />
+    <meta property="og:title" content="{miu:global name='site_title'/}" />
+    <meta property="og:description" content="{miu:global name='site_desc'/}"/>
+    <title>{miu:global name='site_title'/}</title>
+    {include file="head" /}
+    <style>
+        #main > .hero:not(:has(.hero-slide)),
+        #main > .home-products:not(:has(.home-product-card)),
+        #main > .home-cases:not(:has(.home-case-card)),
+        #main > .home-videos:not(:has(.home-video-card)),
+        #main > .home-news:not(:has(.home-news-row)),
+        #main > .home-about:not(:has(.home-about-panel)) { display: none; }
+    </style>
+</head>
+<body data-page="home">
+{include file="header"/}
+<main id="main">
+    <section class="hero" aria-roledescription="carousel">
+        <div class="hero-slides">
+            {miu:adv mark='index_slide'}
+            <article class="hero-slide {$vo.active}" data-slide="0" style="--hero-image:url('{$vo.src}')">
+                <div class="hero-copy">
+                    <h1>{$vo.img_desc|raw}</h1>
+                </div>
+                <div class="hero-caption"><b>{$index}</b><span>{$vo.title}</span></div>
+            </article>
+            {/miu:adv}
+        </div>
+        <div class="hero-controls">
+            <button type="button" class="hero-arrow" data-hero="prev">←</button>
+            <div class="hero-dots">
+                {miu:adv mark='index_slide'}
+                <button class="{$vo.active}" data-goto="{$index}"></button>
+                {/miu:adv}
+            </div>
+            <button type="button" class="hero-arrow" data-hero="next">→</button>
+            <button type="button" class="hero-pause" aria-pressed="false">Ⅱ</button>
+        </div>
+    </section>
+    <section class="home-section home-products" aria-labelledby="home-products-title">
+        <div class="container">
+            <div class="home-section-heading">
+                <div>
+                    {miu:nav id='productNav' nid='product' limit='1'}
+                    <h2 id="home-products-title">{$productNav.title}</h2>
+                    {if condition="$productNav.title_ext_1"}<p>{$productNav.title_ext_1}</p>{/if}
+                    {/miu:nav}
+                </div>
+                {miu:nav id='productLink' nid='product'}<a class="home-section-link" href="{$productLink.url}">{miu:lang key='home.view_products' /}<span aria-hidden="true">↗</span></a>{/miu:nav}
+            </div>
+            <div class="home-product-grid">
+                {miu:list name='product' nid='product' limit='3' order='add_time' sort='desc'}
+                <article class="home-product-card">
+                    <a class="home-product-image" href="{$product.url}">
+                        {if condition="$product.litpic"}<img src="{$product.litpic}" alt="{$product.title}" loading="lazy" />{/if}
+                        <span class="home-image-arrow" aria-hidden="true">↗</span>
+                    </a>
+                    <div class="home-product-copy">
+                        <h3><a href="{$product.url}">{$product.title}</a></h3>
+                        {if condition="$product.title_ext_1"}<p>{$product.title_ext_1}</p>{/if}
+                    </div>
+                </article>
+                {/miu:list}
+            </div>
+        </div>
+    </section>
+    <section class="home-section home-cases" aria-labelledby="home-cases-title">
+        <div class="container">
+            <div class="home-section-heading">
+                <div>
+                    {miu:nav id='caseNav' nid='image' limit='1'}
+                    <h2 id="home-cases-title">{$caseNav.title}</h2>
+                    {if condition="$caseNav.title_ext_1"}<p>{$caseNav.title_ext_1}</p>{/if}
+                    {/miu:nav}
+                </div>
+                {miu:nav id='caseLink' nid='image'}<a class="home-section-link" href="{$caseLink.url}">{miu:lang key='home.view_cases' /}<span aria-hidden="true">↗</span></a>{/miu:nav}
+            </div>
+            <div class="home-case-grid">
+                {miu:list name='case' nid='image' limit='3' order='add_time' sort='desc'}
+                <article class="home-case-card">
+                    <a class="home-case-image" href="{$case.url}">
+                        {if condition="$case.litpic"}<img src="{$case.litpic}" alt="{$case.title}" loading="lazy" />{/if}
+                        <span class="home-case-overlay"><strong>{$case.title}</strong>{if condition="$case.title_ext_1"}<span>{$case.title_ext_1}</span>{/if}</span>
+                    </a>
+                </article>
+                {/miu:list}
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section home-news" aria-labelledby="home-news-title">
+        <div class="container">
+            <div class="home-section-heading">
+                <div>
+                    {miu:nav id='newsNav' nid='article' limit='1'}
+                    <h2 id="home-news-title">{$newsNav.title}</h2>
+                    {if condition="$newsNav.title_ext_1"}<p>{$newsNav.title_ext_1}</p>{/if}
+                    {/miu:nav}
+                </div>
+                {miu:nav id='newsLink' nid='article'}<a class="home-section-link" href="{$newsLink.url}">{miu:lang key='home.more_news' /}<span aria-hidden="true">↗</span></a>{/miu:nav}
+            </div>
+            <div class="home-news-list">
+                {miu:list name='news' nid='article' limit='4' order='add_time' sort='desc'}
+                <article class="home-news-row">
+                    {if condition="$news.litpic"}<a class="home-news-image" href="{$news.url}"><img src="{$news.litpic}" alt="{$news.title}" loading="lazy" /></a>{/if}
+                    <div class="home-news-copy">
+                        <time>{$news.add_time_text}</time>
+                        <h3><a href="{$news.url}">{$news.title}</a></h3>
+                        {if condition="$news.title_ext_1"}<p>{$news.title_ext_1}</p>{/if}
+                    </div>
+                    <a class="home-news-arrow" href="{$news.url}" aria-label="{miu:lang key='home.read_prefix' /}{$news.title}">↗</a>
+                </article>
+                {/miu:list}
+            </div>
+        </div>
+    </section>
+    <section class="home-section home-about" aria-labelledby="home-about-title">
+        <div class="container">
+            {miu:nav id='aboutNav' nid='single' limit='1'}
+            <div class="home-about-panel">
+                <div class="home-about-heading">
+                    <h2 id="home-about-title">{$aboutNav.title}</h2>
+                    <span>{miu:global name='site_name'/}</span>
+                </div>
+                <div class="home-about-copy">
+                    {if condition="$aboutNav.title_ext_1"}<p>{$aboutNav.title_ext_1}</p>{/if}
+                    <a class="home-section-link" href="{$aboutNav.url}">{miu:lang key='home.learn_more' /}<span aria-hidden="true">↗</span></a>
+                </div>
+            </div>
+            {/miu:nav}
+        </div>
+    </section>
+</main>
+{include file="footer" /}
+</body>
+</html>

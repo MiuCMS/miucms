@@ -1,0 +1,237 @@
+{extend name="common/base"/}
+
+{block name="style"}
+<link rel="stylesheet" href="{__ADMIN__}/codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="{__ADMIN__}/codemirror/theme/monokai.css">
+<link rel="stylesheet" href="{__ADMIN__}/font/css/font-awesome.min.css?v=6.7.2">
+<link rel="stylesheet" href="{__ADMIN__}/css/template.css">
+<style>
+	.tplmgr { padding: 14px 16px 0; }
+	.tplmgr-head { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+	.tplmgr-head h3 { margin: 0; font-size: 16px; font-weight: 600; color: #333; }
+	.tplmgr-crumb { font-size: 13px; color: #666; }
+	.tplmgr-crumb a { color: #1e9fff; text-decoration: none; }
+	.tplmgr-crumb a:hover { text-decoration: underline; }
+	.tplmgr-crumb .sep { color: #ccc; margin: 0 4px; }
+	.tplmgr-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+	.tplmgr-link { color: #333; text-decoration: none; }
+	.tplmgr-link:hover { color: #1e9fff; }
+	.tplmgr-link i { margin-right: 6px; color: #519aba; }
+	.tplmgr-link i.fa-folder { color: #dcb67a; }
+	.tplmgr-btn { display: inline-block; padding: 1px 8px; margin: 0 2px; font-size: 12px; border: 1px solid #dcdfe6; border-radius: 3px; color: #555; text-decoration: none; background: #fff; }
+	.tplmgr-btn:hover { border-color: #1e9fff; color: #1e9fff; }
+	.tplmgr-btn.danger:hover { border-color: #ff5722; color: #ff5722; }
+	.tplmgr-foot { display: flex; align-items: center; gap: 8px; padding: 14px 0; }
+	.tplmgr-foot .total { color: #999; font-size: 13px; }
+	.tplmgr-err { margin-bottom: 12px; }
+	#editorContainer .CodeMirror pre.CodeMirror-line { padding-left: 10px; }
+</style>
+{/block}
+
+{block name="body"}
+<div class="tplmgr">
+	<div class="tplmgr-head">
+		<h3><i class="fa fa-folder-open-o"></i> 模板管理</h3>
+		<div class="tplmgr-crumb">
+			<a href="{:url('admin/tplmanage/index')}">模板根目录</a>
+			{volist name="crumb" id="c"}<span class="sep">/</span><a href="{:url('admin/tplmanage/index')}?activepath={$c.path}">{$c.name}</a>{/volist}
+		</div>
+		<div class="tplmgr-actions">
+			<button class="layui-btn layui-btn-sm layui-btn-primary" onclick="tplNew('file')"><i class="fa fa-file-o"></i> 新建文件</button>
+			<button class="layui-btn layui-btn-sm layui-btn-primary" onclick="tplNew('dir')"><i class="fa fa-folder-o"></i> 新建目录</button>
+		</div>
+	</div>
+
+	{notempty name="err"}
+	<div class="layui-elem-quote layui-quote-nm tplmgr-err" style="color:#ff5722;">{$err}</div>
+	{/notempty}
+
+	<!-- 文件列表：由下面的 layui 表格渲染 -->
+	<table id="tplFileTable"></table>
+
+	<div class="tplmgr-foot">
+		<span class="total">共有 {$list|count} 条数据（{$fileCount} 个文件，{$dirCount} 个文件夹）</span>
+	</div>
+</div>
+
+{include file="tplmanage/editor_part" /}
+{/block}
+
+{block name="script"}
+<script src="{__ADMIN__}/codemirror/lib/codemirror.min.js"></script>
+<script src="{__ADMIN__}/codemirror/mode/xml/xml.js"></script>
+<script src="{__ADMIN__}/codemirror/mode/javascript/javascript.js"></script>
+<script src="{__ADMIN__}/codemirror/mode/css/css.js"></script>
+<script src="{__ADMIN__}/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+<script src="{__ADMIN__}/codemirror/mode/php/php.js"></script>
+<script src="{__ADMIN__}/codemirror/addon/search/searchcursor.js"></script>
+<script src="{__ADMIN__}/codemirror/addon/selection/active-line.js"></script>
+<script src="{__ADMIN__}/codemirror/addon/edit/matchbrackets.js"></script>
+<script src="{__ADMIN__}/codemirror/addon/fold/foldcode.js"></script>
+<script src="{__ADMIN__}/codemirror/addon/fold/foldgutter.js"></script>
+<script src="{__ADMIN__}/codemirror/addon/fold/xml-fold.js"></script>
+<script src="{__ADMIN__}/codemirror/addon/comment/comment.js"></script>
+<script>
+	layui.use(['layer'], function () {
+		var layer = layui.layer, $ = layui.jquery;
+		var TPL_ACTIVE = "{$active_url}";
+		var TPL_API    = "{:url('admin/tplmanage/api')}";
+
+		function reload() { location.href = "{:url('admin/tplmanage/index')}?activepath={$activepath}"; }
+
+		// 新建文件 / 目录
+		window.tplNew = function (type) {
+			var isDir = type === 'dir';
+			layer.prompt({
+				formType: 0,
+				title: isDir ? '新建目录' : '新建文件',
+				area: ['420px', 'auto'],
+				placeholder: isDir ? '目录名' : '文件名（如 header.html）'
+			}, function (val, idx) {
+				layer.close(idx);
+				val = $.trim(val || '');
+				if (!val) { layer.msg('名称不能为空'); return; }
+				$.post(TPL_API + '?do=' + (isDir ? 'newdir' : 'newfile'), {activepath: TPL_ACTIVE, name: val}, function (res) {
+					layer.msg(res.msg, {icon: res.code == 1 ? 1 : 2});
+					if (res.code == 1) setTimeout(reload, 600);
+				}, 'json');
+			});
+		};
+
+		// 重命名
+		window.tplRename = function (name) {
+			layer.prompt({formType: 0, title: '重命名', value: name, area: ['420px', 'auto']}, function (val, idx) {
+				layer.close(idx);
+				val = $.trim(val || '');
+				if (!val || val === name) return;
+				$.post(TPL_API + '?do=rename', {activepath: TPL_ACTIVE, filename: name, newname: val}, function (res) {
+					layer.msg(res.msg, {icon: res.code == 1 ? 1 : 2});
+					if (res.code == 1) setTimeout(reload, 600);
+				}, 'json');
+			});
+		};
+
+		// 删除（移入回收站）
+		window.tplDelete = function (name) {
+			layer.confirm('确定删除「' + name + '」吗？<br><span style="color:#999;">文件会放进回收站（runtime/template_trash），可手动恢复。</span>', {icon: 3, title: '提示', focus: true}, function (idx) {
+				layer.close(idx);
+				$.post(TPL_API + '?do=delete', {activepath: TPL_ACTIVE, filename: name}, function (res) {
+					layer.msg(res.msg, {icon: res.code == 1 ? 1 : 2});
+					if (res.code == 1) setTimeout(reload, 600);
+				}, 'json');
+			});
+		};
+
+		// 有模板文件还没保存时，刷新/关闭页面给出提示
+		window.addEventListener('beforeunload', function (e) {
+			var app = window.EditorApp;
+			if (app && app.tabs && app.tabs.some(function (t) { return t.modified; })) {
+				e.preventDefault();
+				e.returnValue = '有模板文件还没保存，确定离开吗？';
+				return e.returnValue;
+			}
+		});
+	});
+</script>
+<script>
+	// 文件列表：用后台统一的 layui 表格（tablePlus）渲染
+	layui.use(['tablePlus'], function () {
+		var table = layui.tablePlus, $ = layui.jquery;
+		var TPL_ACTIVE = "{$active_url}";
+		var TPL_INDEX  = "{:url('admin/tplmanage/index')}";
+		var TPL_ROWS   = {$listJson|raw};
+
+		function esc(s) {
+			return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+		}
+
+		// 按扩展名给文件配图标（FontAwesome 6；html/css/js 用品牌图标，其余沿用 FA4 类名，由 v4-shims 兼容）
+		function fileIcon(name) {
+			var ext = String(name || '').toLowerCase().split('.').pop();
+			var map = {
+				// 语言品牌图标（FA6 brands）
+				html: 'fab fa-html5', htm: 'fab fa-html5',
+				css: 'fab fa-css3-alt',
+				js: 'fab fa-js',
+				// 其它代码/标记
+				json: 'fa fa-file-code-o', xml: 'fa fa-file-code-o',
+				ini: 'fa fa-file-code-o', map: 'fa fa-file-code-o', php: 'fa fa-file-code-o',
+				// 图片
+				svg: 'fa fa-file-image-o', png: 'fa fa-file-image-o', jpg: 'fa fa-file-image-o',
+				jpeg: 'fa fa-file-image-o', gif: 'fa fa-file-image-o', webp: 'fa fa-file-image-o',
+				bmp: 'fa fa-file-image-o', ico: 'fa fa-file-image-o',
+				// 纯文本
+				txt: 'fa fa-file-text-o', md: 'fa fa-file-text-o', log: 'fa fa-file-text-o',
+				// 压缩包
+				zip: 'fa fa-file-archive-o', rar: 'fa fa-file-archive-o', '7z': 'fa fa-file-archive-o',
+				gz: 'fa fa-file-archive-o', tar: 'fa fa-file-archive-o',
+				// 文档
+				pdf: 'fa fa-file-pdf-o',
+				doc: 'fa fa-file-word-o', docx: 'fa fa-file-word-o',
+				xls: 'fa fa-file-excel-o', xlsx: 'fa fa-file-excel-o', csv: 'fa fa-file-excel-o',
+				ppt: 'fa fa-file-powerpoint-o', pptx: 'fa fa-file-powerpoint-o',
+				// 音视频
+				mp3: 'fa fa-file-audio-o', wav: 'fa fa-file-audio-o', ogg: 'fa fa-file-audio-o',
+				flac: 'fa fa-file-audio-o', m4a: 'fa fa-file-audio-o',
+				mp4: 'fa fa-file-video-o', avi: 'fa fa-file-video-o', mov: 'fa fa-file-video-o',
+				webm: 'fa fa-file-video-o', mkv: 'fa fa-file-video-o', flv: 'fa fa-file-video-o'
+			};
+			return map[ext] || 'fa fa-file-o';
+		}
+
+		// 文件名列：目录给链接（进下一级），可编辑文件给「打开编辑器」，其余文件置灰
+		function nameCell(d) {
+			if (d.type === 'dir') {
+				return '<a class="tplmgr-link" href="' + TPL_INDEX + '?activepath=' + d.childPath + '">'
+					+ '<i class="fa fa-folder"></i>' + esc(d.name) + '</a>';
+			}
+			var ico = fileIcon(d.name);
+			if (d.editable) {
+				return '<a class="tplmgr-link tplmgr-open" href="javascript:;" data-name="' + esc(d.name) + '">'
+					+ '<i class="' + ico + '"></i>' + esc(d.name) + '</a>';
+			}
+			return '<i class="' + ico + '" style="color:#bbb;margin-right:6px;"></i><span style="color:#aaa;">' + esc(d.name) + '</span>';
+		}
+
+		// 操作列
+		function opCell(d) {
+			var h = '';
+			if (d.type === 'file' && d.editable) {
+				h += '<a class="tplmgr-btn tplmgr-open" href="javascript:;" data-name="' + esc(d.name) + '">编辑</a>';
+			}
+			h += '<a class="tplmgr-btn" href="javascript:;" data-act="rename" data-name="' + esc(d.name) + '">重命名</a>';
+			h += '<a class="tplmgr-btn danger" href="javascript:;" data-act="delete" data-name="' + esc(d.name) + '">删除</a>';
+			return h;
+		}
+
+		table.render({
+			elem: '#tplFileTable',
+			id: 'tplFileTable',
+			data: TPL_ROWS,
+			page: false,             // 目录列表不分页，全部显示
+			autoSort: true,          // 静态数据，点表头由 layui 做前端排序
+			defaultToolbar: false,   // 不要「导出/数据说明」那套工具条
+			text: { none: '空目录' },
+			cols: [[
+				{ field: 'name', title: '文件名', minWidth: 260, sort: true, templet: function (d) { return nameCell(d); } },
+				// 大小/时间用数值字段排序（layui 对数字按大小比），显示走 templet 取格式化好的文本
+				{ field: 'size', title: '文件大小', width: 120, align: 'left', sort: true, templet: function (d) { return d.sizeText; } },
+				{ field: 'mtime', title: '更新时间', width: 170, align: 'center', sort: true, templet: function (d) { return d.mtimeText; } },
+				{ title: '操作', width: 220, align: 'center', templet: function (d) { return opCell(d); } }
+			]]
+		});
+
+		// 事件用委托：templet 里不写 inline onclick，免得文件名带引号时出错
+		$(document).on('click', '.tplmgr-open', function () {
+			openEditor($(this).data('name'), TPL_ACTIVE);
+		});
+		$(document).on('click', '.tplmgr-btn[data-act="rename"]', function () {
+			window.tplRename($(this).data('name'));
+		});
+		$(document).on('click', '.tplmgr-btn[data-act="delete"]', function () {
+			window.tplDelete($(this).data('name'));
+		});
+	});
+</script>
+{/block}

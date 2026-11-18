@@ -1,0 +1,618 @@
+{extend name="common/base"/}
+{block name="style"}
+<style type="text/css">
+.editormd-code-toolbar select {display: inline-block}
+.editormd li {list-style: inherit;}
+/* 修复 TinyMCE 下拉框被父容器截断 */
+.tox-tinymce-aux { z-index: 19891015 !important; }
+.miu-doc-tagpicker{padding:12px 16px;background:#fff}
+.miu-doc-tagpicker .miu-tag-selected{min-height:48px;padding:5px 8px;border-bottom:1px solid #e7e8eb}
+.miu-doc-tagpicker .miu-tag-selected ul{display:inline}
+.miu-doc-tagpicker .miu-tag-selected li{display:inline-block;margin:4px;padding:3px 7px;border:1px solid #69d6fe;border-radius:3px;background:#e1f2ff;color:#01AAED;font-size:12px;line-height:20px}
+.miu-doc-tagpicker .miu-tag-selected a{padding-left:6px;color:#333;cursor:pointer}
+.miu-doc-tagpicker .miu-tag-input{width:190px;height:32px;margin:4px;border:0;outline:0}
+.miu-doc-tagpicker .layui-tabs{margin-top:10px}
+.miu-doc-tagpicker .layui-tabs-body{max-height:320px;overflow-y:auto}
+.miu-doc-tagpicker .miu-tag-list{padding:14px}
+.miu-doc-tagpicker .miu-tag-list ul li{display:inline-block;margin:0 6px 6px 0;padding:0 10px;border:1px solid #ddd;border-radius:3px;background:#f9f9f9;cursor:pointer;font-size:12px;line-height:27px}
+.miu-doc-tagpicker .miu-tag-list ul li.a_cur{border-color:#1E9FFF;background:#1E9FFF;color:#fff}
+.miu-doc-tagpicker .miu-tag-list ul li.miu-tag-empty{border:0;background:transparent;color:#999;cursor:default}
+.litpic-picker{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.litpic-preview-card,.litpic-upload-tile{box-sizing:border-box;position:relative;width:108px;height:81px;border:1px solid #e6e6e6;border-radius:2px;overflow:hidden}
+.litpic-preview-card img{display:block;width:100%;height:100%;object-fit:cover;cursor:pointer}
+.litpic-remove{position:absolute;top:0;right:0;width:20px;height:20px;padding:0;border:0;background:rgba(0,0,0,.55);color:#fff;line-height:20px;cursor:pointer}
+.litpic-replace{position:absolute;left:0;bottom:0;width:100%;height:24px;padding:0;border:0;background:rgba(0,0,0,.35);color:#fff;line-height:24px;text-align:center;cursor:pointer}
+.litpic-replace:hover{background:rgba(0,0,0,.55);color:#fff}
+.litpic-upload-tile{display:flex;align-items:center;justify-content:center;padding:0;background:#fff;border-style:dashed;color:#999;cursor:pointer}
+.litpic-upload-tile:hover{border-color:#1E9FFF;color:#1E9FFF}
+.doc-ext-toggle{flex:0 0 auto;align-self:center;padding:0 8px;color:#1e9fff;font-size:13px;white-space:nowrap;cursor:pointer;}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<form class="layui-form">
+<div class="layui-tabs layui-tab-brief layui-container" lay-options="{trigger: 'mousedown'}">
+
+	<ul class="layui-tabs-header layui-bg-tint">
+<!--		<li class="layui-disabled miu-tab-title" lay-unselect>发布文档</li>-->
+		<li class="layui-this">基础内容</li>
+		{if condition="$nid eq 'special'"}
+		<li>专题文章</li>
+		{/if}
+		<li>SEO优化</li>
+		<li>更多参数</li>
+		{notempty name="i18nRows"}
+		<li>多语言</li>
+		{/notempty}
+	</ul>
+	<div class="layui-tabs-body">
+
+		<div class="layui-tabs-item layui-show">
+			<div class=" layui-row layui-col-space16">
+				<div class="layui-col-md5">
+					<div class="layui-form-item">
+						<label class="layui-form-label">标题<font>*</font></label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								<input type="hidden" name="title_color" class="layui-input">
+								<input type="text" name="title" lay-verify="required" lay-affix="clear" lay-reqText="请输入文档标题" placeholder="请输入文档标题" class="layui-input" >
+								<div id="colorpicker" style="width:50px;" title="标题颜色"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+				<div class="layui-col-md4">
+					<div class="layui-form-item">
+						<label class="layui-form-label">短标题</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								<input type="text" name="short_title" value="" lay-affix="clear" placeholder="简短标题" class="layui-input">
+								<a href="javascript:;" class="doc-ext-toggle">【扩展标题】</a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+				<div class="layui-col-md4 doc-ext-box" style="display:none;">
+					<div class="layui-form-item">
+						<label class="layui-form-label">扩展标题1</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								<input type="text" name="title_ext_1" lay-affix="clear" placeholder="" class="layui-input" value="">
+								{tips tips="备用扩展标题，字段名 title_ext_1" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+				<div class="layui-col-md4 doc-ext-box" style="display:none;">
+					<div class="layui-form-item">
+						<label class="layui-form-label">扩展标题2</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								<input type="text" name="title_ext_2" lay-affix="clear" placeholder="" class="layui-input" value="">
+								{tips tips="备用扩展标题，字段名 title_ext_2" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+				<div class="layui-col-md4 doc-ext-box" style="display:none;">
+					<div class="layui-form-item">
+						<label class="layui-form-label">扩展标题3</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								<input type="text" name="title_ext_3" lay-affix="clear" placeholder="" class="layui-input" value="">
+								{tips tips="备用扩展标题，字段名 title_ext_3" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+				<div class="layui-col-md6">
+					<div class="layui-form-item">
+						<label class="layui-form-label">栏目<font>*</font></label>
+						<div class="layui-input-block" style="width: 300px">
+							<select name="nav_id" lay-verify="required" lay-reqText="请选择栏目">
+								<option value="">请选择栏目</option>
+								{volist name="navs" id="v"}
+								<option value="{$v.id}" {if condition="$v.id eq $nav_id_curr"}selected{/if} {if condition="$v.channel_id neq $channel_id_curr"}disabled{/if}>{$v.title}{if condition="$v.is_show eq 1"} [隐]{/if}</option>
+								{/volist}
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md6"></div>
+				<div class="layui-col-md12">
+					<div class="layui-form-item">
+						<label class="layui-form-label">文档属性</label>
+						<div class="layui-input-block">
+							<input type="checkbox" name="is_head" value="1" lay-skin="tag" title="头条" lay-filter="">
+							<input type="checkbox" name="is_recommend" value="1" lay-skin="tag" title="推荐" lay-filter="">
+							<input type="checkbox" name="is_special" value="1" lay-skin="tag" title="特荐" lay-filter="">
+							<input type="checkbox" name="is_b" value="1" lay-skin="tag" title="加粗" lay-filter="tagCheck">
+<!--							<input type="checkbox" name="is_litpic" lay-skin="tag" title="有图" lay-filter="">-->
+							<input type="checkbox" name="is_original" value="1" lay-skin="tag" title="原创" lay-filter="" checked>
+							<input type="checkbox" name="is_jump" value="1" lay-skin="tag" title="跳转" lay-filter="jumpCheck">
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md6 layui-hide" id="jumplinksdiv">
+					<div class="layui-form-item">
+						<label class="layui-form-label">跳转链接</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								<input type="text" name="jumplinks" lay-affix="clear" placeholder="https://" class="layui-input" >
+								{tips tips="请输入完整的URL网址（包含http或https），设置后访问该条信息将直接跳转到设置的链接" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+				<div class="layui-col-md6">
+					<div class="layui-form-item">
+						<label class="layui-form-label">标签</label>
+						<div class="layui-input-block">
+							<input type="text" id="keyword_name" name="keyword_names" lay-affix="clear" placeholder="请选择标签" class="layui-input" readonly>
+							<input type="hidden" id="keyword_id" name="keyword_ids">
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+				<div class="layui-col-md6">
+					<div class="layui-form-item">
+						<label class="layui-form-label">缩略图</label>
+						<div class="layui-input-block">
+							<div class="litpic-picker">
+								<div class="litpic-preview-card layui-hide" id="litpic-preview-card">
+									<img id="litpic-preview" src="" alt="缩略图" title="点击预览">
+									<button type="button" class="litpic-remove" id="litpic-remove" title="移除缩略图" aria-label="移除缩略图"><i class="layui-icon layui-icon-close"></i></button>
+									<button type="button" class="litpic-replace" id="litpic-replace">替换</button>
+								</div>
+								<button type="button" class="litpic-upload-tile uploadBtn" id="litpic-upload-tile" data-bind="litpic" data-filter="image" title="选择缩略图" aria-label="选择缩略图"><i class="layui-icon layui-icon-addition" style="font-size:24px;"></i></button>
+								<input type="hidden" id="litpic" name="litpic" value="">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+
+<!--				<div class="layui-col-md6">-->
+<!--					<div class="layui-form-item">-->
+<!--						<label class="layui-form-label">内容摘要</label>-->
+<!--						<div class="layui-input-block">-->
+<!--							<div class="layui-input-group" style="width:100%">-->
+<!--								<textarea type="text" name="desc" lay-affix="clear" maxlength="200" style="resize:none;" class="layui-input layui-textarea" ></textarea>-->
+<!--								{tips tips="一般不超过200个字，不填写时系统自动提取正文的前200个字符" /}-->
+<!--							</div>-->
+<!--						</div>-->
+<!--					</div>-->
+<!--				</div>-->
+				<!--自定义字段开始-->
+				{include file="common/customfields" /}
+				<!--自定义字段结束-->
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+				<div class="layui-col-md12">
+					<label class="layui-form-label">内容详情 </label>
+					<input type="checkbox" value="1" name="editor_img_download_to_local" title="远程图片本地化" {if condition="$otherCFG.editor_img_download_to_local eq 1"}checked{/if}>
+					<input type="checkbox" value="1" name="editor_img_clear_link" title="删除非站内链接" {if condition="$otherCFG.editor_img_clear_link eq 1"}checked{/if}>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+				<div class="layui-col-md12">
+					<div class="layui-form-item" style="margin:0 100px;">
+						<div id="editor—wrapper">
+							<textarea id="mdContent" style="display:none;"></textarea>
+							<div id="docContent"></div>
+							<div id="editor-container" style="height:500px;min-height:300px;"><!-- 编辑器 --></div>
+							<textarea id="content" name="content" style="display:none;"></textarea>
+
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12">
+					<label class="layui-form-label"></label>
+					<i id="text-number" style="margin-left:12px;position:relative;top:-16px;"></i>
+				</div>
+
+			</div>
+
+		</div>
+		{if condition="$nid eq 'special'"}
+		{include file="common/special" /}
+		{/if}
+		<div class="layui-tabs-item">
+			<div class="layui-row layui-col-space16">
+				<div class="layui-col-md6">
+					<div class="layui-form-item">
+						<label class="layui-form-label">SEO标题</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								<input type="text" name="seo_title" lay-affix="clear" placeholder="建议80个字以内" class="layui-input" >
+								{tips tips="建议80个字以内，不填写则使用 内容标题_栏目名称_网站名称 在前端展示" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+				<div class="layui-col-md6">
+					<div class="layui-form-item">
+						<label class="layui-form-label">SEO关键词</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								<input type="text" name="seo_keywords" lay-affix="clear" placeholder="建议100个字以内" class="layui-input" >
+								{tips tips="建议100个字以内，多个关键词请用英文逗号（,）隔开，建议3到5个关键词。" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+				<div class="layui-col-md6">
+					<div class="layui-form-item">
+						<label class="layui-form-label">SEO描述</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								<textarea type="text" name="seo_description" maxlength="200" lay-affix="clear" placeholder="一般不超过200个字" class="layui-input layui-textarea" ></textarea>
+								{tips tips="一般不超过200个字，不填写时系统自动提取正文的前200个字符" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+			</div>
+		</div>
+		<div class="layui-tabs-item">
+			<div class="layui-row layui-col-space16">
+				<div class="layui-col-md3">
+					<div class="layui-form-item">
+						<div class="layui-inline">
+							<label class="layui-form-label">作者</label>
+							<div class="layui-input-inline margin-right-0" style="position:relative;">
+								<div class="layui-input-wrap">
+									<input type="text" name="author" value="{$admin_nickname}" autocomplete="off" lay-affix="clear" class="layui-input miu-preset-input" data-preset="author">
+								</div>
+								<div class="miu-preset-dropdown" id="preset-author"></div>
+							</div>
+							<div class="layui-form-mid" style="padding: 0!important;">
+								<button type="button" class="layui-btn layui-btn-primary radius-l-0" data-action="set-preset" data-type="author">设置</button>
+								{tips tips="留空时前台显示默认名称（当前管理员昵称）。点击设置可修改默认名称" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md3">
+					<div class="layui-form-item">
+						<div class="layui-inline">
+							<label class="layui-form-label">文章来源</label>
+							<div class="layui-input-inline margin-right-0" style="position:relative;">
+								<div class="layui-input-wrap">
+									<input type="text" name="from" autocomplete="off" lay-affix="clear" placeholder="" class="layui-input miu-preset-input" data-preset="from">
+								</div>
+								<div class="miu-preset-dropdown" id="preset-from"></div>
+							</div>
+							<div class="layui-form-mid" style="padding: 0!important;">
+								<button type="button" class="layui-btn layui-btn-primary radius-l-0" data-action="set-preset" data-type="from">设置</button>
+								{tips tips="转载自哪里。点击设置可修改默认名称" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+				<div class="layui-col-md6">
+					<div class="layui-form-item">
+						<label class="layui-form-label">来源链接</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:100%">
+								<input type="text" name="from_url" lay-affix="clear" placeholder="https://" class="layui-input" >
+								{tips tips="转载出处链接。可留空" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+				<div class="layui-col-md6">
+					<div class="layui-form-item">
+						<label class="layui-form-label">点击数</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:40%">
+								<input type="number" name="click" min="0"  placeholder="" class="layui-input" value='{if condition="$otherCFG.is_random_click"}{$a|default=mt_rand($otherCFG.random_click_scope_start,$otherCFG.random_click_scope_end)}{/if}'"'>
+								{tips tips="文章点击数，发布文档时随机。可在后台-基础-核心配置里关闭" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+				<div class="layui-col-md6">
+					<div class="layui-form-item">
+						<label class="layui-form-label">阅读权限</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:200px">
+								<select name="arcrank" lay-filter="switchTest">
+									<option value="-1" selected>未审核</option>
+									<option value="0" selected>开放浏览</option>
+									{volist name="user_level" id="v"}
+									<option value="{$v.id}">{$v.title}</option>
+									{/volist}
+								</select>
+								{tips tips="" /}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md12" style="height:0;padding: 0;"></div>
+				<div class="layui-col-md6">
+					<div class="layui-form-item">
+						<label class="layui-form-label">发布时间</label>
+						<div class="layui-input-block">
+							<div class="layui-input-group" style="width:40%">
+								<input type="text" name="release_time" class="layui-input" id="release_time" placeholder="yyyy-MM-dd HH:mm:ss" readonly>
+								{tips tips="留空系统获取当前时间" /}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		{notempty name="i18nRows"}
+		<div class="layui-tabs-item">
+			{include file="common/i18n_fields" /}
+		</div>
+		{/notempty}
+
+	</div>
+
+	<div class="layui-row">
+		<div class="layui-col-sm12">
+			<div class="layui-col-md2"></div>
+			<div class="layui-col-md9 layui-hide" >
+				<div class="py-3">
+					<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+					<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+</div>
+</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+
+<script src="{__ADMIN__}/js/document-tagpicker.js?v={:CMS_VERSION}"></script>
+<script src="{__ADMIN__}/js/document-i18n-editors.js?v={:CMS_VERSION}-5"></script>
+<script>
+	const editorType = '{$editor}';
+	window.__MIU_URLS = {
+		filesIndex: "{:url('admin/files/index')}",
+		savePreset: "{:url('admin/api/save_preset')}",
+		documentKeywords: "{:url('admin/api/get_keyword_cate')}",
+		documentKeywordGroups: "{:url('admin/keywords/group')}",
+		i18nEditorUpload: "{:url('admin/api/upload')}?sourse=tinymce&type=image"
+	};
+	var arr = ['form','tool','tabs'];
+	if (editorType == 1) arr.push('tinymce');
+	else if (editorType == 2) arr.push('editormd');
+
+	layui.use(arr,function(){
+		var form = layui.form, tool = layui.tool, tabs = layui.tabs, colorpicker = layui.colorpicker, util = layui.util, laydate = layui.laydate;
+		var markdownEditor = null;
+		form.render();
+
+		// 日期时间选择器
+		laydate.render({ elem: '#release_time', type: 'datetime', fullPanel: true });
+		// 图片上传
+		$('.uploadBtn').on('click', function(){
+			openFileManager($(this).attr('data-bind'));
+			return false;
+		});
+		// 缩略图卡片：同步文件管理器、清除操作和 AI 生图回填的值
+		function updateLitpicPreview(){
+			var src = String($('#litpic').val() || '').trim();
+			if(src){
+				$('#litpic-preview').attr('src', src);
+				$('#litpic-preview-card').removeClass('layui-hide');
+				$('#litpic-upload-tile').addClass('layui-hide');
+			}else{
+				$('#litpic-preview').attr('src', '');
+				$('#litpic-preview-card').addClass('layui-hide');
+				$('#litpic-upload-tile').removeClass('layui-hide');
+			}
+		}
+		$('#litpic').on('input change', updateLitpicPreview);
+		$('#litpic-remove').on('click', function(){
+			$('#litpic').val('').trigger('input').trigger('change');
+		});
+		$('#litpic-replace').on('click', function(){
+			openFileManager('litpic', 'image');
+		});
+		$('#litpic-preview').on('click', function(){
+			var src = String($('#litpic').val() || '').trim();
+			if(src) layer.photos({photos:{data:[{src:src}],start:0},anim:5});
+		});
+		updateLitpicPreview();
+		// 颜色选择器
+		let pickDown = function(e){
+			$('[name="title"]').css('color', e);
+			$('[name="title_color"]').val(e);
+		};
+		colorpicker.render({
+			elem: '#colorpicker',
+			color: '#000000',
+			predefine: true,
+			colors: ['#000000','#ff0000','#0000ff','#006600','#333333','#ffff00','#cc0000','#0033cc','#339900','#d1ddaa','#ffcc33','#990000','#000099','#33cc00','#999999','#ff6633','#660000','#330099','#66ff00','#cccccc','#a233c6','#ffb800'],
+			change: pickDown,
+			done: pickDown
+		});
+		// 加粗联动
+		form.on('checkbox(tagCheck)', function(data){
+			$('[name="title"]').css('fontWeight', data.elem.checked ? 'bold' : 'normal');
+		});
+		// 跳转联动
+		form.on('checkbox(jumpCheck)', function(data){
+			$('#jumplinksdiv').toggleClass('layui-hide', !data.elem.checked);
+		});
+		initDocumentTagPicker('#keyword_name', '#keyword_id', window.__MIU_URLS.documentKeywords, window.__MIU_URLS.documentKeywordGroups, tabs);
+		if (editorType == 1) {
+			// tinymce 编辑器
+			var editor = layui.tinymce, tinymceEditor = null;
+			editor.render({
+				selector: "#editor-container",
+				images_upload_url: "{:url('admin/api/upload')}?sourse=tinymce&type=image",
+				height: 500,
+				toolbar: 'code undo redo | forecolor backcolor bold italic underline strikethrough removeformat | alignleft aligncenter alignright alignjustify outdent indent | bullist numlist table blockquote myimage myvideo codesample | formatselect fontselect fontsizeselect',
+				setup: function(inst){
+					inst.ui.registry.addButton('myimage', { icon: 'image', tooltip: '插入图片', onAction: function(){ openFileManagerForTinymce(inst, 'image'); } });
+					inst.ui.registry.addButton('myvideo', { icon: 'embed', tooltip: '插入视频', onAction: function(){ openFileManagerForTinymce(inst, 'video'); } });
+				},
+				init_instance_callback: function(inst){
+					tinymceEditor = inst;
+					var val = document.getElementById('content').value || '';
+					if(val) inst.setContent(val);
+				}
+			});
+
+		} else if(editorType == 2){
+			// markdown 编辑器
+			markdownEditor = layui.editormd.render('docContent', {
+				width: "100%",
+				height: 500,
+				autoFocus: false,
+				markdown: document.getElementById('mdContent').value
+			});
+			window.__MIU_DOCUMENT_MARKDOWN_EDITOR = markdownEditor;
+
+		}
+		window.initDocumentI18nEditors($('.miu-i18n-fields'));
+
+		// 预设值下拉与弹窗
+		initDocPresets({ presets: {:json_encode($doc_preset)}, saveUrl: "{:url('admin/api/save_preset')}" });
+
+		// 监听提交
+		form.on('submit(webform)', function(data){
+			window.syncDocumentI18nEditors(data.field);
+			if (typeof window.syncCustomFieldEditors === 'function') {
+				window.syncCustomFieldEditors(data.field);
+			}
+			// TinyMCE 内容同步到 textarea
+			if (editorType == 1 && typeof tinymce !== 'undefined' && tinymceEditor) {
+				data.field.content = tinymceEditor.getContent();
+				delete data.field['editor-container'];
+			}
+			if (editorType == 2) {
+				if (!markdownEditor) {
+					layer.msg('MarkDown编辑器未初始化');
+					return false;
+				}
+				var markdownContent = markdownEditor.getMarkdown();
+				if (!markdownContent.trim()) {
+					layer.msg('请先完善文档内容');
+					return false;
+				}
+				markdownEditor.save();
+				data.field['docContent-markdown-doc'] = markdownContent;
+				data.field['docContent-html-code'] = markdownEditor.getHTML();
+			}
+			// 明确提交两个正文处理选项的开关状态，未勾选时也发送 0。
+			data.field.editor_img_download_to_local = $('[name="editor_img_download_to_local"]').prop('checked') ? 1 : 0;
+			data.field.editor_img_clear_link = $('[name="editor_img_clear_link"]').prop('checked') ? 1 : 0;
+			var loadIndex = layer.msg('<i class="layui-icon miuai-runse layui-font-16 zoom-in-out neon-text"></i><span class="neon-text">&emsp; 正在提交...</span>', { skin: "white-msg", shade: 0.01,time:0 });
+			tool.post("{:url('admin/document/add')}", data.field, function(e){
+				layer.close(loadIndex);
+				if (e.code == 0) {
+					parent.layui.pageTable.reload('article');
+					parent.layer.close(parent.layer.getFrameIndex(window.name));
+					parent.layer.msg(e.msg, { icon: 1 });
+				} else {
+					layer.msg(e.msg, { icon: 2 });
+				}
+			}, {
+				timeout: 660000,
+				error: function (xhr, status) {
+					layer.close(loadIndex);
+					var errorMessage = status === 'timeout'
+						? '提交等待超时，请先确认文档是否已保存，再决定是否重试。'
+						: tool.responseMessage(xhr);
+					if (!errorMessage) {
+						errorMessage = xhr && xhr.status
+							? '提交失败（HTTP ' + xhr.status + '），请检查服务器日志后重试。'
+							: '提交失败，请检查网络后重试。';
+					}
+					layer.msg(errorMessage, { icon: 2, time: 6000 });
+				}
+			});
+			return false;
+		});
+		// 监听表单改动标记，同时同步到父页面状态表
+		var formChanged = false;
+		var myLayerIndex = parent.layer.getFrameIndex(window.name);
+		if(myLayerIndex){
+			parent.layer.formChangedMap = parent.layer.formChangedMap || {};
+			parent.layer.formChangedMap[myLayerIndex] = false;
+		}
+		function markFormChanged(){
+			formChanged = true;
+			if(myLayerIndex) parent.layer.formChangedMap[myLayerIndex] = true;
+		}
+		$('form.layui-form').on('input change', 'input, textarea', markFormChanged);
+		// Layui select 通过 form.on('select') 监听，原生 change 不触发
+		form.on('select', markFormChanged);
+		// tinymce 内容改动监听
+		if(typeof tinymce !== 'undefined'){
+			tinymce.editors.forEach(function(ed){
+				ed.on('change keyup', markFormChanged);
+			});
+		}
+
+		// ESC 关闭弹层：表单有改动时提示保存
+		$(document).on('keyup', function(e){
+			if(e.keyCode === 27){
+				// 已有弹窗时先关闭它，避免重复弹出 confirm
+				if($('.layui-layer-dialog').length > 0){
+					var lastIndex = $('.layui-layer-dialog:last').attr('times');
+					if(lastIndex) layer.close(lastIndex);
+					return;
+				}
+				if(formChanged){
+					layer.confirm('文档内容已修改，是否保存？', {
+						btn: ['保存','不保存'],
+						icon: 3,
+						title: '提示',
+						// 动态取当前最顶层 z-index+1，避免固定小值被默认基数(19891014)遮挡
+						zIndex: (function(){
+							var max = 19891014;
+							return max + 1;
+						})()
+					}, function(index){
+						// 点击保存：触发提交按钮
+						$('form.layui-form button[lay-submit]').trigger('click');
+						layer.close(index);
+					}, function(){
+						// 点击不保存：直接关闭弹层
+						if(parent.layer.escIndex && Array.isArray(parent.layer.escIndex)){
+							parent.layer.close(parent.layer.escIndex[0]);
+						}else{
+							parent.layer.closeAll();
+						}
+					});
+				}else{
+					if(parent.layer.escIndex && Array.isArray(parent.layer.escIndex)){
+						parent.layer.close(parent.layer.escIndex[0]);
+					}else{
+						parent.layer.closeAll();
+					}
+				}
+			}
+		});
+		//【扩展标题】：点一下显示/隐藏下面两个扩展标题输入框
+		$('.doc-ext-toggle').on('click', function(){
+			$('.doc-ext-box').slideToggle(300);
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

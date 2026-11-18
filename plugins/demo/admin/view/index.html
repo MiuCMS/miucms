@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="renderer" content="webkit">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<title>演示插件首页</title>
+	<link rel="stylesheet" href="{__ADMIN__}/css/miu.css">
+	<script src="{__ADMIN__}/layui/layui.js"></script>
+	<script src="{__ADMIN__}/init.js"></script>
+	<style>
+		html, body { height: auto; background: #fff; }
+		.demo-intro { line-height: 1.8; }
+		.demo-step { min-height: 112px; }
+		.demo-step-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+		.demo-code { overflow-wrap: anywhere; }
+		.demo-status { display: inline-block; margin: 2px 8px 2px 0; }
+	</style>
+</head>
+<body>
+<div class="p-3">
+	<div class="layui-card">
+		<div class="layui-card-header">
+			<span class="layui-breadcrumb">
+				<a>插件管理</a>
+				<a><cite>演示插件首页</cite></a>
+			</span>
+		</div>
+		<div class="layui-card-body">
+			<blockquote class="layui-elem-quote demo-intro">
+				<strong>欢迎来到 Miucms 插件开发演示。</strong><br>
+				这里不是业务插件，而是一份可运行的开发样例。你可以从下面的卡片进入自定义配置页、打开前台演示页，再按“开发流程”查看代码分别放在哪个文件。
+			</blockquote>
+
+			<div class="layui-btn-container" style="margin:14px 0 18px;">
+				<button type="button" class="layui-btn tab-a" data-title="演示插件配置" data-id="demo-config" data-href="{:url('admin/plugin/run')}?name=demo&c=Index&a=config">
+					<i class="layui-icon layui-icon-set"></i> 打开自定义配置页
+				</button>
+				<a class="layui-btn layui-btn-primary" href="/demo/hello?name=访客" target="_blank" rel="noopener">打开前台演示页</a>
+				<button type="button" class="layui-btn layui-btn-primary" id="btnClear">
+					<i class="layui-icon layui-icon-delete"></i> 清空文档演示记录
+				</button>
+			</div>
+
+			<div class="layui-row layui-col-space16">
+				<div class="layui-col-md4">
+					<div class="layui-card layui-bg-gray demo-step">
+						<div class="layui-card-body">
+							<div class="demo-step-title"><i class="layui-icon layui-icon-set"></i> 配置项</div>
+							<span class="demo-status">站点：{$config.site_name|default='我的演示站点'}</span><br>
+							<span class="demo-status">作者：{$pluginInfo.author|default='Miucms'}</span><br>
+							<span class="demo-status">作者官网：
+								{if !empty($pluginInfo.author_url)}
+								<a href="{$pluginInfo.author_url}" target="_blank" rel="noopener noreferrer">访问官网</a>
+								{else /}未设置{/if}
+							</span><br>
+							<span class="demo-status">页脚注入：{if !empty($config.enable_footer)}已开启{else /}未开启{/if}</span><br>
+							<span class="demo-status">示例 Key：{if !empty($config.demo_api_key)}已配置（内容不回显）{else /}未配置{/if}</span>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md4">
+					<div class="layui-card layui-bg-gray demo-step">
+						<div class="layui-card-body">
+							<div class="demo-step-title"><i class="layui-icon layui-icon-template-1"></i> 后台页面</div>
+							首页：<code>admin/view/index.html</code><br>
+							配置页：<code>admin/view/config.html</code><br>
+							控制器：<code>admin/controller/Index.php</code>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md4">
+					<div class="layui-card layui-bg-gray demo-step">
+						<div class="layui-card-body">
+							<div class="demo-step-title"><i class="layui-icon layui-icon-link"></i> 前台入口</div>
+							路由：<code>demo/hello</code><br>
+							模板标签：<code>{demo:hello name='访客' /}</code><br>
+							数据表：<code>demo_record</code>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="layui-card" style="margin-top:8px;">
+				<div class="layui-card-header">建议按这个顺序体验</div>
+				<div class="layui-card-body">
+					<div class="layui-row layui-col-space16">
+						<div class="layui-col-md3">
+							<strong>1. 配置插件</strong>
+							<p>进入“插件配置”填写站点名和欢迎语。密码字段不会回显；留空保存表示保留旧值。</p>
+						</div>
+						<div class="layui-col-md3">
+							<strong>2. 查看前台</strong>
+							<p>打开前台演示页，观察配置读取和 <code>{demo:hello}</code> 标签的输出。</p>
+						</div>
+						<div class="layui-col-md3">
+							<strong>3. 触发文档钩子</strong>
+							<p>发布一篇文档，<code>documentAdded()</code> 会将标题写入插件自己的数据表。</p>
+						</div>
+						<div class="layui-col-md3">
+							<strong>4. 阅读源码</strong>
+							<p>从 <code>Plugin.php</code> 开始，再看菜单、控制器、视图、路由、标签和 SQL 文件。</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="layui-card" style="margin-top:8px;">
+				<div class="layui-card-header">这个插件演示了什么</div>
+				<div class="layui-card-body">
+					<div class="layui-row layui-col-space16">
+						<div class="layui-col-md6">
+							<ul class="layui-text">
+								<li><code>getConfigFields()</code>：text、textarea、switch、number、radio、select、password、help_area、条件显示。</li>
+								<li><code>PluginAdminBase</code>：后台登录校验、插件视图渲染和配置读取。</li>
+								<li>自动钩子：<code>templateParse()</code>、<code>documentAdded()</code>、<code>userLogin()</code>。</li>
+								<li>映射钩子：<code>hooks.php</code> 将 <code>search_before</code> 指向 <code>onSearchBefore()</code>。</li>
+							</ul>
+						</div>
+						<div class="layui-col-md6">
+							<ul class="layui-text">
+								<li>前台路由：<code>route.php</code> → 控制器 → 独立模板。</li>
+								<li>模板标签：参数通过 <code>var_export()</code> 安全写入编译代码，输出时做 HTML 转义。</li>
+								<li>数据表：安装脚本使用 <code>__PREFIX__</code>，只创建插件自己的表。</li>
+								<li>配置中的示例 API Key 仅演示密码字段，不会调用服务，也不会显示明文。</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="layui-card" style="margin-top:8px;">
+				<div class="layui-card-header">文档发布记录 <span class="layui-font-gray">（由 document_added 钩子写入，最多显示 {$limit} 条）</span></div>
+				<div class="layui-card-body">
+					<table class="layui-table">
+						<thead>
+							<tr><th style="width:70px;">记录 ID</th><th style="width:90px;">文档 ID</th><th>文档标题</th><th style="width:180px;">记录时间</th></tr>
+						</thead>
+						<tbody>
+							{empty name="records"}
+							<tr><td colspan="4" style="text-align:center;color:#999;">暂无记录。确认插件已安装并启用后，到后台发布一篇文档即可体验。</td></tr>
+							{/empty}
+							{volist name="records" id="vo"}
+							<tr>
+								<td>{$vo.id}</td>
+								<td>{$vo.doc_id}</td>
+								<td>{$vo.doc_title}</td>
+								<td>{:date('Y-m-d H:i:s', $vo.created_at)}</td>
+							</tr>
+							{/volist}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+layui.use(['layer','tool'], function () {
+	var $ = layui.$,layer = layui.layer,tool = layui.tool;
+	$('#btnClear').on('click', function () {
+		layer.confirm('只会删除演示插件记录表中的数据，不会删除文档或其他插件数据。确定继续吗？', { icon: 3, title: '清空演示记录' }, function (index) {
+			$.post("{:url('admin/plugin/run')}?name=demo&c=Index&a=clear", {}, function (res) {
+				layer.msg(res.msg, { icon: res.code === 0 ? 1 : 2 });
+				if (res.code === 0) {
+					setTimeout(function () { location.reload(); }, 700);
+				}
+			}).fail(function () {
+				layer.msg('请求失败，请检查网络后重试', { icon: 2 });
+			});
+			layer.close(index);
+		});
+	});
+});
+</script>
+</body>
+</html>

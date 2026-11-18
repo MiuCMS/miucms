@@ -1,0 +1,60 @@
+<a class="skip-link" href="#main">{miu:lang key='nav.skip_to_content' /}</a>
+<div class="topline"><span>{miu:custom name='top_left'/}</span><span>{miu:custom name='top_right'/}</span></div>
+<header class="site-header">
+    <div class="header-inner">
+        <a class="brand" href="{:home_url()}">
+            <img src="{miu:global name='site_logo'/}" alt="" />
+            <span>{miu:global name='site_name'/}</span>
+        </a>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+            <span></span><span></span>
+        </button>
+        <nav class="primary-nav" id="primary-nav">
+            <a href="{:home_url()}" class="{miu:isindex /}">{miu:lang key='nav.home' /}</a>
+            {miu:nav id="vo" pid="0" order='sort' sort='asc' currentstyle='active' emptykey='nav.no_categories'}
+            {notempty name="vo.has_children"}
+            <div class="nav-dropdown">
+                <a href="{$vo.url}" class="nav-dropdown-toggle {$vo.currentstyle}" aria-expanded="false" aria-controls="subnav-{$vo.id}">{$vo.title}<svg class="nav-dropdown-caret" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="m3 4.5 3 3 3-3" /></svg></a>
+                <div class="nav-dropdown-menu" id="subnav-{$vo.id}">
+                    {miu:nav name='sub' pid='$vo.id'}
+                    <a href="{$sub.url}" {eq name="sub.target" value="1"}target="_blank"{/eq}>{$sub.title}</a>
+                    {/miu:nav}
+                </div>
+            </div>
+            {else/}
+            <a href="{$vo.url}" class="{$vo.currentstyle}" {eq name="vo.target" value="1"}target="_blank"{/eq}>{$vo.title}</a>
+            {/notempty}
+            {/miu:nav}
+        </nav>
+        <div class="header-actions" aria-label="{miu:lang key='nav.quick_actions' /}">
+            <details class="header-popover">
+                <summary class="header-action" aria-label="{miu:lang key='nav.search' /}" title="{miu:lang key='nav.search' /}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"></circle><path d="m15.5 15.5 5 5"></path></svg>
+                </summary>
+                <form class="header-search" action="{:url_entry()}/search" method="get" role="search">
+                    <label for="header-search-keyword">{miu:lang key='nav.search_site' /}</label>
+                    <div class="header-search-row">
+                        <input id="header-search-keyword" name="keyword" type="search" placeholder="{miu:lang key='nav.keyword_placeholder' /}" maxlength="50" required />
+                        <button type="submit">{miu:lang key='nav.search' /}</button>
+                    </div>
+                </form>
+            </details>
+            <details class="header-popover">
+                <summary class="header-action" aria-label="{miu:lang key='nav.change_language' /}" title="{miu:lang key='nav.change_language' /}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3.5 12h17M12 3c2.3 2.5 3.4 5.5 3.4 9S14.3 18.5 12 21M12 3c-2.3 2.5-3.4 5.5-3.4 9S9.7 18.5 12 21"></path></svg>
+                </summary>
+                <div class="header-language-menu" aria-label="{miu:lang key='nav.select_language' /}">
+                    {miu:langlist id='lang'}
+                    <a href="{$lang.url}" class="header-language-link {eq name='lang.current' value='1'}is-current{/eq}" lang="{$lang.code}">
+                        <span>{$lang.name}</span>
+                        {eq name='lang.current' value='1'}<span aria-label="{miu:lang key='nav.current_language' /}">✓</span>{/eq}
+                    </a>
+                    {/miu:langlist}
+                </div>
+            </details>
+            <a class="header-action " href="{:url_entry()}/login" aria-label="{miu:lang key='nav.member_access' /}" title="{miu:lang key='nav.member_center' /}">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c.5-3.5 3.2-5.5 7-5.5s6.5 2 7 5.5"></path></svg>
+            </a>
+        </div>
+    </div>
+</header>

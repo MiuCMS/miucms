@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body class="theme-blog">
+{include file="header" /}
+<main id="main">
+    <section class="blog-masthead"><div class="container"><p class="blog-kicker">{miu:lang key='latestArticles' /}</p><h1>{miu:global name='site_title' /}</h1><p>{miu:global name='site_desc' /}</p><a href="{:miu_search_url()}" class="blog-search-link">{miu:lang key='search' /} <span aria-hidden="true">↗</span></a></div></section>
+    <section class="container blog-stream"><div class="blog-stream-heading"><h2>{miu:lang key='latestArticles' /}</h2><span>{miu:global name='site_name' /}</span></div>
+        <ol class="blog-entry-list">
+            {miu:list id='vo' limit='10'}
+            <li class="blog-entry"><time>{$vo.date}</time><a class="blog-entry-title" href="{$vo.url}">{$vo.title}</a><span class="blog-entry-channel">{$vo.nav_name}</span></li>
+            {/miu:list}
+        </ol>
+    </section>
+</main>
+{include file="footer" /}
+</body>
+</html>

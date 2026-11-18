@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body class="theme-portal">
+{include file="header" /}
+<main id="main"><section class="page-intro portal-list-intro"><div class="container">{miu:position /}<p class="portal-kicker">{miu:lang key='newsIndex' /}</p><h1>{$nav.title}</h1><p>{$nav.seo_description|default=''}</p></div></section>
+    <section class="container portal-list-section"><div class="portal-article-list">{miu:list id='vo' pagesize='12'}<article><time>{$vo.date}</time><div><span>{$vo.nav_name}</span><h2><a href="{$vo.url}">{$vo.title}</a></h2><p>{$vo.seo_description|default=''}</p></div>{notempty name="vo.litpic"}<a class="portal-list-image" href="{$vo.url}"><img src="{$vo.litpic}" alt="{$vo.title}" loading="lazy"></a>{/notempty}</article>{/miu:list}</div>{miu:pagelist theme='light' /}</section>
+</main>
+{include file="footer" /}
+</body>
+</html>

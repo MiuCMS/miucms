@@ -1,0 +1,330 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+{php}
+    // URL示例使用当前站点地址。
+    $siteUrl = request()->domain();
+{/php}
+<div class="layui-fluid">
+	<div class="layui-card">
+		<div class="layui-card-body setting" style="padding: 15px;">
+			<style>
+				form.url-form .layui-form-label { width: 130px; }
+				form.url-form .layui-input-block { margin-left: 160px; }
+				form.url-form .layui-form-item { margin-bottom: 18px; }
+				form.url-form .exp { color: #1e9fff; }
+				form.url-form .exp-txt { color: #ff5722; }
+				form.url-form .notic { color: #999; margin-top: 6px; line-height: 1.7; }
+				form.url-form .notic-red { color: #ff5722; margin-top: 6px; }
+				/* layui 会取「带 lay-radio 属性的兄弟 div」的 innerHTML 当选项文案，模板本身要藏起来 */
+				form.url-form [lay-radio] { display: none; }
+				.none { display: none; }
+			</style>
+			<blockquote class="layui-elem-quote layui-font-gray">
+				本页设置项请在网站上线前设置好，运营中尽量不要修改这些选项，避免影响SEO。
+			</blockquote>
+			<form class="layui-form url-form" action="" lay-filter="urlform">
+
+				<!-- ================= URL模式 ================= -->
+				<div class="layui-col-sm12">
+					<div class="layui-col-sm6">
+						<div style="padding: 4px 16px;" class="layui-bg-gray layui-font-gray layui-margin-2">URL模式</div>
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">URL模式</label>
+					<div class="layui-input-block">
+						<input type="radio" name="url_pseudo" lay-filter="url_pseudo" value="1" title="动态URL" {eq name="config.url_pseudo" value="1"}checked{/eq}>
+						<input type="radio" name="url_pseudo" lay-filter="url_pseudo" value="3" title="伪静态化" {eq name="config.url_pseudo" value="3"}checked{/eq}>
+						<input type="radio" name="url_pseudo" lay-filter="url_pseudo" value="2" title="生成静态模式" {eq name="config.url_pseudo" value="2"}checked{/eq}>
+					</div>
+				</div>
+
+				<!-- ================= 静态页面：页面保存目录 / 栏目页面名称 / 文档页面名称 ================= -->
+				<div id="dl_html_format">
+					<div class="layui-col-sm12">
+						<div class="layui-col-sm6">
+							<div style="padding: 4px 16px;" class="layui-bg-gray layui-font-gray layui-margin-2">生成静态路径设置</div>
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">页面保存目录</label>
+						<div class="layui-input-block">
+							<input type="text" id="url_html_arcdir" name="url_html_arcdir" autocomplete="off" class="layui-input" style="width:260px;display:inline-block;vertical-align:middle;" value="{$config.url_html_arcdir}" placeholder="留空默认根目录">
+							<span style="margin-left:8px;">（如：html）</span>
+							<p class="notic">填写需要生成静态页面的文件夹名称，不能包含特殊字符，不能和根目录系统文件夹重名；其他已配置语言会放在此目录下的语言子目录，例如 html/en-us/、html/zh-tw/</p>
+							<p class="notic-red {empty name='config.url_html_arcdir'}none{/empty}" id="tips_arcdir">页面将保存在 {$siteUrl}/<span id="tips_arcdir_dir">{$config.url_html_arcdir}</span>/</p>
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">栏目页面路径</label>
+						<div class="layui-input-block">
+							<input type="radio" name="url_html_listname" value="1" {eq name="config.url_html_listname" value="1"}checked{/eq}>
+							<div lay-radio>顶级目录名称/list_ID.html（<a href="javascript:void(0);" class="exp" onclick="view_exp('exp_l1', event);">示例</a><span id="exp_l1" class="none exp-txt">：{$siteUrl}<span class="sp_arcdir">/{$config.url_html_arcdir}</span>/news/list_1.html</span>）</div>
+							<br>
+							<input type="radio" name="url_html_listname" value="2" {eq name="config.url_html_listname" value="2"}checked{/eq}>
+							<div lay-radio>父级目录名称/子目录名称/（<a href="javascript:void(0);" class="exp" onclick="view_exp('exp_l2', event);">示例</a><span id="exp_l2" class="none exp-txt">：{$siteUrl}<span class="sp_arcdir">/{$config.url_html_arcdir}</span>/news/tech/</span>）</div>
+							<br>
+							<input type="radio" name="url_html_listname" value="3" {eq name="config.url_html_listname" value="3"}checked{/eq}>
+							<div lay-radio>子目录名称/（<a href="javascript:void(0);" class="exp" onclick="view_exp('exp_l3', event);">示例</a><span id="exp_l3" class="none exp-txt">：{$siteUrl}<span class="sp_arcdir">/{$config.url_html_arcdir}</span>/tech/</span>）</div>
+<!--							<br>-->
+<!--							<input type="radio" name="url_html_listname" value="4" {eq name="config.url_html_listname" value="4"}checked{/eq}>-->
+<!--							<div lay-radio>自定义（<a href="javascript:void(0);" class="exp" onclick="view_exp('exp_l4', event);">点击查看</a><span id="exp_l4" class="none exp-txt">：在【栏目管理】新增/编辑栏目可以自定义文件保存目录和列表命名规则</span>）</div>-->
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">文档页面路径</label>
+						<div class="layui-input-block">
+							<input type="radio" name="url_html_pagename" value="1" {eq name="config.url_html_pagename" value="1"}checked{/eq}>
+							<div lay-radio>顶级目录名称/ID.html（<a href="javascript:void(0);" class="exp" onclick="view_exp('exp_p1', event);">示例</a><span id="exp_p1" class="none exp-txt">：{$siteUrl}<span class="sp_arcdir">/{$config.url_html_arcdir}</span>/news/10.html</span>）</div>
+							<br>
+							<input type="radio" name="url_html_pagename" value="2" {eq name="config.url_html_pagename" value="2"}checked{/eq}>
+							<div lay-radio>父级目录名称/子目录名称/ID.html（<a href="javascript:void(0);" class="exp" onclick="view_exp('exp_p2', event);">示例</a><span id="exp_p2" class="none exp-txt">：{$siteUrl}<span class="sp_arcdir">/{$config.url_html_arcdir}</span>/news/tech/100.html</span>）</div>
+							<br>
+							<input type="radio" name="url_html_pagename" value="3" {eq name="config.url_html_pagename" value="3"}checked{/eq}>
+							<div lay-radio>子目录名称/ID.html（<a href="javascript:void(0);" class="exp" onclick="view_exp('exp_p3', event);">示例</a><span id="exp_p3" class="none exp-txt">：{$siteUrl}<span class="sp_arcdir">/{$config.url_html_arcdir}</span>/tech/100.html</span>）</div>
+<!--							<br>-->
+<!--							<input type="radio" name="url_html_pagename" value="4" {eq name="config.url_html_pagename" value="4"}checked{/eq}>-->
+<!--							<div lay-radio>自定义（<a href="javascript:void(0);" class="exp" onclick="view_exp('exp_p4', event);">点击查看</a><span id="exp_p4" class="none exp-txt">：在【栏目管理】新增/编辑栏目可以自定义文件保存目录和文档命名规则</span>）</div>-->
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">标签页面路径</label>
+						<div class="layui-input-block">
+							<input type="radio" name="url_html_tagname" value="1" {eq name="config.url_html_tagname" value="1"}checked{/eq}>
+							<div lay-radio>tag/标签ID.html（<a href="javascript:void(0);" class="exp" onclick="view_exp('exp_t1', event);">示例</a><span id="exp_t1" class="none exp-txt">：{$siteUrl}<span class="sp_arcdir">/{$config.url_html_arcdir}</span>/tag/92.html，第2页：tag/92_p2.html</span>）</div>
+							<br>
+							<input type="radio" name="url_html_tagname" value="2" {eq name="config.url_html_tagname" value="2"}checked{/eq}>
+							<div lay-radio>tag/标签ID/（<a href="javascript:void(0);" class="exp" onclick="view_exp('exp_t2', event);">示例</a><span id="exp_t2" class="none exp-txt">：{$siteUrl}<span class="sp_arcdir">/{$config.url_html_arcdir}</span>/tag/92/，第2页：tag/92/p2.html</span>）</div>
+							<p class="notic">标签页标题可在下方单独设置「标签标题」规则。</p>
+						</div>
+					</div>
+
+				</div>
+
+				<!-- ================= 伪静态化：栏目URL / 文档URL ================= -->
+				<div class="layui-col-sm12" id="dl_rewrite_title">
+					<div class="layui-col-sm6">
+						<div style="padding: 4px 16px;" class="layui-bg-gray layui-font-gray layui-margin-2">伪静态URL设置</div>
+					</div>
+				</div>
+				<div class="layui-form-item none" id="dl_rewrite_format">
+					<label class="layui-form-label">栏目URL</label>
+					<div class="layui-input-block">
+						<input type="radio" name="url_rewrite_format" lay-filter="url_rewrite_format" value="1" {eq name="config.url_rewrite_format" value="1"}checked{/eq}>
+						<div lay-radio>目录名称（<a href="javascript:void(0);" class="exp" onclick="view_exp('exp_3_1', event);">示例</a><span id="exp_3_1" class="none exp-txt">：{$siteUrl}/news/</span>）</div>
+						<br>
+						<input type="radio" name="url_rewrite_format" lay-filter="url_rewrite_format" value="2" {eq name="config.url_rewrite_format" value="2"}checked{/eq}>
+						<div lay-radio>模型标识（<a href="javascript:void(0);" class="exp" onclick="view_exp('exp_3_2', event);">示例</a><span id="exp_3_2" class="none exp-txt">：{$siteUrl}/article/news.html</span>）</div>
+					</div>
+				</div>
+
+				<div class="layui-form-item none" id="dl_rewrite_view_format">
+					<label class="layui-form-label">文档URL</label>
+					<div class="layui-input-block">
+						<input type="radio" name="url_rewrite_view_format" value="1" {eq name="config.url_rewrite_view_format" value="1"}checked{/eq}>
+						<div lay-radio>父目录（<a href="javascript:void(0);" class="exp" onclick="view_exp('exp_3_3', event);">示例</a><span id="exp_3_3" class="none exp-txt">：{$siteUrl}/news/100.html</span>）</div>
+						<br>
+						<input type="radio" name="url_rewrite_view_format" value="3" {eq name="config.url_rewrite_view_format" value="3"}checked{/eq}>
+						<div lay-radio>当前目录（<a href="javascript:void(0);" class="exp" onclick="view_exp('exp_3_4', event);">示例</a><span id="exp_3_4" class="none exp-txt">：{$siteUrl}/tech/100.html</span>）</div>
+						<br>
+						<input type="radio" name="url_rewrite_view_format" value="4" {eq name="config.url_rewrite_view_format" value="4"}checked{/eq}>
+						<div lay-radio>父目录/当前目录/（<a href="javascript:void(0);" class="exp" onclick="view_exp('exp_3_5', event);">示例</a><span id="exp_3_5" class="none exp-txt">：{$siteUrl}/news/tech/100.html</span>）</div>
+					</div>
+				</div>
+
+				<div class="layui-col-sm12">
+					<div class="layui-col-sm6">
+						<div style="padding: 4px 16px;" class="layui-bg-gray layui-font-gray layui-margin-2">标题规则设置</div>
+					</div>
+				</div>
+				<!-- ================= 栏目标题 ================= -->
+				<div class="layui-form-item">
+					<label class="layui-form-label">栏目标题</label>
+					<div class="layui-input-block">
+						<input type="radio" name="url_liststitle_format" value="3" title="栏目名称" {eq name="config.url_liststitle_format" value="3"}checked{/eq}>
+						<br>
+						<input type="radio" name="url_liststitle_format" value="1" {eq name="config.url_liststitle_format" value="1"}checked{/eq}>
+						<div lay-radio>栏目名称<span class="sp_seo_title_symbol">{$config.url_title_symbol}</span>网站名称</div>
+						<br>
+						<input type="radio" name="url_liststitle_format" value="4" {eq name="config.url_liststitle_format" value="4"}checked{/eq}>
+						<div lay-radio>栏目名称<span class="sp_seo_title_symbol">{$config.url_title_symbol}</span>第N页</div>
+						<br>
+						<input type="radio" name="url_liststitle_format" value="2" {eq name="config.url_liststitle_format" value="2"}checked{/eq}>
+						<div lay-radio>栏目名称<span class="sp_seo_title_symbol">{$config.url_title_symbol}</span>第N页<span class="sp_seo_title_symbol">{$config.url_title_symbol}</span>网站名称</div>
+					</div>
+				</div>
+
+				<!-- ================= 标签标题 ================= -->
+				<div class="layui-form-item">
+					<label class="layui-form-label">标签标题</label>
+					<div class="layui-input-block">
+						<input type="radio" name="url_tagtitle_format" value="3" title="标签名称" {eq name="config.url_tagtitle_format" value="3"}checked{/eq}>
+						<br>
+						<input type="radio" name="url_tagtitle_format" value="1" {eq name="config.url_tagtitle_format" value="1"}checked{/eq}>
+						<div lay-radio>标签名称<span class="sp_seo_title_symbol">{$config.url_title_symbol}</span>网站名称</div>
+						<br>
+						<input type="radio" name="url_tagtitle_format" value="4" {eq name="config.url_tagtitle_format" value="4"}checked{/eq}>
+						<div lay-radio>标签名称<span class="sp_seo_title_symbol">{$config.url_title_symbol}</span>第N页</div>
+						<br>
+						<input type="radio" name="url_tagtitle_format" value="2" {eq name="config.url_tagtitle_format" value="2"}checked{/eq}>
+						<div lay-radio>标签名称<span class="sp_seo_title_symbol">{$config.url_title_symbol}</span>第N页<span class="sp_seo_title_symbol">{$config.url_title_symbol}</span>网站名称</div>
+						<p class="notic">标题名称会带「标签：」前缀；第1页不显示页码。</p>
+					</div>
+				</div>
+
+				<!-- ================= 文档标题 ================= -->
+				<div class="layui-form-item">
+					<label class="layui-form-label">文档标题</label>
+					<div class="layui-input-block">
+						<input type="radio" name="url_viewtitle_format" value="1" title="内容标题" {eq name="config.url_viewtitle_format" value="1"}checked{/eq}>
+						<br>
+						<input type="radio" name="url_viewtitle_format" value="2" {eq name="config.url_viewtitle_format" value="2"}checked{/eq}>
+						<div lay-radio>内容标题<span class="sp_seo_title_symbol">{$config.url_title_symbol}</span>网站名称</div>
+						<br>
+						<input type="radio" name="url_viewtitle_format" value="3" {eq name="config.url_viewtitle_format" value="3"}checked{/eq}>
+						<div lay-radio>内容标题<span class="sp_seo_title_symbol">{$config.url_title_symbol}</span>栏目名称<span class="sp_seo_title_symbol">{$config.url_title_symbol}</span>网站名称</div>
+					</div>
+				</div>
+
+				<!-- ================= 标题间连接符 ================= -->
+				<div class="layui-form-item">
+					<label class="layui-form-label">标题间连接符</label>
+					<div class="layui-input-block">
+						<input type="text" id="url_title_symbol" name="url_title_symbol" autocomplete="off" class="layui-input" style="width:260px;" value="{$config.url_title_symbol}">
+					</div>
+				</div>
+
+				<!-- ================= 静态页面：发布文档 / 编辑文档 ================= -->
+				<div class="layui-form-item none" id="dl_pub_html">
+					<label class="layui-form-label">发布文档</label>
+					<div class="layui-input-block">
+						<input type="checkbox" name="url_pub_home" value="1" title="更新首页" lay-skin="primary" {eq name="config.url_pub_home" value="1"}checked{/eq}>
+						<input type="checkbox" name="url_pub_nav" value="1" title="更新相关栏目" lay-skin="primary" {eq name="config.url_pub_nav" value="1"}checked{/eq}>
+						<input type="checkbox" name="url_pub_side" value="1" title="更新上下篇" lay-skin="primary" {eq name="config.url_pub_side" value="1"}checked{/eq}>
+					</div>
+				</div>
+
+				<div class="layui-form-item none" id="dl_edit_html">
+					<label class="layui-form-label">编辑文档</label>
+					<div class="layui-input-block">
+						<input type="checkbox" name="url_edit_home" value="1" title="更新首页" lay-skin="primary" {eq name="config.url_edit_home" value="1"}checked{/eq}>
+						<input type="checkbox" name="url_edit_nav" value="1" title="更新相关栏目" lay-skin="primary" {eq name="config.url_edit_nav" value="1"}checked{/eq}>
+						<input type="checkbox" name="url_edit_side" value="1" title="更新上下篇" lay-skin="primary" {eq name="config.url_edit_side" value="1"}checked{/eq}>
+					</div>
+				</div>
+
+				<div class="layui-form-item">
+					<div class="layui-input-block">
+						<button class="layui-btn layui-bg-blue" lay-submit lay-filter="urlform">确认提交</button>
+					</div>
+				</div>
+
+			</form>
+		</div>
+	</div>
+</div>
+{/block}
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+layui.use(['form','tool'], function(){
+	var form = layui.form, tool = layui.tool;
+
+	// 展开/收起「示例」
+	function view_exp(id, ev){
+		if (ev) { ev.stopPropagation(); }   // 别让点击穿透到外面的单选框
+		$('#' + id).toggle();
+	}
+	window.view_exp = view_exp;
+
+	form.render();
+
+	// ===== 标题连接符：改了以后，选项文案里的连接符实时跟着变 =====
+	$('#url_title_symbol').on('input keyup', function(){
+		$('.sp_seo_title_symbol').html($(this).val());
+	});
+
+	// ===== 页面保存目录：实时提示「页面将保存在 xxx/」，示例里的目录前缀也跟着变 =====
+	$('#url_html_arcdir').on('input keyup', function(){
+		var v = $.trim($(this).val()).replace(/^\/+|\/+$/g, '');
+		$('#tips_arcdir_dir').text(v);
+		$('#tips_arcdir').toggle(v !== '');
+		$('.sp_arcdir').text(v === '' ? '' : '/' + v);
+	});
+
+	// ===== 文档URL 显隐：栏目URL 选「模型标识」时，文档URL 不显示 =====
+	function toggleViewFormat(){
+		var f = $('input[name=url_rewrite_format]:checked').val();
+		if (f == 1) {
+			$('#dl_rewrite_view_format').show();
+		} else {
+			$('#dl_rewrite_view_format').hide();
+		}
+	}
+
+	// ===== URL模式 切换：下面的行跟着显示/隐藏 =====
+	function togglePseudo(){
+		// 先全部藏起来，再按当前模式显示对应的
+		$('#dl_html_format').hide();
+		$('#dl_rewrite_title').hide();
+		$('#dl_rewrite_format').hide();
+		$('#dl_rewrite_view_format').hide();
+		$('#dl_pub_html').hide();
+		$('#dl_edit_html').hide();
+
+		var pseudo = $('input[name=url_pseudo]:checked').val();
+		if (pseudo == 2) {
+			// 静态页面：页面保存目录 + 栏目/文档页面名称 + 发布文档 + 编辑文档
+			$('#dl_html_format').show();
+			$('#dl_pub_html').show();
+			$('#dl_edit_html').show();
+		} else if (pseudo == 3) {
+			// 伪静态化：栏目URL + 文档URL。
+			$('#dl_rewrite_title').show();
+			$('#dl_rewrite_format').show();
+			toggleViewFormat();
+		}
+	}
+
+	form.on('radio(url_pseudo)', togglePseudo);
+	form.on('radio(url_rewrite_format)', toggleViewFormat);
+	togglePseudo();
+
+	// ===== 提交 =====
+	form.on('submit(urlform)', function (data) {
+		//复选框没勾选时不会提交，这里补成 0，避免保存后变空
+		['url_pub_home','url_pub_nav','url_pub_side','url_edit_home','url_edit_nav','url_edit_side'].forEach(function(k){
+			if(data.field[k] === undefined){ data.field[k] = 0; }
+		});
+		tool.post("{:url('admin/seo/index')}", data.field, function(e){
+			//切到「生成静态」模式时后端会带回一句提醒：前台得先生成静态文件才能访问
+			if (e.code == 0 && e.data && e.data.notice) {
+				layer.alert(e.data.notice, {
+					icon: 1,
+					title: '提示',
+					btnAlign:'c',
+					btn: ['去页面生成', '知道了'],
+					yes: function (index) {
+						layer.close(index);
+						tool.tabAdd("{:url('admin/seo/createhtml')}", '页面生成', '1031');
+					}
+				});
+				return;
+			}
+
+			layer.msg(e.msg, { icon: e.code == 0 ? 1 : 2 });
+			setTimeout(function(){
+				location.reload();
+			},1000)
+		});
+		return false;
+	});
+});
+</script>
+{/block}
+<!-- /脚本 -->

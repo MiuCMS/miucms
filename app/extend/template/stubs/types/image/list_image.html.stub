@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body class="theme-image">
+{include file="header" /}
+<main id="main">
+    <section class="page-intro image-list-intro"><div class="container">{miu:position /}<p class="image-kicker">{miu:lang key='imageIndex' /}</p><h1>{$nav.title}</h1><p>{$nav.seo_description|default=''}</p></div></section>
+    <section class="container image-list-section"><nav class="category-links">{miu:nav id='vo' pid='$nav.top_navid'}<a href="{$vo.url}" class="{$vo.currentstyle}">{$vo.title}</a>{/miu:nav}</nav>
+        <div class="gallery-wall">{miu:list id='vo' pagesize='12'}<article class="gallery-tile"><a class="gallery-tile-image" href="{$vo.url}">{notempty name="vo.litpic"}<img src="{$vo.litpic}" alt="{$vo.title}" loading="lazy">{else/}<span>{miu:lang key='noImage' /}</span>{/notempty}</a><div class="gallery-tile-caption"><span>{$vo.date}</span><h2><a href="{$vo.url}">{$vo.title}</a></h2><p>{$vo.nav_name}</p></div></article>{/miu:list}</div>
+        {miu:pagelist theme='light' /}
+    </section>
+</main>
+{include file="footer" /}
+</body>
+</html>

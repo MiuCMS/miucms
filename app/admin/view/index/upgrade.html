@@ -1,0 +1,82 @@
+{extend name="common/base"/}
+{block name="title"}<title>系统升级 - {:get_system_config('admin_title')}</title>{/block}
+{block name="style"}
+<style>
+.miu-upgrade-page{padding:18px}.miu-upgrade-card{max-width:960px;margin:0 auto}.miu-upgrade-card .layui-card-header{font-size:16px;font-weight:600}.miu-upgrade-version{display:flex;flex-wrap:wrap;gap:12px 28px;margin:8px 0 18px;color:#5b6472}.miu-upgrade-version strong{color:#202a36}.miu-upgrade-note{margin:16px 0;padding:12px 16px;border-left:3px solid #1e9fff;background:#f4f8ff;color:#526174;line-height:1.8}.miu-upgrade-error{margin:16px 0;padding:12px 16px;border-left:3px solid #ff5722;background:#fff6f3;color:#8c3b25;line-height:1.8;word-break:break-word}.miu-upgrade-empty{padding:28px 0;text-align:center;color:#7b8492}.miu-upgrade-actions{display:flex;gap:10px;flex-wrap:wrap}
+</style>
+{/block}
+{block name="body"}
+<div class="layui-fluid miu-upgrade-page" id="upgradePage"
+     data-apply-url="{:url('admin/index/upgrade_apply')}"
+     data-token="{$upgradeCsrfToken}">
+    <div class="layui-card miu-upgrade-card">
+        <div class="layui-card-header">MiuCMS 版本升级</div>
+        <div class="layui-card-body">
+            <div class="miu-upgrade-version">
+                <span>当前版本：<strong>{$upgradeStatus.current_version}</strong></span>
+                <span>最新版本：<strong>{$upgradeStatus.latest_version|default='—'}</strong></span>
+            </div>
+            <div class="miu-upgrade-note">升级包使用 RSA-SHA256 数字签名和 SHA-256 校验。每次只升级一个连续版本；执行前自动备份数据库和将要变更的程序文件，升级失败时尝试自动恢复。</div>
+            {if condition="$upgradeStatus.error neq ''"}
+            <div class="miu-upgrade-error">{$upgradeStatus.error}</div>
+            {elseif condition="$upgradeStatus.available"}
+            <p>发现可用增量升级：<strong>{$upgradeStatus.release.from_version}</strong> → <strong>{$upgradeStatus.release.version}</strong></p>
+            <div class="miu-upgrade-actions" style="margin-top:18px">
+                <button type="button" class="layui-btn" id="upgradeApply">开始升级</button>
+                <button type="button" class="layui-btn layui-btn-primary" id="upgradeCheck">重新检查</button>
+            </div>
+            {else/}
+            <div class="miu-upgrade-empty">当前没有可直接应用的下一版本升级包。</div>
+            <div class="miu-upgrade-actions" style="justify-content:center">
+                <button type="button" class="layui-btn layui-btn-primary" id="upgradeCheck">立即检查</button>
+            </div>
+            {/if}
+        </div>
+    </div>
+</div>
+{/block}
+{block name="script"}
+<script>
+layui.use(['layer'], function () {
+    var layer = layui.layer;
+    var $ = layui.$;
+    var $page = $('#upgradePage');
+    var busy = false;
+
+    $('#upgradeCheck').on('click', function () {
+        if (busy) return;
+        busy = true;
+        layer.load(2);
+        location.reload();
+    });
+
+    $('#upgradeApply').on('click', function () {
+        if (busy) return;
+        layer.confirm('升级会短暂暂停前台、后台和接口请求，并自动备份数据库及将要替换的程序文件。确认开始升级吗？', {title: '确认系统升级', icon: 3}, function (index) {
+            layer.close(index);
+            busy = true;
+            var loading = layer.msg('正在下载、验签并应用增量升级包，请勿关闭页面…', {icon: 16, time: 0, shade: 0.12});
+            $.post($page.data('apply-url'), {token: $page.data('token')}, function (res) {
+                layer.close(loading);
+                if (res && res.code === 0) {
+                    if (typeof parent.__miuClearUpgradeNotice === 'function') {
+                        parent.__miuClearUpgradeNotice();
+                    }
+                    var translate = window.MiuAdminI18n ? window.MiuAdminI18n.translate : function (text) { return text; };
+                    layer.alert(translate('升级完成：') + res.data.from_version + ' → ' + res.data.version + translate('。备份保存在 ') + res.data.backup, {icon: 1}, function () {
+                        location.reload();
+                    });
+                } else {
+                    layer.alert((res && res.msg) || '升级失败');
+                }
+            }, 'json').fail(function () {
+                layer.close(loading);
+                layer.alert('升级请求中断。若升级期间连接断开，系统会在下次打开升级页时尝试自动恢复。');
+            }).always(function () {
+                busy = false;
+            });
+        });
+    });
+});
+</script>
+{/block}

@@ -1,0 +1,4 @@
+{notempty name="doc.imgs"}
+<!-- imgs 已由后端转为数组，图片项只有 src、name，不要再次 json_decode。 -->
+<div class="gallery">{volist name="doc.imgs" id="vo"}<figure><a href="{$vo.src}" target="_blank" rel="noopener noreferrer"><img src="{$vo.src}" alt="{$vo.name}" loading="lazy"></a>{notempty name="vo.name"}<figcaption>{$vo.name}</figcaption>{/notempty}</figure>{/volist}</div>
+{/notempty}

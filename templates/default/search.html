@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="{miu:locale name='current'/}">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="keywords" content="{$nav.seo_keywords}" />
+    <meta name="description" content="{$nav.seo_description}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="{miu:global name='site_name'/}" />
+    <meta property="og:title" content="{$page_title}" />
+    <title>{$page_title}</title>
+    {include file="head" /}
+</head>
+<body data-page="search">
+{include file="header" /}
+<main id="main">
+    <section class="page-intro page-intro--search">
+        <div class="container">
+            <div class="breadcrumbs"><a href="{:home_url()}">{miu:lang key='nav.home' /}</a><span>/</span><b>{miu:lang key='search.results' /}</b></div>
+            <h1>{$nav.title}</h1>
+            <p class="intro-copy">{if condition="$keyword neq ''"}“{$keyword}” · {/if}{$total} {miu:lang key='search.results_count_suffix' /}</p>
+        </div>
+    </section>
+    <section class="container listing-section">
+        {if condition="$total gt 0"}
+        <div class="editorial-grid">
+            {volist name="list" id="vo"}
+            <article class="editorial-card">
+                <a class="card-media" href="{$vo.url}"><img class="card-image" src="{$vo.litpic|default='/skin/default/images/none.png'}" alt="{$vo.title}" loading="lazy" /></a>
+                <div class="card-meta"><span>{$vo.nav_name}</span><time>{$vo.date}</time></div>
+                <h2><a href="{$vo.url}" style="{$vo.title_style}">{$vo.title}</a></h2>
+                <p>{$vo.seo_description}</p>
+                <div class="card-foot"><a class="text-link" href="{$vo.url}">{miu:lang key='common.read_more' /} <span aria-hidden="true">↗</span></a></div>
+            </article>
+            {/volist}
+        </div>
+        {else/}
+        <div class="empty-state">
+            <h2>{if condition="$keyword neq ''"}{miu:lang key='search.empty' /}{else/}{miu:lang key='search.empty_prompt' /}{/if}</h2>
+            <p>{if condition="$keyword neq ''"}{miu:lang key='search.tip' /}{else/}{miu:lang key='search.prompt' /}{/if}</p>
+        </div>
+        {/if}
+        {miu:pagelist type='full' listitem='index,pre,pageno,next,end' /}
+    </section>
+</main>
+{include file="footer" /}
+</body>
+</html>

@@ -1,0 +1,42 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<style>
+	body{background:#fff;}
+	.detail-row{display:flex;padding:9px 0;border-bottom:1px dashed #eee;}
+	.detail-row .k{flex:0 0 110px;color:#999;}
+	.detail-row .v{flex:1 1 auto;word-break:break-all;}
+</style>
+<div class="layui-card">
+	<div class="layui-card-body">
+		<h3 class="pb-3">留言详情 · {$form.form_name|default='（表单已删除）'}</h3>
+
+		{volist name="fields" id="f"}
+		<div class="detail-row">
+			<div class="k">{$f.name}</div>
+			<div class="v">{$f.value|default='—'}</div>
+		</div>
+		{/volist}
+
+		<div class="detail-row">
+			<div class="k">提交时间</div>
+			<div class="v">{:date('Y-m-d H:i:s', (int)$info['add_time'])}</div>
+		</div>
+		<div class="detail-row">
+			<div class="k">提交 IP</div>
+			<div class="v">{$info.ip|default='—'}</div>
+		</div>
+		<div class="detail-row">
+			<div class="k">提交来源</div>
+			<div class="v">{if condition="$info['source'] eq 2"}手机端{else/}电脑端{/if}</div>
+		</div>
+		{notempty name="info.reply"}
+		<div class="detail-row">
+			<div class="k">回复内容</div>
+			<div class="v">{$info.reply}</div>
+		</div>
+		{/notempty}
+	</div>
+</div>
+{/block}
+<!-- /主体 -->

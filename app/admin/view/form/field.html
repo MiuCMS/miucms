@@ -1,0 +1,106 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-3">
+	<form class="layui-form miucms-form-bar border-t border-x">
+		<div class="layui-input-inline" style="width:240px;">
+			<select name="form_id" lay-filter="formFilter">
+				<option value="0">全部表单</option>
+				{volist name="forms" id="f"}
+				<option value="{$f.id}" {eq name="form_id" value="$f.id"}selected{/eq}>{$f.form_name}</option>
+				{/volist}
+			</select>
+		</div>
+		<div class="layui-input-inline" style="width:150px">
+			<button class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="table-search" id="fieldSearchBtn"><i class="layui-icon layui-icon-search mr-1"></i>筛选</button>
+		</div>
+	</form>
+	<table class="layui-hide" id="field" lay-filter="field"></table>
+</div>
+
+<script type="text/html" id="toolbarDemo">
+	<div class="layui-btn-container">
+		<button class="layui-btn layui-btn-sm layui-btn-color layui-btn-radius" lay-event="add">+ 添加字段</button>
+	</div>
+</script>
+<script type="text/html" id="barDemo">
+<div class="layui-btn-group">
+	<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+	<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</div>
+</script>
+<script type="text/html" id="yesNoTpl">
+	{{# if(d.required == 1){ }}<span class="layui-badge layui-bg-orange">必填</span>{{# } else { }}<span class="miu-i18n-ui-label" style="color:#999;">选填</span>{{# } }}
+</script>
+<script type="text/html" id="showTpl">
+	{{# if(d.is_showlist == 1){ }}<i class="layui-icon layui-icon-ok"></i>{{# } else { }}<i class="layui-icon layui-icon-close" style="color:#ccc;"></i>{{# } }}
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['tool','tablePlus'],function(){
+		var table = layui.tablePlus, tool = layui.tool, form = layui.form, layer = layui.miulayer;
+
+		layui.pageTable = table.render({
+			elem: '#field',
+			title: '表单字段列表',
+			toolbar: '#toolbarDemo',
+			defaultToolbar: [],
+			url: "{:url('admin/form/field')}",
+			page: true,
+			limit: 20,
+			where: {form_id: '{$form_id}'},
+			cols: [
+				[
+					{field: 'id', title: 'ID号', width: 70, align: 'center'},
+					{field: 'attr_name', title: '字段名称', minWidth: 160},
+					{field: 'type_name', title: '字段类型', width: 110, align: 'center'},
+					{field: 'required', title: '是否必填', width: 100, align: 'center', toolbar: '#yesNoTpl'},
+					{field: 'is_showlist', title: '列表显示', width: 100, align: 'center', toolbar: '#showTpl'},
+					{field: 'attr_values', title: '可选值', minWidth: 180, templet: function (d) {
+						if (!d.attr_values) return '<span style="color:#ccc;">—</span>';
+						return layui.util.escape(String(d.attr_values).replace(/\r?\n/g, ' / '));
+					}},
+					{field: 'sort_order', title: '排序', width: 80, align: 'center'},
+					{field: 'right', title: '操作', toolbar: '#barDemo', width: 130, align: 'center'}
+				]
+			]
+		});
+
+		//切换表单：自动重新拉一次
+		form.on('select(formFilter)', function () {
+			document.getElementById('fieldSearchBtn').click();
+		});
+
+		table.on('toolbar(field)', function (obj) {
+			if (obj.event === 'add') {
+				var formId = $('select[name="form_id"]').val() || '{$form_id}';
+				tool.side("{:url('admin/form/field_add')}?form_id=" + formId, '80%');
+			}
+		});
+
+		table.on('tool(field)', function (obj) {
+			var data = obj.data;
+			if (obj.event === 'edit') {
+				tool.side("{:url('admin/form/field_add')}?id=" + data.id, '80%');
+				return;
+			}
+			if (obj.event === 'del') {
+				layer.confirm('确定删除这个字段吗？（历史留言里已填的值会保留）', {icon: 3, title: '提示'}, function (index) {
+					tool.delete("{:url('admin/form/field_delete')}", {id: data.id}, function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							obj.del();
+						}
+					});
+					layer.close(index);
+				});
+			}
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

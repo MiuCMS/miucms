@@ -1,0 +1,43 @@
+{notempty name="i18nRows"}
+<div class="layui-form-item miu-i18n-fields">
+	<label class="layui-form-label">多语言内容</label>
+	<div class="layui-input-block">
+		<div class="layui-tabs layui-tab-brief" lay-options="{trigger: 'mousedown'}">
+			<ul class="layui-tabs-header">
+				{volist name="i18nRows" id="language"}
+				<li {eq name="language.is_first" value="1"}class="layui-this"{/eq}>{$language.label} <small>{$language.code}</small></li>
+				{/volist}
+			</ul>
+			<div class="layui-tabs-body">
+				{volist name="i18nRows" id="language"}
+				<div class="layui-tabs-item {eq name="language.is_first" value="1"}layui-show{/eq}">
+					<div class="layui-font-gray" style="margin:8px 0 14px;">留空时该字段使用简体中文原文。</div>
+					{volist name="language.fields" id="field"}
+					{if condition="isset($field.editor) && $field.editor eq 'tinymce' && isset($editor) && $editor eq '2'"}
+					<textarea id="miu-i18n-html-output-{$language.code}" name="translations[{$language.code}][{$field.entity_type}][{$field.name}]" class="layui-hide miu-i18n-html-output">{$field.value|default=''}</textarea>
+					{elseif condition="isset($field.editor) && $field.editor eq 'markdown' && isset($editor) && $editor eq '1'"}
+					{else/}
+					<div class="layui-form-item">
+						<label class="layui-form-label">{$field.label}</label>
+						<div class="layui-input-block">
+							{if condition="isset($field.editor) && $field.editor eq 'tinymce' && isset($editor) && $editor eq '1'"}
+							<textarea id="miu-i18n-html-{$language.code}" name="translations[{$language.code}][{$field.entity_type}][{$field.name}]" rows="{$field.rows|default=12}" class="layui-textarea miu-i18n-html-editor" placeholder="{$field.label}">{$field.value|default=''}</textarea>
+							{elseif condition="isset($field.editor) && $field.editor eq 'markdown' && isset($editor) && $editor eq '2'"}
+							<textarea id="miu-i18n-markdown-source-{$language.code}" name="translations[{$language.code}][{$field.entity_type}][{$field.name}]" class="layui-textarea layui-hide miu-i18n-markdown-source">{$field.value|default=''}</textarea>
+							<div id="miu-i18n-markdown-{$language.code}" class="miu-i18n-markdown-editor" data-source-id="miu-i18n-markdown-source-{$language.code}" data-html-output-id="miu-i18n-html-output-{$language.code}"></div>
+							{elseif condition="$field.type eq 'textarea'"}
+							<textarea name="translations[{$language.code}][{$field.entity_type}][{$field.name}]" rows="{$field.rows|default=4}" class="layui-textarea" placeholder="{$field.label}">{$field.value|default=''}</textarea>
+							{else/}
+							<input type="text" name="translations[{$language.code}][{$field.entity_type}][{$field.name}]" value="{$field.value|default=''}" class="layui-input" placeholder="{$field.label}">
+							{/if}
+						</div>
+					</div>
+					{/if}
+					{/volist}
+				</div>
+				{/volist}
+			</div>
+		</div>
+	</div>
+</div>
+{/notempty}

@@ -1,0 +1,7 @@
+<div class="detail-collect-wrap">
+    <button class="detail-collect" type="button" data-collect-button data-collect-hydrate="1" data-doc-id="{$doc.id}" data-collected="0" data-state-url="{:url_entry()}/user/collect_state" data-toggle-url="{:url_entry()}/user/collect_toggle" data-login-url="{:url_entry()}/login" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.7c0 5.1-8.8 11-8.8 11s-8.8-5.9-8.8-11a4.7 4.7 0 0 1 8.8-2.2 4.7 4.7 0 0 1 8.8 2.2Z"></path></svg>
+        <span data-collect-label>{miu:lang key='js.favorite' /}</span>
+        <span class="detail-collect-count" data-collect-count>{$doc.collection|default='0'}</span>
+    </button>
+</div>

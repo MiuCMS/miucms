@@ -1,0 +1,164 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="style"}
+<style>
+	/* 「调用标签」那一列：点一下选中文字并复制 */
+	.copy-tag {
+		cursor: pointer;
+		padding: 2px 6px;
+		border-radius: 3px;
+		font-family: Consolas, Monaco, "Courier New", monospace;
+		font-size: 12px;
+		color: #5f6b7a;
+	}
+	.copy-tag:hover { background: #f2f6fc; color: #1e9fff; }
+</style>
+{/block}
+{block name="body"}
+<div class="p-3">
+	<form class="layui-form miucms-form-bar border-t border-x">
+		<div class="layui-input-inline" style="width:300px;">
+			<input type="text" name="keywords" placeholder="字段标识 / 字段名称" class="layui-input" />
+		</div>
+		<div class="layui-input-inline" style="width:150px">
+			<button class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="table-search"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+			<button type="reset" class="layui-btn layui-btn-reset" lay-filter="table-reset">清空</button>
+		</div>
+	</form>
+	<table class="layui-hide" id="custom" lay-filter="custom"></table>
+</div>
+
+<script type="text/html" id="status">
+	<i class="layui-icon {{#  if(d.status == 1){ }}layui-icon-ok{{#  } else { }}layui-icon-close{{#  } }}"></i>
+</script>
+<script type="text/html" id="copy">
+	<span class="copy-tag" title="点击复制">{literal}{miu:custom name='{{=d.name}}'/}{/literal}</span>
+</script>
+<script type="text/html" id="toolbarDemo">
+	<div class="layui-btn-container">
+		<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-color layui-btn-radius" lay-event="add">+ 添加自定义变量</button>
+	</div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['tool','tablePlus'],function(){
+		var table = layui.tablePlus, tool = layui.tool;
+
+		//搜索/清空由 tablePlus 全局处理（lay-filter="table-search" / "table-reset"），
+		//这里把实例挂到 layui.pageTable 上，搜索完和保存完（tool.sideClose）都会自动重载它
+		layui.pageTable = table.render({
+			elem: '#custom',
+			title: '自定义变量列表',
+			toolbar: '#toolbarDemo',
+			defaultToolbar: [],
+			url: "{:url('admin/custom/index')}",
+			page: true,
+			limit: 20,
+			cols: [
+				[
+					{ field: 'id', width: 80, title: 'ID编号', align: 'center' },
+					{ field: 'sort', width: 70, title: '排序', align: 'center',edit:true },
+					{ field: 'title', width: 180, title: '变量名称' ,edit:true},
+					{ field: 'default_value',  title: '变量值',edit:false},
+					{ field: 'type_title', width: 110, title: '变量类型', align: 'center' },
+					{ field: 'maxlength', width: 90, title: '最大长度', align: 'center' },
+					{  title: '调用标签',align: 'center',toolbar:'#copy' },
+					{ field: 'status', width: 80, title: '状态', templet: '#status', align: 'center' },
+					{
+						width: 190,
+						title: '操作',
+						align: 'center',
+						ignoreExport: true,
+						templet: function (d) {
+							var html = '<div class="layui-btn-group"><button class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">编辑</button><button class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</button>';
+							layui.$.each(d.list_actions || [], function (index, action) {
+								html += '<button class="layui-btn ' + layui.util.escape(action.class || 'layui-btn-primary') + ' layui-btn-xs" lay-event="' + layui.util.escape(action.event) + '">' + layui.util.escape(action.title) + '</button>';
+							});
+							return html + '</div>';
+						}
+					}
+				]
+			]
+		});
+
+		//「调用标签」：点一下选中文字并复制
+		layui.$(document).on('click', '.copy-tag', function () {
+			var el = this;
+			var text = (el.textContent || '').trim();
+
+			//先选中可见的文字（用户能看到选中效果）
+			var range = document.createRange();
+			range.selectNodeContents(el);
+			var sel = window.getSelection();
+			sel.removeAllRanges();
+			sel.addRange(range);
+
+			var ok = function () { layer.msg('已复制：' + text, { icon: 1, time: 1200 }); };
+			var fail = function () { layer.msg('复制失败，请手动选中后 Ctrl+C', { icon: 2 }); };
+
+			//能用新接口就用（https 或 localhost 下才有），否则退回复制「当前选中的内容」
+			if (navigator.clipboard && window.isSecureContext) {
+				navigator.clipboard.writeText(text).then(ok, fail);
+			} else {
+				try {
+					document.execCommand('copy') ? ok() : fail();
+				} catch (e) {
+					fail();
+				}
+			}
+		});
+
+		//表头工具栏事件
+		table.on('toolbar(custom)', function (obj) {
+			if (obj.event === 'add') {
+				tool.side("{:url('admin/custom/add')}", '60%');
+				return;
+			}
+		});
+		// 单元格编辑后的事件
+		table.on('edit(custom)', function(obj){
+			var field = obj.field; // 得到修改的字段
+			var value = obj.value // 得到修改后的值
+			var data = obj.data // 得到所在行所有键值
+			// 值的校验
+			if(value.replace(/\s/g, '') === ''){
+				layer.tips('值不能为空', this, {tips: 1});
+				return obj.reedit(); // 重新编辑 -- v2.8.0 新增
+			}
+			// 编辑后续操作，如提交更新请求，以完成真实的数据更新
+			tool.post("{:url('admin/custom/edit_field')}", { field: field,value:value,id:data.id }, function(data) {
+				layer.msg(data.msg);
+			});
+
+		});
+		//监听行工具事件
+		table.on('tool(custom)', function (obj) {
+			var data = obj.data;
+			if (obj.event === 'edit') {
+				tool.side("{:url('admin/custom/add')}?id=" + obj.data.id, '60%');
+				return;
+			}
+			if (obj.event === 'del') {
+				layer.confirm('确定要删除该变量吗？', {
+					icon: 3,
+					title: '提示'
+				}, function (index) {
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							obj.del();
+						}
+					}
+					tool.delete("{:url('admin/custom/delete')}", { id: data.id }, callback);
+					layer.close(index);
+				});
+			}
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

@@ -1,0 +1,5 @@
+<div class="document-tags">{miu:tag id='vo'}<a href="{$vo.url}">{$vo.title}</a>{/miu:tag}</div>
+<nav class="document-adjacent">
+    {miu:prenext id='vo' type='pre' titlelen='24'}<a class="{$vo.disclass}" href="{$vo.link}">{miu:lang key='previous' /}<strong>{$vo.title|default=''}</strong></a>{/miu:prenext}
+    {miu:prenext id='vo' type='next' titlelen='24'}<a class="{$vo.disclass}" href="{$vo.link}">{miu:lang key='next' /}<strong>{$vo.title|default=''}</strong></a>{/miu:prenext}
+</nav>

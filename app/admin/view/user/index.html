@@ -1,0 +1,195 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-3">
+	<form class="layui-form miucms-form-bar border-t border-x">
+		<div class="layui-inline" id="range">
+			<div class="layui-input-inline" style="width:100px;">
+				<input type="text" class="layui-input" id="start_time" readonly placeholder="注册开始时间" name="start_time">
+			</div>
+			<div class="layui-input-inline"> ~ </div>
+			<div class="layui-input-inline" style="width:100px;">
+				<input type="text" class="layui-input" id="end_time" readonly placeholder="注册结束时间" name="end_time">
+			</div>
+		</div>
+		<div class="layui-input-inline" style="width:300px;">
+			<input type="text" name="keywords" placeholder="昵称/真实姓名/手机号" class="layui-input" autocomplete="off" />
+		</div>
+		<div class="layui-input-inline" style="width:150px">
+			<button class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="table-search"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+			<button type="reset" class="layui-btn layui-btn-reset" lay-filter="table-reset">清空</button>
+		</div>
+	</form>
+	<table class="layui-hide" id="user" lay-filter="user"></table>
+</div>
+<script type="text/html" id="toolbarDemo">
+	<h3>用户列表</h3>
+</script>
+<script type="text/html" id="status">
+	<i class="layui-icon {{#  if(d.status == 1){ }}layui-icon-ok{{#  } else { }}layui-icon-close{{#  } }}"></i>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	layui.use(['tool','tablePlus'],function(){
+		var tool = layui.tool, table = layui.tablePlus, laydate = layui.laydate, form = layui.form;
+		laydate.render({
+			elem: '#range',
+			range: ['#start_time', '#end_time']
+		});
+
+		layui.pageTable = table.render({
+			elem: '#user',
+			title: '用户列表',
+			toolbar: '#toolbarDemo',
+			url: "{:url('admin/user/index')}", //数据接口
+			page: true, //开启分页
+			limit: 20,
+			height: 'full-83',
+			cols: [
+				[ //表头
+					{
+						field: 'id',
+						title: 'ID号',
+						align: 'center',
+						width: 90
+					}, {
+						field: 'headimgurl',
+						title: '头像',
+						align: 'center',
+						width: 60,
+						templet: function (d) {
+							var html = '<img src="' + tool.xss(d.headimgurl) + '"  onerror="javascript:this.src=\'{__ADMIN__}/images/default_avatar.png\';this.onerror=null;" width="30" height="30"/>';
+							return html;
+						}
+					}, {
+						field: 'username',
+						title: '用户名',
+						align: 'center',
+						width: 100
+					}, {
+						field: 'level_name',
+						title: '会员等级',
+						align: 'center',
+						width: 90
+					}, {
+						field: 'sex',
+						title: '性别',
+						align: 'center',
+						width: 60,
+						templet: function (d) {
+							var html = '-';
+							if (d.sex == 1) {
+								html = '男'
+							} else if (d.sex == 2) {
+								html = '女'
+							}
+							return html;
+						}
+					}, {
+						field: 'nickname',
+						title: '昵称',
+						align: 'center',
+						width: 100
+					}, {
+						field: 'name',
+						title: '真实姓名',
+						align: 'center',
+						width: 100
+					}, {
+						field: 'mobile',
+						title: '手机号码',
+						align: 'center',
+						width: 120
+					}, {
+						field: 'email',
+						title: '电子邮箱',
+						align: 'center',
+						minWidth: 150
+					}, {
+						field: 'register_time',
+						title: '注册时间',
+						align: 'center',
+						width: 150
+					}, {
+						field: 'status',
+						title: '状态',
+						toolbar: '#status',
+						align: 'center',
+						width: 60
+					}, {
+						field: 'right',
+						fixed: 'right',
+						title: '操作',
+						align: 'center',
+						ignoreExport:true,
+						width: 120,
+						templet:function(d){
+							let btn1 = '<span class="layui-btn layui-btn-xs" lay-event="edit">编辑</span>';
+							let btn2 = '<span class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">禁用</span>';
+							let btn3 = '<span class="layui-btn layui-btn-normal layui-btn-xs" lay-event="open">启用</span>';
+							if(d.status == 1){
+								return '<div class="layui-btn-group">'+btn1+btn2+'</div>';
+							}else{
+								return '<div class="layui-btn-group">'+btn1+btn3+'</div>';
+							}							
+						}
+					}
+				]
+			]
+		});
+
+		//监听行工具事件
+		table.on('tool(user)', function (obj) {
+			var data = obj.data;
+			if (obj.event === 'edit') {
+				tool.side("{:url('admin/user/edit')}?id=" + data.id,'80%');
+				return;
+			}
+			else if (obj.event === 'del') {
+				layer.confirm('您确定要禁用该用户', {
+					icon: 3,
+					title: '提示'
+				}, function (index) {
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layer.close(index);
+							layui.pageTable.reload()
+						}
+					}
+					tool.post("{:url('admin/user/disable')}", { id: data.id, status: 0 }, callback);
+					layer.close(index);
+				});
+			} else if (obj.event === 'open') {
+				layer.confirm('您确定要启用该用户', {
+					icon: 3,
+					title: '提示'
+				}, function (index) {
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layer.close(index);
+							layui.pageTable.reload()
+						}
+					}
+					tool.post("{:url('admin/user/disable')}", { id: data.id, status: 1 }, callback);
+					layer.close(index);
+				});
+			}
+		});
+		//监听搜索提交
+		form.on('submit(webform)', function (data) {
+			layui.pageTable.reload({
+				where: data.field,
+				page: {curr: 1}
+			});
+			return false;
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->

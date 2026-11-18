@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="miu-csrf" content="{:admin_csrf_token()}">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=0">
+{block name="meta"}
+	<link rel="mobile-prefetch" href=""/>
+{/block}
+{block name="title"}
+	<title>后台管理 - {:get_system_config('admin_title')} - miucms.com</title>
+{/block}
+{block name="keywords"}
+
+{/block}
+{block name="css"}
+ 	<link rel="stylesheet" href="{__ADMIN__}/css/miu.css?v={:CMS_VERSION}" media="all">
+{/block}
+{block name="style"}{/block}
+<script src="{__ADMIN__}/i18n.js"></script>
+{php}echo \app\services\PluginService::adminI18nScript();{/php}
+<script src="{__ADMIN__}/layui/layui.js?v={:LAYUI_VERSION}"></script>
+<script src="{__ADMIN__}/init.js?v={:CMS_VERSION}"></script>
+<script>window.MIU_ADMIN = "{$admin_prefix}";
+// 只向同源后台请求附加令牌，避免第三方地址获得令牌。
+$.ajaxPrefilter(function (options, original, xhr) {
+    var target = new URL(options.url, window.location.href);
+    if (target.origin === window.location.origin) xhr.setRequestHeader('X-Miu-Csrf', $('meta[name="miu-csrf"]').attr('content') || '');
+});
+</script>
+</head>
+<body class="main-body">
+	<!-- 主体 -->
+	{block name="body"}{/block}
+	<!-- /主体 -->
+
+	<!-- 底部 -->
+	{block name="footer"}{/block}
+	<!-- /底部 -->
+	
+	<!-- 脚本 -->
+	{block name="script"}
+	<script>
+		const moduleInit = ['tool'];
+		function init() {
+			console.log('初始化成功...');
+		}
+	</script>
+	{/block}
+	<!-- /脚本 -->
+	{block name="js"}
+
+	{/block}
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>米柚CMS安装</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<link rel="stylesheet" href="{__ADMIN__}/layui/css/layui.css" media="all">
+	<style>
+		body {
+			width: 100%;
+			height: 100%;
+			background-size: cover;
+			background: url("{__ADMIN__}/images/bg_pattern.png"), #7b4397;
+			background: url("{__ADMIN__}/images/bg_pattern.png"), -webkit-linear-gradient(to left, #34a853, #4285f4);
+			background: url("{__ADMIN__}/images/bg_pattern.png"), linear-gradient(to left, #34a853, #4285f4);
+		}
+		.install-check-pass { color: #16a085; }
+		.install-check-fail { color: #ff5722; }
+	</style>
+</head>
+
+<body>
+	<div style="width:200px;margin: 20px auto;"><img src="{__ADMIN__}/images/login_logo.png" alt="米柚CMS安装" width="200"></div>
+	<div style="width:888px;margin:0 auto 30px;">
+		<div class="layui-layout layui-layout-admin">
+			<div class="layui-header layui-bg-green" style="border-radius:6px 6px 0 0;position:relative;">
+				<div class="layui-logo" style="color: #fff; width:100px;">安装引导</div>
+				<ul class="layui-nav layui-layout-right">
+					<li class="layui-nav-item">版本：v{:CMS_VERSION}</li>
+				</ul>
+			</div>
+			<div style="padding:20px; background-color:#fff;line-height:27px; border-radius:0 0 6px 6px">
+				<h3>必需环境检测</h3>
+				<table class="layui-table" lay-skin="nob" lay-size="sm">
+					<colgroup>
+						<col width="170">
+						<col width="170">
+						<col width="360">
+						<col width="100">
+					</colgroup>
+					<thead>
+						<tr>
+							<th>检测项目</th>
+							<th>要求</th>
+							<th>当前配置</th>
+							<th>是否符合</th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ($environmentChecks as $check): ?>
+						<tr>
+							<td><?php echo htmlspecialchars((string) $check['name'], ENT_QUOTES, 'UTF-8'); ?></td>
+							<td><?php echo htmlspecialchars((string) $check['minimum'], ENT_QUOTES, 'UTF-8'); ?></td>
+							<td><?php echo htmlspecialchars((string) $check['current'], ENT_QUOTES, 'UTF-8'); ?></td>
+							<td class="<?php echo $check['ok'] ? 'install-check-pass' : 'install-check-fail'; ?>">
+								<i class="layui-icon <?php echo $check['ok'] ? 'layui-icon-ok' : 'layui-icon-close'; ?>"></i>
+							</td>
+						</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+
+				<h3>目录权限检测</h3>
+				<table class="layui-table" lay-skin="nob" lay-size="sm">
+					<colgroup>
+						<col width="180">
+						<col width="190">
+						<col width="400">
+						<col width="100">
+					</colgroup>
+					<thead>
+						<tr>
+							<th>目录或文件</th>
+							<th>要求</th>
+							<th>当前状态</th>
+							<th>是否符合</th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ($directoryChecks as $check): ?>
+						<tr>
+							<td><?php echo htmlspecialchars((string) $check['name'], ENT_QUOTES, 'UTF-8'); ?></td>
+							<td><?php echo htmlspecialchars((string) $check['minimum'], ENT_QUOTES, 'UTF-8'); ?></td>
+							<td><?php echo htmlspecialchars((string) $check['current'], ENT_QUOTES, 'UTF-8'); ?></td>
+							<td class="<?php echo $check['ok'] ? 'install-check-pass' : 'install-check-fail'; ?>">
+								<i class="layui-icon <?php echo $check['ok'] ? 'layui-icon-ok' : 'layui-icon-close'; ?>"></i>
+							</td>
+						</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+
+				<div style="margin:10px auto;width:190px;">
+					<a href="{$baseFile}?s=install/index/index" class="layui-btn layui-bg-cyan">上一步</a>
+					<a href="javascript:;" class="layui-btn layui-bg-blue" id="step2" data-can-continue="<?php echo $canContinue ? '1' : '0'; ?>">下一步</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="{__ADMIN__}/layui/layui.js" charset="utf-8"></script>
+	<script>
+		layui.use(['jquery', 'layer'], function () {
+			var $ = layui.jquery,
+				layer = layui.layer;
+			$('#step2').on('click', function () {
+				if ($(this).attr('data-can-continue') !== '1') {
+					layer.tips('请先处理上表中未通过的环境或目录权限项', this);
+					return;
+				}
+				location.href = '{$baseFile}?s=install/index/step3';
+			});
+		});
+	</script>
+</body>
+
+</html>

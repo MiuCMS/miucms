@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="{miu:locale name='current'/}">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>{miu:lang key='account.reset_title' /} - {miu:global name='site_name'/}</title>
+    {include file="head" /}
+    <link rel="stylesheet" href="/static/home/user/css/user.css" />
+    <script defer src="/static/home/user/js/user.js"></script>
+</head>
+<body data-page="member-reset-password">
+{include file="header" /}
+<main id="main" class="account-page">
+    <div class="account-layout">
+        <section class="account-story" aria-label="{miu:lang key='account.reset_aria' /}">
+            <div>
+                <p class="eyebrow">ACCOUNT SECURITY</p>
+                <h1>{miu:lang key='account.reset_hero' /}</h1>
+                <p>{miu:lang key='account.reset_hero_copy' /}</p>
+            </div>
+            <div class="account-story-note">{miu:lang key='account.reset_note' /}</div>
+        </section>
+        <section class="account-card" aria-labelledby="reset-title">
+            <h2 id="reset-title">{miu:lang key='account.reset_heading' /}</h2>
+            {if condition="$resetError neq ''"}
+            <p class="account-reset-error" role="status">{$resetError}</p>
+            <p class="account-foot"><a href="{:url_entry()}/forgot">{miu:lang key='account.request_reset_link' /}</a></p>
+            {else/}
+            <p class="account-card-intro">{miu:lang key='account.reset_intro' /}</p>
+            <form class="account-form" data-account-form action="{:url_entry()}/reset_submit" method="post" autocomplete="off" data-success-url="{:url_entry()}/login">
+                <input type="hidden" name="token" value="{$resetToken}" />
+                <div class="account-field account-float-field">
+                    <label for="reset-password">{miu:lang key='account.new_password' /}</label>
+                    <input id="reset-password" name="new_password" type="password" autocomplete="off" data-no-autofill minlength="6" maxlength="128" placeholder="{miu:lang key='account.password_min' /}" required />
+                </div>
+                <div class="account-field account-float-field">
+                    <label for="reset-password-confirm">{miu:lang key='account.confirm_new_password' /}</label>
+                    <input id="reset-password-confirm" name="new_password_confirm" type="password" autocomplete="off" data-no-autofill minlength="6" maxlength="128" placeholder="{miu:lang key='account.confirm_new_password_placeholder' /}" required />
+                </div>
+                <button class="button button-dark account-submit" type="submit">{miu:lang key='member.save_password' /} <span aria-hidden="true">→</span></button>
+                <p class="account-feedback" data-form-feedback role="status" aria-live="polite"></p>
+            </form>
+            {/if}
+        </section>
+    </div>
+</main>
+{include file="footer" /}
+</body>
+</html>

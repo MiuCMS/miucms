@@ -1,0 +1,93 @@
+{extend name="common/base"/}
+
+{block name="style"}
+<style>
+	.language-grid { margin-top: 8px; }
+	.language-option { min-height: 46px; padding: 10px 12px 4px 12px; border: 1px solid #eee; border-radius: 4px;position: relative; }
+	.language-code { color: #999; margin-left: 5px; font-size: 12px; }
+	.language-option { padding-right: 132px; }
+	.language-default { position: absolute; top: 6px; right: 6px; }
+	.language-default[hidden] { display: none; }
+</style>
+{/block}
+
+{block name="body"}
+<div class="layui-fluid">
+	<div class="layui-card">
+		<div class="layui-card-body" style="padding: 15px;">
+			<blockquote class="layui-elem-quote">
+					 启用前台模板多语言。<br/>勾选、取消勾选语言或点击“设置为默认语言”都会立即保存当前页配置；启用语言时会补建缺失的语言库示例文件。<br/>默认语言必须启用；简体中文非默认时可停用，中文原文及语言包仍保留用于翻译回退。修改默认语言后，请重新生成静态页面和 Sitemap。<br/>自动翻译功能开关和接口配置请到“插件 → AI翻译”设置。
+			</blockquote>
+			<form class="layui-form" lay-filter="multilanguage-form">
+				<input type="hidden" name="default_locale" value="{$defaultLocale}">
+				<div class="layui-row layui-col-space16 language-grid">
+					{volist name="languages" id="item"}
+					<div class="layui-col-xs12 layui-col-sm6 layui-col-md4 layui-col-xl3">
+						<div class="language-option">
+							<input type="checkbox" name="locales" value="{$item.code}" title="{$item.label}" lay-skin="primary" lay-filter="language-enabled" {eq name="item.enabled" value="1"}checked{/eq}>
+							<span class="language-code" style="position: relative;top: 9px;">{$item.code}</span>
+							<button type="button" class="layui-btn layui-btn-xs language-default {eq name='item.is_default' value='0'}layui-btn-normal{/eq}" data-locale="{$item.code}" {eq name="item.enabled" value="0"}hidden{/eq} {eq name="item.is_default" value="1"}disabled{/eq}>{eq name="item.is_default" value="1"}已默认{else/}设置为默认语言{/eq}</button>
+						</div>
+					</div>
+					{/volist}
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+{/block}
+
+{block name="script"}
+<script>
+layui.use(['form', 'tool'], function () {
+	var form = layui.form;
+	var tool = layui.tool;
+	var $default = $('input[name="default_locale"]');
+	var saving = false;
+	function selectedLocales() {
+		return $('input[name="locales"]:checked').map(function () { return $(this).val(); }).get();
+	}
+	var savedLocales = selectedLocales();
+	function renderDefault() {
+		$('input[name="locales"]').each(function () {
+			var $input = $(this);
+			var isDefault = $input.val() === $default.val();
+			$input.prop('disabled', saving || isDefault);
+			$input.closest('.language-option').find('.language-default').prop('hidden', !$input.prop('checked')).prop('disabled', saving || isDefault).toggleClass('layui-btn-normal', !isDefault).text(isDefault ? '已默认' : '设置为默认语言');
+		});
+		form.render('checkbox');
+	}
+	function saveConfig(defaultLocale) {
+		if (saving) return;
+		var locales = selectedLocales();
+		saving = true;
+		renderDefault();
+		tool.post(MIU_ADMIN + "/multilanguage/index", { locales: locales, default_locale: defaultLocale }, function (res) {
+			if (res.code === 0) {
+				savedLocales = locales;
+				$default.val(defaultLocale);
+				layer.msg(res.msg, { icon: 1 });
+			} else {
+				layer.alert(res.msg, { icon: 0 });
+			}
+		}, { error: function () {
+			layer.msg('请求失败，请稍后重试', { icon: 2 });
+		}, complete: function () {
+			//失败时使用上次保存成功的状态，不让页面显示未生效的配置。
+			$('input[name="locales"]').each(function () {
+				$(this).prop('checked', $.inArray($(this).val(), savedLocales) !== -1);
+			});
+			saving = false;
+			renderDefault();
+		} });
+	}
+	form.on('checkbox(language-enabled)', function () { saveConfig($default.val()); });
+	$('.language-default').on('click', function () {
+		var $button = $(this);
+		if (!$button.closest('.language-option').find('input[name="locales"]').prop('checked')) return;
+		saveConfig($button.attr('data-locale'));
+	});
+	renderDefault();
+});
+</script>
+{/block}

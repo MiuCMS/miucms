@@ -1,0 +1,49 @@
+.video-line-switcher{position:relative;z-index:5;margin:-5px 0 10px}
+.video-line-toggle{width:100%;min-height:42px;display:flex;align-items:center;gap:12px;padding:8px 12px;border:none;border-bottom:1px solid var(--line);background:var(--soft);color:var(--ink);font-size:13px;text-align:left;cursor:pointer;transition:border-color .2s,background .2s}
+.video-line-toggle:hover,.video-line-switcher.is-open .video-line-toggle{border-color:#c7c7c2;background:#fff}
+.video-line-toggle strong{margin-left:auto;overflow:hidden;color:var(--muted);font-size:12px;font-weight:500;text-overflow:ellipsis;white-space:nowrap}
+.video-line-chevron{width:8px;height:8px;flex:none;border-right:1px solid currentColor;border-bottom:1px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+.video-line-switcher.is-open .video-line-chevron{transform:rotate(225deg) translate(-2px,-1px)}
+.video-line-menu{position:absolute;top:calc(100% + 5px);left:0;right:0;max-height:240px;overflow:auto;padding:5px;background:#fff;border:1px solid var(--line);box-shadow:0 12px 28px #17181918}
+.video-line-option{width:100%;display:block;padding:9px 10px;border:0;background:transparent;color:#555;font-size:12px;text-align:left;cursor:pointer;transition:background .15s,color .15s}
+.video-line-option:hover,.video-line-option.is-current{background:var(--soft);color:var(--ink)}
+.video-line-option.is-current:after{content:attr(data-current-label);float:right;color:var(--muted);font-size:10px}
+.video-line-count{display:block;margin:0 0 8px;color:var(--muted);font-size:11px}
+.actual-video-player .dplayer-mount{position:absolute;inset:0;width:100%;height:100%}.actual-video-player .dplayer-mount .dplayer{width:100%;height:100%}
+.video-line-toggle:focus-visible,.video-line-option:focus-visible{outline:2px solid #d14a30;outline-offset:2px}
+.page-intro--video-detail h2[data-video-page-title]{max-width:800px;margin:0;font-size:clamp(30px,3.8vw,48px);font-weight:500;letter-spacing:-.05em;line-height:1.1}
+
+/* 桌面端分集栏占满播放器所在行，集数过多时在右栏内部滚动。 */
+.video-detail>.video-player{grid-column:1;grid-row:1;align-self:start}
+.video-detail>.episode-section{grid-column:2;grid-row:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.video-detail>.episode-section .episode-heading,.video-detail>.episode-section .video-line-switcher,.video-detail>.episode-section .video-line-count{flex:none}
+.video-detail>.episode-section .video-line-group:not([hidden]){display:flex;flex:1;flex-direction:column;min-height:0}
+.video-detail>.episode-section .video-line-group[hidden]{display:none!important}
+.video-detail>.episode-section .episode-list{flex:1;min-height:0;max-height:none;overflow-y:auto}
+.video-detail>.video-content{grid-column:1;grid-row:2;min-width:0}
+.video-detail>.news-pagination{grid-column:1/-1;grid-row:3}
+.video-detail>.watch-recommendations{grid-column:1/-1;grid-row:4;min-width:0}
+.video-detail>.watch-recommendations .compact-heading{margin-bottom:18px}
+.video-detail>.watch-recommendations .videos-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.video-detail>.watch-recommendations .video-info{min-height:0;padding:12px}
+.video-detail>.watch-recommendations .video-card-title{display:block;min-height:0;margin:0 0 4px;overflow:hidden;font-size:15px;line-height:1.4;text-overflow:ellipsis;white-space:nowrap}
+.video-detail>.watch-recommendations .video-card-summary{min-height:0;margin:0;font-size:12px;line-height:1.4;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden}
+.video-detail>.watch-recommendations .video-link{display:none}
+@media(max-width:900px){
+    .video-detail{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto auto}
+    .video-detail>.video-player{grid-column:1;grid-row:1}
+    .video-detail>.video-content{grid-column:1;grid-row:2}
+    .video-detail>.episode-section{grid-column:1;grid-row:3;overflow:visible}
+    .video-detail>.episode-section .video-line-group:not([hidden]),.video-detail>.episode-section .episode-list{flex:none;overflow:visible}
+    .video-detail>.news-pagination{grid-column:1;grid-row:4}
+    .video-detail>.watch-recommendations{grid-column:1;grid-row:5}
+    .video-detail>.watch-recommendations .videos-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+}
+
+/* 去掉集数编号节点后，缩略图和播放状态仍使用紧凑的三列布局。 */
+.video-detail>.episode-section .episode-list a.episode-select{grid-template-columns:52px minmax(0,1fr) 24px}
+.video-detail>.episode-section .episode-select .episode-current,.video-detail>.episode-section .episode-select .episode-open{grid-column:3}
+@media(max-width:900px){.video-detail>.episode-section .episode-list a.episode-select{grid-template-columns:88px minmax(0,1fr) 28px}}
+@media(max-width:740px){.video-detail>.episode-section .episode-list a.episode-select{grid-template-columns:64px minmax(0,1fr) 24px}}
+@media(max-width:740px){.page-intro--video-detail h2[data-video-page-title]{font-size:clamp(26px,7vw,34px);letter-spacing:-.04em}}
+@media(max-width:560px){.video-detail>.watch-recommendations .videos-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.video-detail>.watch-recommendations .video-info{padding:8px}.video-detail>.watch-recommendations .video-card-title{font-size:13px}.video-detail>.watch-recommendations .video-card-summary{font-size:11px}}

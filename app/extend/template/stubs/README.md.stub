@@ -1,0 +1,44 @@
+# MiuCMS 基础模板范例
+
+本目录由后台“创建模板”生成。先在模板列表启用，系统会把 static 资源发布到 public/skin/对应模板目录。继续在本目录维护源文件，再通过后台清理缓存同步资源；生成静态模式还需要重新生成页面。
+
+## 目录与页面
+
+- info.json：JSON 格式模板元信息，包含 name、title、version、minCmsVersion、description、author、authorUrl 和 type。
+- type：corporate（企业官网）、blog（博客站）、image（图片站）、video（视频站）、portal（资讯门户）；创建时选择，页面骨架会按类型生成。
+- head.html、header.html、footer.html：公共元信息、吸顶导航（搜索框默认收起，点放大镜按钮展开；含语言切换、会员登录）、页脚。
+- index.html：首页固定条数的小列表。
+- list_<模型标识>.html：按后台登记的 nid 生成，普通文档栏目使用当前栏目分页，不写死栏目 ID。
+- view_<模型标识>.html：文章、图集、产品、下载、招聘、专题、视频及自定义模型的详情范例。
+- list_single.html：单页栏目，正文使用后端合并的 doc/nav。
+- list_clue.html、form_fields.html：留言栏目及按实际字段 ID 展开的表单控件。
+- list_tag.html：控制器已经按标签筛选的文档列表。
+- search.html：控制器准备的搜索结果与分页。
+- card.html、document_body.html、gallery.html、detail_end.html：列表卡片、正文、图片集、标签与上下篇公共片段。
+- static/css/style.css、static/js/app.js：响应式基础样式、手机导航、分集播放交互。
+- lang/zh-cn.json、zh-hk.json、en.json：界面文案。语言启用与默认语言在后台“基础 → 国际化”设置。
+- TAG_EXAMPLES.md：全部 18 个内置自定义标签的调用示例，保留为文档，不会自动在前台执行。
+
+创建后可直接启用查看现有数据。页面无数据时显示空状态；不会自动创建栏目、文档、广告、自定义变量或留言表单，也不会替换当前启用的模板。
+
+## 修改方式
+
+1. 先看 TAG_EXAMPLES.md，再调整对应模型模板。id/name 含义相同，任选其一，默认 vo；内层数组遍历使用局部变量，避免覆盖外层 vo。
+2. 常用详情字段为 doc.title、doc.litpic、doc.content、doc.md_content、doc.top_navid。产品附加 price/buy_url，招聘附加 word_location 等。
+3. 图片集 doc.imgs、视频组 doc.videos 和下载资源 doc.downloads 已由后端整理成数组。下载按钮必须使用资源项 endpoint。
+4. 普通变量保持默认 HTML 转义。仅可信的正文 HTML 使用 raw；JSON、URL、HTML 属性不共用一套转义规则。
+5. CSS 首部的变量统一控制主色、内容宽度和间距；资源引用不额外拼接版本参数。
+
+首页、详情页没有分页上下文，list 用 limit；普通栏目页用 pagesize + pagelist。不要把首页写法直接用于栏目页的侧栏并假定 limit 生效。
+
+## 视频与下载
+
+视频页使用系统公共资源 /static/home/dplayer/hls.min.js、dplayer.js，支持 HTML5、DPlayer 与 HLS；自动播放仍受浏览器策略限制，外部媒体还需要正确的跨域配置。
+
+下载经后端入口处理。当前系统的会员、付费等下载授权接入情况，以实际后端实现为准，隐藏原始地址不等于完成付费保护。
+
+专题节点中的文档通过带缓存的后端帮助函数读取，范例只展示正常、公开、免费的文档。自定义权限规则仍应在后端执行。
+
+单页、留言主要走栏目地址；虽然也提供对应 view 文件作为通用范例，通常使用的是 list_single/list_clue。
+
+模板使用网站现有内容与资源，不依赖外部字体和图片。发布前根据实际内容补齐文案、检查展示与交互，并保留页脚 Power by MiuCMS 版权标识。

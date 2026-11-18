@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="{miu:locale /}">
+<head>{include file="head" /}</head>
+<body>
+{include file="header" /}
+<main id="main" class="section container">
+    {miu:position /}
+    <header class="document-heading"><h1>{$doc.title}</h1><p>{$doc.title_ext_1|default=''}</p></header>
+    {include file="gallery" /}
+    <article class="reading-layout">{include file="document_body" /}</article>
+    {include file="detail_end" /}
+</main>
+{include file="footer" /}
+</body>
+</html>

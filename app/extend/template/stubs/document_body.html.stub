@@ -1,0 +1,7 @@
+<div class="document-body">
+{if condition="$editor eq '2'"}
+{miu:markdown value='$doc.md_content' /}
+{else/}
+{$doc.content|default=''|raw}
+{/if}
+</div>

@@ -1,0 +1,330 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<style>
+	body{background: #fff;}
+	.layui-card{padding-bottom: 50px;}
+	.layui-form-item{margin-bottom: 20px;}
+	.adv-type-tag{display:inline-block;padding:1px 6px;margin-right:6px;border-radius:3px;
+		font-size:12px;line-height:18px;background:#eaf5ff;color:#1e9fff;vertical-align:middle;}
+	.adv-content-cell{display:flex;align-items:center;gap:8px;min-width:0;}
+	.adv-content-thumb{flex:0 0 36px;width:36px;height:36px;border:1px solid #eee;border-radius:3px;
+		overflow:hidden;background:#fafafa;}
+	.adv-content-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+	.adv-content-text{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+		color:#666;font-size:13px;}
+	/* 轮播图：一行摆几张缩略图，点哪张就从哪张开始预览整行 */
+	.adv-content-imgs{display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden;}
+	.adv-content-img{width:36px;height:36px;object-fit:cover;display:block;cursor:zoom-in;
+		border:1px solid #eee;border-radius:3px;background:#fafafa;}
+	.adv-content-img:hover{border-color:#1e9fff;}
+	/* 超过 5 张的：藏起来不显示，但点图预览时仍然算在内 */
+	.adv-content-img.adv-img-hide{display:none;}
+	.adv-content-img2{width:auto;height:36px;object-fit:cover;display:block;
+		border-radius:3px;background:#fafafa;}
+	.adv-content-more{flex:0 0 auto;color:#999;font-size:14px;line-height:1;}
+	/* 这一列有图片时，单元格默认的固定高（38px）装不下 36px 的图，得放开 */
+	.layui-table-cell.adv-cell-imgs{height:auto;min-height:38px;padding-top:6px;padding-bottom:6px;overflow:visible;}
+	.adv-tag-help{margin-top:12px;padding:10px 12px;background:#f7f8fa;border:1px solid #eee;border-radius:4px;
+		color:#666;font-size:12px;line-height:1.9;}
+	.adv-tag-help p{margin:0 0 4px;}
+	.adv-tag-help code{padding:1px 4px;border-radius:2px;background:#fff;color:#1e9fff;}
+</style>
+<div class="p-3">
+	<form class="layui-form miucms-form-bar border-t border-x">
+		<div class="layui-input-inline" style="width:300px;">
+			<input type="text" name="keywords" placeholder="ID/标题/标识/备注" class="layui-input" />
+		</div>
+		<div class="layui-input-inline" style="width:150px">
+			<button class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="table-search"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+			<button type="reset" class="layui-btn layui-btn-reset" lay-filter="table-reset">清空</button>
+		</div>
+	</form>
+	<table class="layui-hide" id="adv" lay-filter="adv"></table>
+</div>
+
+<script type="text/html" id="status">
+	<i class="layui-icon {{#  if(d.status == 1){ }}layui-icon-ok{{#  } else { }}layui-icon-close{{#  } }}"></i>
+</script>
+<script type="text/html" id="toolbarDemo">
+	<div class="layui-btn-container">
+	<button class="layui-btn layui-btn-sm layui-btn-color layui-btn-radius" lay-event="add">+ 添加广告</button>
+  </div>
+</script>
+<script type="text/html" id="barDemo">
+<div class="layui-btn-group">
+	<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">编辑</a>
+	<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+	<a class="layui-btn layui-btn-xs" lay-event="label">调用标签</a>
+</div>
+</script>
+<!-- 内容列：轮播图显示前 5 张（多的用省略号），其余类型显示缩略图 + 摘要 -->
+<script type="text/html" id="contentTpl">
+	{{# if(d.type == 1 && d.content_images && d.content_images.length){ }}
+	<div class="adv-content-imgs">
+		{{# for(var i = 0; i < d.content_images.length; i++){ }}
+		<img class="adv-content-img{{ i > 4 ? ' adv-img-hide' : '' }}" src="{{ d.content_images[i].src }}" alt="{{ d.content_images[i].alt || '' }}">
+		{{# } }}
+		{{# if(d.content_images.length > 5){ }}
+		<span class="adv-content-more" title="共 {{ d.content_images.length }} 张">…</span>
+		{{# } }}
+		<span class="adv-content-more">共 {{ d.content_images.length }} 张</span>
+	</div>
+	{{# } }}
+	{{# if(d.type == 2){ }}
+	<div class="adv-content-cell">
+		<div class="adv-content-imgs">
+			<img class="adv-content-img2" src="{__ADMIN__}/images/media.jpg" title="多媒体">
+		</div>
+	</div>
+	{{# } }}
+	{{# if(d.type == 3){ }}
+	<div class="adv-content-cell">
+		<div class="adv-content-imgs">
+			<img class="adv-content-img2" src="{__ADMIN__}/images/html.jpg" title="HTML代码">
+		</div>
+	</div>
+	{{# } }}
+</script>
+<script type="text/html" id="typeTpl">
+		{{# if(d.type==1){ }}
+			<span class="adv-type-tag">轮播图</span>
+		{{# } }}
+		{{# if(d.type==2){ }}
+			<span class="adv-type-tag">多媒体</span>
+		{{# } }}
+		{{# if(d.type==3){ }}
+			<span class="adv-type-tag">HTML代码</span>
+		{{# } }}
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+//JavaScript 调用地址的前缀：动态地址，不随后台的伪静态/静态规则变
+var ADV_JS_BASE = '{$adv_js_base}';
+{literal}
+//按广告类型生成「调用标签」的代码
+function advTagCode(mark, type) {
+	var open = "{miu:adv mark='" + mark + "' id='vo' key='index' active='active' empty='暂无广告'}";
+	var close = "{/miu:adv}";
+	if (type == 2) {
+		return open + "\n<video src=\"{$vo.media_url}\" controls preload=\"metadata\"></video>\n" + close;
+	}
+	if (type == 3) {
+		return open + "{$vo.html|raw}" + close;
+	}
+	return open
+		+ "\n<a href=\"{$vo.url}\"{$vo.target}>"
+		+ "<img src=\"{$vo.src}\" alt=\"{$vo.title}\"></a>"
+		+ "\n<div>{$vo.desc|raw}</div>"
+		+ "\n" + close;
+}
+
+//显示此标签支持的全部参数和当前广告类型可用字段。
+function advTagHelp(type) {
+	var html = '<div class="adv-tag-help">'
+		+ '<p><b>标签参数</b>：<code>mark</code> 必填，填写广告标识；<code>id</code> 循环数据变量名（默认 vo），也可用 <code>name</code>；'
+		+ '<code>key</code> 序号变量名（默认 index，从 1 开始）；<code>active</code> 第一条的高亮值（默认 active，其余条为空）；'
+		+ '<code>empty</code> 无广告时输出的内容（默认不输出）。</p>'
+		+ '<p><b>循环变量</b>：<code>{$index}</code> 当前序号；<code>{$vo.active}</code> 第一条输出 active 值。</p>';
+	if (type == 1) {
+		html += '<p><b>轮播图片字段</b>：<code>{$vo.src}</code> 图片地址、<code>{$vo.title}</code> 图片标题、'
+			+ '<code>{$vo.desc|raw}</code> 图片注释 HTML、<code>{$vo.url}</code> 跳转链接、<code>{$vo.target}</code> 新窗口属性片段（含前后空格的 target="_blank"/空；由程序生成并由默认过滤器安全放行）。</p>'
+			+ '<p><b>兼容字段</b>：<code>{$vo.img_src}</code>、<code>{$vo.img_title}</code>、<code>{$vo.img_desc|raw}</code>、'
+			+ '<code>{$vo.img_url}</code>、<code>{$vo.img_target}</code>。标题和注释优先显示当前语言译文，缺少译文时显示原文。</p>';
+	} else if (type == 2) {
+		html += '<p><b>多媒体字段</b>：<code>{$vo.media_url}</code> 多媒体地址。</p>';
+	} else if (type == 3) {
+		html += '<p><b>HTML代码字段</b>：<code>{$vo.html|raw}</code> 广告 HTML 内容（原样输出）。</p>';
+	}
+	return html + '</div>';
+}
+
+//按广告id生成 JavaScript 调用代码（src 指向前台 /home/api/adv，输出 document.write）
+function advJsCode(id, row) {
+	return '<script type="text/javascript" src="' + ADV_JS_BASE + '?id=' + id + '&row=' + row + '"><\/script>';
+}
+{/literal}
+</script>
+<script>
+	layui.use(['tool','table'],function(){
+		var table = layui.table,tool = layui.tool, form = layui.form, layer = layui.miulayer, $ = layui.jquery;
+		layui.pageTable = table.render({
+			elem: '#adv',
+			title: '广告列表',
+			toolbar: '#toolbarDemo',
+			defaultToolbar:[],
+			lineStyle: 'height: 95px;',
+			url: '{:url("admin/adv/index")}', //数据接口
+			page: true, //开启分页
+			limit: 20,
+			//内容列渲染出图片后给它加个标记，CSS 里靠它把单元格的固定高放开
+			done: function () {
+				$('.adv-content-imgs').closest('.layui-table-cell').addClass('adv-cell-imgs');
+			},
+			cols: [
+				[
+					{
+						field: 'id',
+						title: 'ID号',
+						align: 'center',
+						width: 80
+					}, {
+						field: 'title',
+						title: '标题',
+						width: 200
+					}, {
+						field: 'mark',
+						title: '广告标识',
+						align: 'center',
+						width: 150
+					}, {
+						field: 'type',
+						title: '广告类型',
+						align: 'center',
+						width: 150,
+						toolbar: '#typeTpl'
+					}, {
+						field: 'content',
+						title: '广告内容',
+						toolbar: '#contentTpl'
+					}, {
+						field: 'status',
+						title: '状态',
+						toolbar: '#status',
+						align: 'center',
+						width: 80
+					}, {
+						field: 'right',
+						title: '操作',
+						toolbar: '#barDemo',
+						width: 150,
+						align: 'center'
+					}
+				]
+			]
+		});
+
+		//内容列里点图片：预览这一行的所有图片（不只显示出来的那 5 张），点哪张从哪张开始
+		$(document).on('click', '.adv-content-img', function () {
+			var $all = $(this).closest('.adv-content-imgs').find('.adv-content-img');
+			var imgs = [];
+			$all.each(function () {
+				imgs.push({src: $(this).attr('src'), alt: $(this).attr('alt') || ''});
+			});
+			if (imgs.length) {
+				layer.photos({photos: {data: imgs, start: $all.index(this)}, anim: 5});
+			}
+		});
+
+		//复制某段代码到剪贴板（弹层里两个「复制」按钮共用）
+		function copyToClip(id, text, index, closeIt) {
+			var el = document.getElementById(id);
+			if (el) {
+				el.select();
+				if (el.setSelectionRange) { el.setSelectionRange(0, 99999); }
+			}
+			var done = function () {
+				layer.msg('已复制到剪贴板');
+				if (closeIt) { layer.close(index); }
+			};
+			if (navigator.clipboard && navigator.clipboard.writeText) {
+				navigator.clipboard.writeText(text).then(done, function () {
+					document.execCommand('copy');
+					done();
+				});
+			} else {
+				document.execCommand('copy');
+				done();
+			}
+		}
+
+		//表头工具栏事件
+		table.on('toolbar(adv)', function (obj) {
+			if (obj.event === 'add') {
+				tool.side('{:url("admin/adv/add")}', '80%');
+				return;
+			}
+		});
+		//监听行工具事件
+		table.on('tool(adv)', function (obj) {
+			var data = obj.data;
+			if (obj.event === 'edit') {
+				tool.side('{:url("admin/adv/add")}?id=' + obj.data.id, '80%');
+				return;
+			}
+			if (obj.event === 'del') {
+				layer.confirm('确定删除该广告吗？', {
+					icon: 3,
+					title: '提示'
+				}, function (index) {
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							obj.del();
+						}
+					}
+					tool.delete('{:url("admin/adv/delete")}', { id: data.id }, callback);
+					layer.close(index);
+				});
+				return;
+			}
+			if (obj.event === 'label') {
+				//弹层里给两段可直接粘走的代码：模板标签 + JavaScript 引用
+				var code   = advTagCode(data.mark, data.type);
+				//row 用这条广告的条数（轮播图就是图片张数），取不到就退成 1
+				var jsCode = advJsCode(data.id, data.content_count || 1);
+				//高度自适应：内容多了撑高，超过 520px 就出滚动条
+				var html = '<div style="padding:16px 20px;max-height:520px;overflow-y:auto;box-sizing:border-box;">'
+					+ '<div style="color:#666;margin-bottom:6px;">标签调用：</div>'
+					+ '<textarea id="advTagCode" readonly style="width:96%;height:150px;font-family:Consolas,Monaco,monospace;'
+					+ 'font-size:13px;line-height:1.7;padding:8px;border:1px solid #e6e6e6;border-radius:4px;resize:none;">'
+					+ layui.util.escape(code) + '</textarea>'
+					+ advTagHelp(data.type)
+					+ '<div style="color:#666;margin:12px 0 6px;">JavaScript调用：</div>'
+					+ '<input id="advJsCode" type="text" readonly value="' + layui.util.escape(jsCode) + '"'
+					+ ' style="width:100%;height:34px;font-family:Consolas,Monaco,monospace;font-size:13px;'
+					+ 'padding:0 8px;border:1px solid #e6e6e6;border-radius:4px;box-sizing:border-box;">'
+					+ '<div style="color:#999;font-size:12px;margin-top:6px;">广告：'
+					+ layui.util.escape(data.title || '') + '（标识 ' + layui.util.escape(data.mark || '') + '）</div>'
+					+ '</div>';
+				layer.open({
+					type: 1,
+					title: '代码调用',
+					area: ['660px', 'auto'],
+					shadeClose: true,
+					btn: ['复制标签', '复制JavaScript', '关闭'],
+					btnAlign: 'c',
+					content: html,
+					//复制标签代码
+					yes: function (index) {
+						copyToClip('advTagCode', code, index, true);
+					},
+					//复制 JS 代码（返回 false 让弹层别关）
+					btn2: function (index) {
+						copyToClip('advJsCode', jsCode, index, false);
+						layer.close(index);
+					},
+					btn3: function (index) {
+						layer.close(index);
+					}
+				});
+				return;
+			}
+		});
+
+		//监听搜索提交
+		form.on('submit(webform)', function (data) {
+			layui.pageTable.reload({
+				where: data.field,
+				page: {curr: 1}
+			});
+			return false;
+		});
+	})
+</script>
+{/block}
+<!-- /脚本 -->
