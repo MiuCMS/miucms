@@ -17,7 +17,11 @@ class Comment extends TagLib
         return <<<'PHP'
 <?php
 if (class_exists(\plugins\miu_comment\taglib\Comment::class)) {
-    echo \plugins\miu_comment\taglib\Comment::render((int) ($doc['id'] ?? 0));
+    if (method_exists(\plugins\miu_comment\taglib\Comment::class, 'renderPage')) {
+        echo \plugins\miu_comment\taglib\Comment::renderPage((array) ($doc ?? []), (array) ($nav ?? []), (string) ($nid ?? ''), (string) ($page_og_type ?? ''));
+    } else {
+        echo \plugins\miu_comment\taglib\Comment::render((int) ($doc['id'] ?? 0));
+    }
 }
 ?>
 PHP;

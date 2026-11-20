@@ -74,6 +74,14 @@ abstract class BaseController
         );
     }
 
+    protected function requireRequestMethod(string $method = 'POST'): void
+    {
+        // 请求方法覆盖不能替代实际发送的 HTTP 方法。
+        if ($this->request->method(true) !== $method || $this->request->method() !== $method) {
+            to_assign(1, '请使用 ' . $method . ' 请求', [], '', 405, ['Allow' => $method]);
+        }
+    }
+
     //
     // 以下为新增，为了使用旧版的 success error redirect 跳转  start
     //

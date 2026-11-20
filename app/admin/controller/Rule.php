@@ -34,6 +34,7 @@ class Rule extends BaseController
     {
         $param = get_params();
         if (request()->isAjax()) {
+            $this->requireRequestMethod();
 			$param['src'] = preg_replace('# #','',$param['src']);
             if ($param['id'] > 0) {
                 try {
@@ -103,6 +104,7 @@ class Rule extends BaseController
     //修改排序
     public function edit_field()
     {
+        $this->requireRequestMethod();
         $param = get_params();
         if (request()->isAjax()) {
             $field=$param['field'];

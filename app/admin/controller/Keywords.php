@@ -119,6 +119,7 @@ class Keywords extends BaseController
     {
         $param = get_params();
         if (request()->isAjax()) {
+            $this->requireRequestMethod();
             $translations = is_array($param['translations'] ?? null) ? $param['translations'] : [];
             unset($param['translations']);
             //分组下拉里的「未分组」提交上来是空字符串，落库得变成 0，否则 int 字段会报错
@@ -261,6 +262,7 @@ class Keywords extends BaseController
      */
     public function move()
     {
+        $this->requireRequestMethod();
         if (!request()->isAjax()) {
             return to_assign(1, '错误的请求');
         }
@@ -299,6 +301,7 @@ class Keywords extends BaseController
      */
     public function edit_field()
     {
+        $this->requireRequestMethod();
         if (!request()->isAjax()) {
             return to_assign(1, '错误的请求');
         }
@@ -447,6 +450,7 @@ class Keywords extends BaseController
     {
         $param = get_params();
         if (request()->isAjax()) {
+            $this->requireRequestMethod();
             $param['title'] = trim((string) ($param['title'] ?? ''));
             if ($param['title'] === '') {
                 return to_assign(1, '分组名称不能为空');

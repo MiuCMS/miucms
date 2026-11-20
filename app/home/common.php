@@ -1102,6 +1102,7 @@ function miu_nav_error(string $message, string $id = 'vo', string $key = 'index'
  */
 function miu_nav_list(int $pid, string $order = 'sort', string $sort = 'asc', string $limit = '', int $titlelen = 0, string $notnavid = '', string $navid = '', bool $includeHidden = false, bool $preserveNavidOrder = false, string $modelNid = ''): array
 {
+    $modelNids = $modelNid === '' ? [] : array_values(array_unique(array_map('trim', explode(',', $modelNid))));
     //要排除的栏目id
     $notIds = [];
     if ($notnavid !== '') {
@@ -1127,7 +1128,7 @@ function miu_nav_list(int $pid, string $order = 'sort', string $sort = 'asc', st
         } elseif ((int) $item['pid'] !== $pid) {
             continue;
         }
-        if ($modelNid !== '' && (string) ($item['nid'] ?? '') !== $modelNid) {
+        if ($modelNids && !in_array((string) ($item['nid'] ?? ''), $modelNids, true)) {
             continue;
         }
 
@@ -1331,6 +1332,7 @@ function miu_doc_flags(string $flag): array
  *   pagesize 每页显示条数，默认 10；列表页未填写 limit 时生效
  *   titlelen 标题截断长度，0 = 不截断
  *   flag     文章属性字母，多个用英文逗号隔开
+ *   includehidden  是否包含隐藏栏目下的文档，默认 0
  * @return array
  */
 function miu_list(array $opt = []): array
@@ -1344,6 +1346,7 @@ function miu_list(array $opt = []): array
     $pagesize = (int) ($opt['pagesize'] ?? 0);
     $flag     = trim((string) ($opt['flag'] ?? ''));
     $titlelen = (int) ($opt['titlelen'] ?? 0);
+    $includeHidden = (string) ($opt['includehidden'] ?? '0') === '1';
 
     if ($order === '') {
         $order = 'sort';
@@ -1418,6 +1421,7 @@ function miu_list(array $opt = []): array
     $keyword   = '';    //关键词（搜索页才有）
     $navIds    = null;  //限定的栏目id（含子栏目）；null = 不限栏目
     $channelId = 0;     //限定的模型id；0 = 不限模型
+    $channelIds = [];   //nid 显式指定一个或多个内容模型时使用
 
     if (!empty($search)) {
         //在搜索页上用本标签出「搜索结果」时，条件要跟控制器那次搜索保持一致：
@@ -1447,10 +1451,12 @@ function miu_list(array $opt = []): array
         }
         $navIds = $ids;
     } elseif ($modelNid !== '') {
-        //显式指定模型标识时不套用当前栏目
-        $channelIds = \think\facade\Db::name('channel')->where('nid', $modelNid)->column('id');
-        $channelId = (int) ($channelIds[0] ?? 0);
-        if ($channelId <= 0) {
+        //显式指定一个或多个模型标识时不套用当前栏目
+        $modelNids = array_values(array_unique(array_map('trim', explode(',', $modelNid))));
+        $channelIds = array_map('intval', \think\facade\Db::name('channel')->whereIn('nid', $modelNids)->column('id'));
+        $channelIds = array_values(array_filter($channelIds, static fn($id) => $id > 0));
+        sort($channelIds);
+        if (!$channelIds) {
             return [];
         }
     } elseif ($mid > 0) {
@@ -1460,7 +1466,7 @@ function miu_list(array $opt = []): array
         //当前栏目（含子栏目）
         $navIds = miu_nav_ids_with_children($curNavId);
     }
-    //首页 + 没写 navid/mid/nid：都不限，就是所有栏目的文档
+    //首页不写 navid/mid/nid 时，从全站查询，是否包含隐藏栏目由 includehidden 决定。
 
     // ---------------- 缓存 ----------------
     //搜索页不缓存：搜索结果是长尾 —— 每个「关键词 + 栏目 + 模型 + 页码」组合都是一个新 key，
@@ -1473,7 +1479,8 @@ function miu_list(array $opt = []): array
         'locale'  => \app\home\service\ContentI18n::locale(),
         'keyword' => $keyword,
         'navids'  => $navIds,
-        'channel' => $channelId,
+        'includehidden' => $includeHidden,
+        'channel' => $channelIds ?: $channelId,
         'order'   => $order,
         'sort'    => $sort,
         'flag'    => $flag,
@@ -1487,6 +1494,9 @@ function miu_list(array $opt = []): array
         $query = \think\facade\Db::name('document')
             ->where('is_del', 0)
             ->where('status', 1)->where('arcrank', '>=', 0);
+        if (!$includeHidden) {
+            miu_exclude_hidden_nav_documents($query);
+        }
 
         if ($keyword !== '') {
             //标题 或 SEO描述 里包含关键词（跟 Search::index() 里的条件一致）
@@ -1503,7 +1513,9 @@ function miu_list(array $opt = []): array
         if ($navIds !== null) {
             $query->whereIn('nav_id', $navIds);
         }
-        if ($channelId > 0) {
+        if ($channelIds) {
+            $query->whereIn('channel_id', $channelIds);
+        } elseif ($channelId > 0) {
             $query->where('channel_id', $channelId);
         }
 
@@ -1550,6 +1562,9 @@ function miu_list(array $opt = []): array
             //必须用 Cache::tag() 存：后台清的是「标签」（Cache::clear($tag)），
             //不打 tag 存的话 clear_cache('Document') 清不掉
             $cacheTags = ['Document'];
+            if (!$includeHidden) {
+                $cacheTags[] = 'homeNav';
+            }
             if ($navIds !== null) {
                 $tagIds = [];
                 if ($navid !== '') {
@@ -1563,6 +1578,10 @@ function miu_list(array $opt = []): array
                 }
                 foreach ($tagIds as $nid) {
                     $cacheTags[] = 'docNav' . $nid;
+                }
+            } elseif ($channelIds) {
+                foreach ($channelIds as $cacheChannelId) {
+                    $cacheTags[] = 'docMid' . $cacheChannelId;
                 }
             } elseif ($channelId > 0) {
                 $cacheTags[] = 'docMid' . $channelId;
@@ -3381,6 +3400,25 @@ function miu_render_nav_list(int $navId, int $page = 1)
     ]);
 }
 
+/** 按文档所属栏目的隐藏状态过滤。 */
+function miu_exclude_hidden_nav_documents(\think\db\Query $query): \think\db\Query
+{
+    return $query->whereNotIn('nav_id', static function ($navQuery) {
+        $navQuery->name('nav')->where('is_show', 1)->field('id');
+    });
+}
+
+/** 标签页列表和分页使用同一套文档筛选条件。 */
+function miu_tag_document_query(int $tagId): \think\db\Query
+{
+    $query = \think\facade\Db::name('document')
+        ->where('is_del', 0)
+        ->where('status', 1)
+        ->where('arcrank', '>=', 0)
+        ->where('tag_ids', 'like', '%,' . $tagId . ',%');
+    return miu_exclude_hidden_nav_documents($query);
+}
+
 /**
  * 渲染一个标签列表页（前台访问和静态生成共用）
  *
@@ -3423,21 +3461,18 @@ function miu_render_tag_list(int $tagId, int $page = 1, ?array $tag = null)
         $pageSize = 20;
     }
 
-    //缓存只存原始行和总数；后台文档增删改会清理 Document 标签。
-    $cacheKey = 'public_v2_tagDocList_' . md5(\app\home\service\ContentI18n::locale() . '_' . $tagId . '_' . $page . '_' . $pageSize);
+    //栏目隐藏状态变化时，随 homeNav 一起清理标签页缓存。
+    $cacheKey = 'public_v3_tagDocList_' . md5(\app\home\service\ContentI18n::locale() . '_' . $tagId . '_' . $page . '_' . $pageSize);
     $cached   = get_cache($cacheKey);
     if (!is_array($cached) || !array_key_exists('rows', $cached)) {
-        $query = \think\facade\Db::name('document')
-            ->where('is_del', 0)
-            ->where('status', 1)->where('arcrank', '>=', 0)
-            ->where('tag_ids', 'like', '%,' . $tagId . ',%');
+        $query = miu_tag_document_query($tagId);
 
         $total = (clone $query)->count();
         $rows  = miu_doc_merge_extras(
             $query->order('is_top desc, id desc')->page($page, $pageSize)->select()->toArray()
         );
         $cached = ['rows' => $rows, 'total' => $total];
-        \think\facade\Cache::tag(['Document', 'docTag' . $tagId])->set($cacheKey, $cached, 86400);
+        \think\facade\Cache::tag(['Document', 'docTag' . $tagId, 'homeNav'])->set($cacheKey, $cached, 86400);
     }
 
     $list = [];
@@ -3505,15 +3540,11 @@ function miu_tag_list_page_count(int $tagId): int
         $pageSize = 20;
     }
 
-    $cacheKey = 'public_v2_tagDocCount_' . $tagId;
+    $cacheKey = 'public_v3_tagDocCount_' . $tagId;
     $total    = get_cache($cacheKey);
     if (!is_numeric($total)) {
-        $total = \think\facade\Db::name('document')
-            ->where('is_del', 0)
-            ->where('status', 1)->where('arcrank', '>=', 0)
-            ->where('tag_ids', 'like', '%,' . $tagId . ',%')
-            ->count();
-        \think\facade\Cache::tag(['Document', 'docTag' . $tagId])->set($cacheKey, (int) $total, 86400);
+        $total = miu_tag_document_query($tagId)->count();
+        \think\facade\Cache::tag(['Document', 'docTag' . $tagId, 'homeNav'])->set($cacheKey, (int) $total, 86400);
     }
 
     return max(1, (int) ceil((int) $total / $pageSize));

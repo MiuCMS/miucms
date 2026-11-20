@@ -129,6 +129,7 @@ class Seo extends BaseController
         $param = get_params();
 
         if (request()->isAjax()) {
+            $this->requireRequestMethod();
             $result = $this->buildConfig(is_array($param) ? $param : []);
             if (isset($result['error'])) {
                 return to_assign(1, $result['error']);

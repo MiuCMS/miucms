@@ -41,6 +41,7 @@ class Role extends BaseController
     {
         $param = get_params();
         if (request()->isAjax()) {
+            $this->requireRequestMethod();
             $ruleData = isset($param['rule']) ? $param['rule'] : 0;
             $param['rules'] = implode(',', $ruleData);
             if (!empty($param['id']) && $param['id'] > 0) {

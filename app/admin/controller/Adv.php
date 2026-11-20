@@ -99,6 +99,7 @@ class Adv extends BaseController
         $param = get_params();
 
         if (request()->isAjax()) {
+            $this->requireRequestMethod();
             $isEdit = !empty($param['id']) && $param['id'] > 0;
 
             try {

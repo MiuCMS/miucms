@@ -73,6 +73,7 @@ class Nav extends BaseController
     {
         $param = get_params();
         if (request()->isAjax()) {
+            $this->requireRequestMethod();
             $translations = is_array($param['translations'] ?? null) ? $param['translations'] : [];
             unset($param['translations']);
             try {
@@ -130,6 +131,7 @@ class Nav extends BaseController
     {
         $param = get_params();
         if (request()->isAjax()) {
+            $this->requireRequestMethod();
             $translations = is_array($param['translations'] ?? null) ? $param['translations'] : [];
             unset($param['translations']);
             $navId = (int) ($param['id'] ?? 0);
@@ -205,6 +207,7 @@ class Nav extends BaseController
     {
         $param = get_params();
         if (request()->isAjax()) {
+            $this->requireRequestMethod();
             $docId = filter_var($param['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
             if ($docId === false) {
                 return to_assign(1, '参数错误');
@@ -492,6 +495,7 @@ class Nav extends BaseController
     //修改字段
     public function edit_field()
     {
+        $this->requireRequestMethod();
         $param = get_params();
         if (request()->isAjax()) {
             $field=$param['field'];

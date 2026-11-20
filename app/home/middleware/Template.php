@@ -12,6 +12,8 @@ namespace app\home\middleware;
 use app\home\service\TemplateI18n;
 use app\extend\plugin\PluginManager;
 use app\services\PluginService;
+use think\facade\Cache;
+use think\facade\Db;
 use think\facade\View;
 
 /**
@@ -39,6 +41,37 @@ class Template
         }
         TemplateI18n::beginRequest((string) $request->pathinfo(), (string) $request->url());
         miu_assign_page_meta();
+
+        // 全站计数只统计前台可展示的有效文档和启用标签，并复用各自的缓存失效标签。
+        $documentTotal = Cache::get('publicGlobalDocumentTotal_v1');
+        if (!is_numeric($documentTotal)) {
+            try {
+                $documentTotal = (int) Db::name('document')
+                    ->where('is_del', 0)
+                    ->where('status', 1)
+                    ->where('arcrank', '>=', 0)
+                    ->count();
+                Cache::tag('Document')->set('publicGlobalDocumentTotal_v1', $documentTotal, 86400);
+            } catch (\Throwable $e) {
+                trace('前台文档总数读取失败：' . $e->getMessage(), 'error');
+                $documentTotal = 0;
+            }
+        }
+
+        $tagTotal = Cache::get('publicGlobalTagTotal_v1');
+        if (!is_numeric($tagTotal)) {
+            try {
+                $tagTotal = (int) Db::name('keywords')->where('status', 1)->count();
+                Cache::tag('homeTag')->set('publicGlobalTagTotal_v1', $tagTotal, 86400);
+            } catch (\Throwable $e) {
+                trace('前台标签总数读取失败：' . $e->getMessage(), 'error');
+                $tagTotal = 0;
+            }
+        }
+        View::assign([
+            'document_total' => (int) $documentTotal,
+            'tag_total' => (int) $tagTotal,
+        ]);
 
         $tpl  = get_current_template();
         $path = get_templates_path($tpl);

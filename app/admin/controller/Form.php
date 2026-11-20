@@ -89,6 +89,7 @@ class Form extends BaseController
         $param = get_params();
 
         if (request()->isAjax()) {
+            $this->requireRequestMethod();
             $isEdit = !empty($param['id']) && $param['id'] > 0;
 
             try {
@@ -239,6 +240,7 @@ class Form extends BaseController
         $param = get_params();
 
         if (request()->isAjax()) {
+            $this->requireRequestMethod();
             $isEdit = !empty($param['id']) && $param['id'] > 0;
 
             try {
@@ -473,6 +475,7 @@ class Form extends BaseController
      */
     public function message_read()
     {
+        $this->requireRequestMethod();
         $param = get_params();
         $ids   = $this->toIds($param['ids'] ?? ($param['id'] ?? 0));
         if (!$ids) {
@@ -498,6 +501,7 @@ class Form extends BaseController
      */
     public function message_star()
     {
+        $this->requireRequestMethod();
         $param = get_params();
         $id    = (int) ($param['id'] ?? 0);
         if ($id <= 0) {
@@ -521,6 +525,7 @@ class Form extends BaseController
      */
     public function message_reply()
     {
+        $this->requireRequestMethod();
         $param = get_params();
         $id    = (int) ($param['id'] ?? 0);
         $reply = trim((string) ($param['reply'] ?? ''));
@@ -559,6 +564,7 @@ class Form extends BaseController
      */
     public function message_examine()
     {
+        $this->requireRequestMethod();
         $param   = get_params();
         $ids     = $this->toIds($param['ids'] ?? ($param['id'] ?? 0));
         $examine = (int) ($param['examine'] ?? 1);

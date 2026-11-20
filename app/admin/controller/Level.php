@@ -33,6 +33,7 @@ class Level extends BaseController
     {
         $param = get_params();
         if (request()->isAjax()) {
+            $this->requireRequestMethod();
 			$param['title'] = preg_replace('# #','',$param['title']);
             if ($param['id'] > 0) {
                 try {
@@ -72,6 +73,7 @@ class Level extends BaseController
     //禁用/启用
     public function disable()
     {
+        $this->requireRequestMethod();
         $param = get_params();
 		$param['update_time']= time();
 		$res = Db::name('UserLevel')->strict(false)->field('status,update_time')->update($param);

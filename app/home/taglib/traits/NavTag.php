@@ -24,7 +24,7 @@ namespace app\home\taglib\traits;
  *   {miu:nav id='vo' navid='2004,2005'}...{/miu:nav}
  *   {miu:nav id='vo' navid='$doc.top_navid'}...{/miu:nav}
  *   {miu:nav id='vo' navid='$nav.top_navid,$doc.other_navid'}...{/miu:nav}
- *   {miu:nav id='vo' nid='article'}...{/miu:nav}
+ *   {miu:nav id='vo' nid='article,image'}...{/miu:nav}
  *   {miu:nav id='sub' pid='$vo.id' includehidden='1'}...{/miu:nav}
  *
  * 每个属性都有默认值，填错不报错、直接输出原因：
@@ -47,7 +47,7 @@ namespace app\home\taglib\traits;
  *                  不写 navid 时隐藏栏目照旧不显示
  *                ⚠ 和 notnavid 是反过来的，两个不能同时用
  *   includehidden 是否把后台设为「隐藏」的栏目也纳入结果，默认 0；填 1 表示包含，填 0 表示不包含
- *   nid          只显示指定内容模型的栏目，例如 article、product；不能和 navid、notnavid 同时用
+ *   nid          只显示指定内容模型的栏目，例如 article、product；多个标识用英文逗号隔开，不能和 navid、notnavid 同时用
  *                ⚠ 只影响按 pid 取栏目时的可见性；如果写了 navid，仍按 navid 指定栏目并忽略 pid
  *
  * 栏目里可用的字段：见 miu_nav_items()，常用的是
@@ -173,9 +173,15 @@ trait NavTag
         }
 
         $modelNid = trim((string) ($tag['nid'] ?? ''));
-        if ($modelNid !== '' && !preg_match('/^[A-Za-z][A-Za-z0-9_]{0,63}$/', $modelNid)) {
-            return $this->navError('nid 只能填写内容模型标识，例如 article、product、video', $content);
+        $modelNids = [];
+        foreach ($modelNid === '' ? [] : explode(',', $modelNid) as $nidPart) {
+            $nidPart = trim($nidPart);
+            if (!preg_match('/^[A-Za-z][A-Za-z0-9_]{0,63}$/', $nidPart)) {
+                return $this->navError('nid 只能填写内容模型标识，多个用英文逗号隔开，例如 article,image', $content);
+            }
+            $modelNids[] = $nidPart;
         }
+        $modelNid = implode(',', array_unique($modelNids));
         if ($modelNid !== '' && ($navid !== '' || $notnavid !== '')) {
             return $this->navError('nid（按模型筛选）不能和 navid、notnavid 同时使用', $content);
         }

@@ -38,11 +38,12 @@ namespace app\home\taglib\traits;
  *              ⚠ 指定栏目时会连同它的子孙栏目一起取 —— 文档一般发在叶子栏目上，
  *                不带子栏目的话一级栏目一篇都取不到（后台文档列表也是这个逻辑）。
  *              显式传入时优先按指定栏目取数，不受当前栏目影响；搜索页仍使用搜索条件。
+ * includehidden 是否包含隐藏栏目下的文档，默认 0；填 1 可包含，显式指定 navid 时同样生效。
  * mid          模型id（后台「内容模型」里的ID，纯数字，就是 cms_channel 表的 id）。
  *              不存在的 id 会给出提示，不会让页面 500。
  *              ⚠ navid 和 mid 只能选一个，同时写会提示；
  *              显式传入时优先按该模型取数，不受当前栏目影响。
- * nid          内容模型标识（cms_channel.nid），例如 article、product；不依赖模型数字ID。
+ * nid          内容模型标识（cms_channel.nid），例如 article、product；多个用英文逗号隔开，不依赖模型数字ID。
  *              nid、navid、mid 只能选一个；显式传入时优先按该模型取数，不受当前栏目影响。
  * order        排序字段，默认 sort；普通字段按白名单校验，也可填 rand 随机排序（此时 sort 参数忽略）
  *              普通字段名会拼进 SQL，因此必须通过白名单校验，避免注入。
@@ -111,7 +112,7 @@ trait ListTag
         }
 
         // ---------------- 属性白名单 ----------------
-        $allowAttr = ['id', 'name', 'key', 'navid', 'mid', 'nid', 'order', 'sort', 'limit', 'pagesize', 'titlelen', 'flag', 'empty', 'emptykey'];
+        $allowAttr = ['id', 'name', 'key', 'navid', 'mid', 'nid', 'includehidden', 'order', 'sort', 'limit', 'pagesize', 'titlelen', 'flag', 'empty', 'emptykey'];
         $err       = $this->checkAttrs($tag, $allowAttr, 'miu:list', $content);
         if ($err !== '') {
             return $err;
@@ -144,11 +145,22 @@ trait ListTag
         }
 
         $nid = trim((string) ($tag['nid'] ?? ''));
-        if ($nid !== '' && !preg_match('/^[A-Za-z][A-Za-z0-9_]{0,63}$/', $nid)) {
-            return $this->listError('nid 只能填写内容模型标识，例如 article、product、video', $content);
+        $modelNids = [];
+        foreach ($nid === '' ? [] : explode(',', $nid) as $modelNid) {
+            $modelNid = trim($modelNid);
+            if (!preg_match('/^[A-Za-z][A-Za-z0-9_]{0,63}$/', $modelNid)) {
+                return $this->listError('nid 只能填写内容模型标识，多个用英文逗号隔开，例如 article,image', $content);
+            }
+            $modelNids[] = $modelNid;
         }
+        $nid = implode(',', array_unique($modelNids));
         if ($nid !== '' && ($navid !== '' || $mid !== '')) {
             return $this->listError('nid（按模型标识取）、navid（按栏目取）和 mid（按模型ID取）只能填写一个', $content);
+        }
+
+        $includeHidden = trim((string) ($tag['includehidden'] ?? '0'));
+        if (!in_array($includeHidden, ['0', '1'], true)) {
+            return $this->listError('includehidden 只能填 0 或 1（1 表示包含隐藏栏目）', $content);
         }
 
         // ---------------- order ----------------
@@ -245,6 +257,7 @@ trait ListTag
             'navid'    => $navidVarExpressions === [] ? $navid : '',
             'mid'      => (int) $mid,
             'nid'      => $nid,
+            'includehidden' => (int) $includeHidden,
             'order'    => $order,
             'sort'     => $sort,
             'limit'    => $limit,

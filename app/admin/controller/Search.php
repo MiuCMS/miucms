@@ -37,6 +37,7 @@ class Search extends BaseController
     //删除
     public function delete()
     {
+        $this->requireRequestMethod('DELETE');
         $id = get_params("id");
         if (Db::name('SearchKeywords')->delete($id) !== false) {
             safe_add_log('delete', $id);

@@ -151,6 +151,7 @@ class Index extends BaseController
 	//设置theme
 	public function set_theme()
     {
+        $this->requireRequestMethod();
         if (request()->isAjax()) {
             $param = get_params();
 			$admin = get_login_admin();

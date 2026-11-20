@@ -253,7 +253,7 @@ final class UpgradeManager
             'http' => ['method' => 'GET', 'timeout' => 8, 'follow_location' => 0, 'ignore_errors' => true, 'header' => "Accept: application/json\r\nAccept-Encoding: identity\r\nCache-Control: no-cache\r\nUser-Agent: MiuCMS-Updater/" . (defined('CMS_VERSION') ? CMS_VERSION : 'unknown') . "\r\n"],
             'ssl' => ['verify_peer' => true, 'verify_peer_name' => true],
         ]);
-        $manifestUrl = rtrim((string) config('official.website'), '/') . '/upgrade/stable/latest.json';
+        $manifestUrl = rtrim((string) config('official.upgrade'), '/') . '/upgrade/stable/latest.json';
         $body = @file_get_contents($manifestUrl, false, $context, 0, self::MAX_MANIFEST_BYTES + 1);
         $headers = $http_response_header ?? [];
         if (!is_string($body)) throw new \RuntimeException('无法连接升级服务器，请检查服务器网络和 HTTPS 证书');
@@ -277,7 +277,7 @@ final class UpgradeManager
 
     private function downloadPackage(array $release, string $destination): void
     {
-        $url = rtrim((string) config('official.service'), '/') . $release['package_url'];
+        $url = rtrim((string) config('official.upgrade'), '/') . $release['package_url'];
         $context = stream_context_create([
             'http' => ['method' => 'GET', 'timeout' => 45, 'follow_location' => 0, 'ignore_errors' => true, 'header' => "Accept: application/zip, application/octet-stream\r\nAccept-Encoding: identity\r\nUser-Agent: MiuCMS-Updater/" . CMS_VERSION . "\r\n"],
             'ssl' => ['verify_peer' => true, 'verify_peer_name' => true],

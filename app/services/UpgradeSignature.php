@@ -17,7 +17,7 @@ final class UpgradeSignature
             || version_compare($entry['from_version'], '1.0.0', '<')
             || version_compare($entry['version'], $entry['from_version'], '<=' )
             || !preg_match('/\A[a-f0-9]{64}\z/D', $entry['sha256'])
-            || !preg_match('#\A/upgrade/[A-Za-z0-9._-]+\.zip\z#iD', $entry['package_url'])
+            || !preg_match('#\A/upgrade/(?:[A-Za-z0-9._-]+/)*[A-Za-z0-9._-]+\.zip\z#iD', $entry['package_url'])
             || str_contains($entry['package_url'], '..')) {
             return false;
         }

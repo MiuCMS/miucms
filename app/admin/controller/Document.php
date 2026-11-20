@@ -299,6 +299,7 @@ class Document extends BaseController{
     {
         $param = get_params();
         if (request()->isAjax()) {
+            $this->requireRequestMethod();
 			$param['admin_id'] = $this->uid;
 			$param['channel_id'] = Db::name('nav')->where('id','=',$param['nav_id'])->value('channel_id');
             // 检验完整性
@@ -377,6 +378,7 @@ class Document extends BaseController{
 		$param = get_params();
 		
         if (request()->isAjax()) {
+            $this->requireRequestMethod();
             try {
                 validate(DocumentValidate::class)->check($param);
             } catch (ValidateException $e) {
@@ -571,6 +573,7 @@ class Document extends BaseController{
     //修改字段（支持批量，用于审核/置顶/推荐/内联编辑等）
     public function edit_field()
     {
+        $this->requireRequestMethod();
         $param = get_params();
         if (request()->isAjax()) {
             // 字段白名单，防止前端伪造字段名注入任意字段（按需增删）

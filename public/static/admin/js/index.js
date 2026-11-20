@@ -49,6 +49,7 @@ layui.use(['tool', 'tree', 'admin'], function () {
         click: function (data) {
             $.ajax({
                 url: MIU_ADMIN + '/index/set_theme',
+                type: 'POST',
                 data: {theme: data.theme},
                 success: function (e) {
                     layer.msg(e.msg);

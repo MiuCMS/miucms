@@ -103,6 +103,7 @@ class Custom extends BaseController
         $param = get_params();
 
         if (request()->isAjax()) {
+            $this->requireRequestMethod();
             $isEdit = !empty($param['id']) && $param['id'] > 0;
 
             try {
@@ -205,6 +206,7 @@ class Custom extends BaseController
     //修改字段（支持批量，用于审核/置顶/推荐/内联编辑等）
     public function edit_field()
     {
+        $this->requireRequestMethod();
         $param = get_params();
         if (request()->isAjax()) {
             // 字段白名单，防止前端伪造字段名注入任意字段（按需增删）
