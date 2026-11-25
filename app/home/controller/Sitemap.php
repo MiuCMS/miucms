@@ -9,6 +9,7 @@ declare (strict_types = 1);
 
 namespace app\home\controller;
 
+use app\services\AdminDemo;
 use think\facade\Session;
 
 /**
@@ -34,8 +35,11 @@ class Sitemap
      */
     public function build()
     {
-        if (!request()->isPost()) {
-            return json(['code' => 1, 'msg' => '请使用 POST 请求']);
+        if (request()->method(true) !== 'POST' || !request()->isPost()) {
+            return json(['code' => 1, 'msg' => '请使用 POST 请求'], 405, ['Allow' => 'POST']);
+        }
+        if (AdminDemo::isReadOnly()) {
+            return AdminDemo::denied(request());
         }
         //后台登录时写的 session key 是 app.session_admin（默认 miu_admin）
         $admin = Session::get(get_config('app.session_admin'));

@@ -487,6 +487,7 @@ class Login
             }
             throw $e;
         }
+        \app\services\PluginService::userRegistered((int) $uid);
         Session::delete('homeRegisterInviteId');
         if ($inviteId > 0) {
             clear_cache('homeUserInvite');

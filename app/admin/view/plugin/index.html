@@ -425,7 +425,8 @@ layui.use(['table', 'upload','tool'], function () {
 				row.update_version = update.version || '';
 				row.update_changelog = update.changelog || '';
 			});
-			table.reload('pluginTable', { data: rows });
+			// 保留已绑定上传组件的工具栏按钮。
+			table.reloadData('pluginTable', { data: rows });
 		}, 'json');
 	}
 

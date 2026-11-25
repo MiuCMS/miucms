@@ -64,6 +64,8 @@
 	.tpl-ft{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;border-top:1px solid #f3f5f8;background:#fbfcfd;}
 	.tpl-ft .tpl-state{color:#9aa1ac;}
 	.tpl-ft .layui-btn{height:36px;line-height:36px;padding:0 18px;font-size:14px;}
+	.tpl-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;margin-left:auto;}
+	.tpl-actions .layui-btn+.layui-btn{margin-left:0;}
 
 	/* ===== 空状态 ===== */
 	.tpl-empty{padding:48px 20px;text-align:center;color:#bbb;}
@@ -174,16 +176,21 @@
 						</div>
 
 						<div class="tpl-ft">
+							{if $tpl.name == $current}<span class="tpl-state">正在使用</span>
+							{elseif $tpl.error != '' /}<span class="tpl-state">无法启用</span>
+							{else /}<span class="tpl-state">可切换到该模板</span>{/if}
+							<div class="tpl-actions">
+							{if isset($visualEntries[$tpl['name']])}
+							<a class="layui-btn layui-btn-primary" href="{:url('admin/template/setting')}?visual=open&amp;name={$tpl.name}&amp;key={$visualEntries[$tpl['name']]}">可视化编辑</a>
+							{/if}
 							{if $tpl.name == $current}
-							<span class="tpl-state">正在使用</span>
 							<button type="button" class="layui-btn layui-btn-disabled" disabled>已启用</button>
 							{elseif $tpl.error != '' /}
-							<span class="tpl-state">无法启用</span>
 							<button type="button" class="layui-btn layui-btn-disabled" disabled>启用</button>
 							{else /}
-							<span class="tpl-state">可切换到该模板</span>
 							<button type="button" class="layui-btn layui-btn-normal layui-btn-radius js-enable-template" data-name="{$tpl.name}" data-title="{$tpl.title}">启用</button>
 							{/if}
+							</div>
 						</div>
 					</div>
 				</div>

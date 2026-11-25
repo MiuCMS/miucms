@@ -87,7 +87,7 @@
 <!-- 主体 -->
 {block name="body"}
 <div class="container">
-	<div class="file-container">
+	<div class="file-container" data-picker-url="{$visualFilePickerUrl|default=''}">
 		<div class="file-header">
 			<div class="layui-tab layui-tab-brief" lay-filter="tab">
 				<ul class="layui-tab-title">
@@ -98,7 +98,9 @@
 					<li data-filter="doc">文档</li>
 					<li data-filter="zip">压缩包</li>
 				</ul>
+				{empty name="visualFilePickerUrl"}
 				<button type="button" class="layui-btn layui-btn-sm layui-btn-primary file-recycle-btn" id="fileRecycle"><i class="layui-icon layui-icon-delete"></i>回收站</button>
+				{/empty}
 			</div>
 		</div>
 		<div class="file-item">
@@ -108,21 +110,25 @@
 					<li data-id="" class="active"><i class="layui-icon layui-icon-folder-open"></i><span class="layui-padding-1">全部</span></li>
 					<li data-id="0"><i class="layui-icon layui-icon-folder"></i><span class="layui-padding-1">未分组</span></li>
 				</ul>
+				{empty name="visualFilePickerUrl"}
 				<div class="footer">
 					<span class="layui-btn layui-btn-primary layui-btn-sm add-new"><i class="layui-icon layui-icon-addition"></i> 添加分组</span>
 				</div>
+				{/empty}
 			</div>
 			<!-- 文件 -->
 			<div class="attach">
 				<!-- 工具 -->
 				<form class="layui-form" lay-filter="barsearchform" style="display:block; margin:0;padding:0;">
 					<div class="header">
+						{empty name="visualFilePickerUrl"}
 						<div class="layui-btn-group">
 							<span class="layui-btn layui-btn-sm layui-btn-normal" id="fileUpload">上传文件</span>
 							<span class="layui-btn layui-btn-sm layui-btn-danger" id="fileDelete">批量删除</span>
 							<span class="layui-btn layui-btn-sm layui-btn-warm" id="fileMove">移动至 <i class="layui-icon layui-icon-triangle-d"></i></span>
 							<span style="margin-left:36px;"><input type="checkbox" name="select_all" lay-filter="all" title="全选"></span>
 						</div>
+						{/empty}
 
 						<div class="search">
 							<input type="hidden" name="limit" value="30" />
@@ -165,10 +171,11 @@
 	// 父页面回填目标输入框 ID（由父页面在弹层 success 中注入）
 	var THUMB_BIND_ID = '';
 
+	var visualFilePickerUrl = $('.file-container').attr('data-picker-url');
 	// 从 URL 参数读取配置：filter 为文件类型过滤，target 为回调目标标识
 	(function(){
 		var params = new URLSearchParams(location.search);
-		window.FM_FILTER = params.get('filter') || 'all';
+		window.FM_FILTER = visualFilePickerUrl ? 'image' : (params.get('filter') || 'all');
 		window.FM_TARGET = params.get('target') || '';
 		// 如果 URL 携带了 filter，同步到表单隐藏字段，并仅显示对应的标签卡
 		if(window.FM_FILTER && window.FM_FILTER !== 'all'){
@@ -330,6 +337,7 @@
 			}
 		});
 
+		{empty name="visualFilePickerUrl"}
 		{php}$canUploadSourceFiles = (int) get_login_admin('id') === 1;{/php}
 		var uploadInst = upload.render({
 			elem: '#fileUpload'
@@ -355,6 +363,7 @@
 				layer.msg('上传失败');
 			}
 		});
+		{/empty}
 		
 		// 搜索框回车触发搜索
 		$('[name="keywords"]').on('keydown', function(e){
@@ -481,7 +490,8 @@
 		
 		function get_group(param){
 			$.ajax({
-				url:"{:url('admin/files/get_group')}",
+				url:visualFilePickerUrl || "{:url('admin/files/get_group')}",
+				data:visualFilePickerUrl ? {groups:1} : undefined,
 				success:function(res){
 					if(res.code==0){
 						var group=res.data,item='';
@@ -489,9 +499,13 @@
 							for(var a=0;a<group.length;a++){
 								var groupId = parseInt(group[a].id, 10) || 0;
 								var groupTitle = tool.xss(String(group[a].title || ''));
-								item+='<li data-id="'+groupId+'" data-title="'+groupTitle+'"><i class="layui-icon layui-icon-folder"></i><span class="layui-padding-1">'+groupTitle+'</span><i class="layui-icon layui-icon-more-vertical dropdown-on"></i></li>';
+								var groupActions = visualFilePickerUrl ? '' : '<i class="layui-icon layui-icon-more-vertical dropdown-on"></i>';
+								item+='<li data-id="'+groupId+'" data-title="'+groupTitle+'"><i class="layui-icon layui-icon-folder"></i><span class="layui-padding-1">'+groupTitle+'</span>'+groupActions+'</li>';
 							}
 							$('#group').append(item);
+						}
+						if (visualFilePickerUrl) return;
+						if (group.length) {
 							// 自定义事件
 							dropdown.render({
 								elem: '.dropdown-on',
@@ -580,6 +594,7 @@
 		}
 
 		function get_files(param){
+			if (visualFilePickerUrl) param.limit = 25;
 			var requestedPage = parseInt(param.page, 10);
 			if (!isNaN(requestedPage) && requestedPage > 0) {
 				currentFilePage = requestedPage;
@@ -588,7 +603,7 @@
 			// 注意：filter 参数由表单隐藏字段携带（标签点击时更新），后端 Files.php 负责按类型过滤；
 			// 这里不再强制用 URL 中的 filter 覆盖，否则点击标签切换类型会失效。
 			$.ajax({
-				url:"{:url('admin/files/index')}",
+				url:visualFilePickerUrl || "{:url('admin/files/index')}",
 				data:param,
 				complete:function(){
 					setTimeout(function(){
@@ -622,7 +637,7 @@
 								let fileType = '';
 								// 判断元素是否在数组中
 								let path='/static/admin/images/icon/file.png';
-								if (image.includes(item[a].fileext)) {
+								if (visualFilePickerUrl || image.includes(item[a].fileext)) {
 									path=fileUrl;
 									fileType = 'image';
 									down = '<span data-href="'+fileUrl+'" class="layui-btn layui-btn-xs layui-btn-normal file-view-img">预览</span>';
@@ -650,13 +665,14 @@
 								var mediaTag = fileType === 'video'
 									? '<video src="'+path+'" class="file-item" title="'+fileName+'" style="width:100px;height:100px;object-fit:cover;"></video>'
 									: '<img src="'+path+'" alt="'+fileOriginalName+'" style="object-fit: contain;" class="file-item" title="'+fileName+'">';
-								li+='<li data-id="'+fileId+'" data-title="'+fileName+'" data-ext="'+fileExtension+'" data-src="'+fileUrl+'" data-type="'+safeFileType+'" data-filesize="'+fileSize+'">'+mediaTag+'<p title="'+fileName+'">'+fileName+'</p><div class="layui-btn-group"><span class="layui-btn layui-btn-xs file-edit">重命名</span>'+down+'<span class="layui-btn layui-btn-xs layui-btn-danger file-del">删除</span></div></li>';
+								var fileActions = visualFilePickerUrl ? down : '<span class="layui-btn layui-btn-xs file-edit">重命名</span>'+down+'<span class="layui-btn layui-btn-xs layui-btn-danger file-del">删除</span>';
+								li+='<li data-id="'+fileId+'" data-title="'+fileName+'" data-ext="'+fileExtension+'" data-src="'+fileUrl+'" data-type="'+safeFileType+'" data-filesize="'+fileSize+'">'+mediaTag+'<p title="'+fileName+'">'+fileName+'</p><div class="layui-btn-group">'+fileActions+'</div></li>';
 							}
 							$('#filesBox').html(li);
 							$('#laypage').show();
-						}else{
-								$('#filesBox').html('<div class="empty"><i class="layui-icon layui-icon-upload"></i><p>暂无文件，赶紧去上传吧!</p></div>');
-								$('#laypage').hide();
+						} else {
+							$('#filesBox').html(visualFilePickerUrl ? '<div class="empty"><p>没有符合条件的图片</p></div>' : '<div class="empty"><i class="layui-icon layui-icon-upload"></i><p>暂无文件，赶紧去上传吧!</p></div>');
+							$('#laypage').hide();
 						}
 					}	
 				}				
@@ -670,6 +686,7 @@
 		var ignoreFileSelectionClearClick = false;
 		var boxSelectionActive = false;
 		$fileSubject.on('mousedown', function(e){
+			if (visualFilePickerUrl) return;
 			var $target = $(e.target);
 			if (e.which !== 1 || $target.closest('button, a, input').length) return;
 			if ($target.closest('#filesBox > li').length && !$target.closest('#filesBox > li > .file-item, #filesBox > li > p').length) return;
@@ -738,6 +755,7 @@
 				return false;
 			}
 			e.stopPropagation();
+			if (visualFilePickerUrl) $(this).parent().siblings().removeClass('on');
 			$(this).parent().toggleClass("on");
 		})
 
@@ -832,6 +850,10 @@
 				layer.msg('未找到文件路径');
 				return;
 			}
+			if (visualFilePickerUrl) {
+				if (typeof window.pickTemplateVisualImage === 'function') window.pickTemplateVisualImage(templateVisualImage($li));
+				return;
+			}
 
 			var target = window.FM_TARGET;
 			if(!target){
@@ -914,6 +936,16 @@
 				return;
 			}
 		})
+
+		function templateVisualImage($li) {
+			return {id: Number($li.attr('data-id')), name: $li.attr('data-title'), filepath: $li.attr('data-src')};
+		}
+		if (visualFilePickerUrl) {
+			window.getTemplateVisualImage = function () {
+				var $selected = $('#filesBox > li.on');
+				return $selected.length === 1 ? templateVisualImage($selected) : null;
+			};
+		}
 
 		// 暴露获取选中媒体地址的方法，供父页面确定按钮调用（单选校验用）
 		window.getThumbSrc = function(){

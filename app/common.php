@@ -289,6 +289,9 @@ function get_templates(): array
 //获取当前启用的前台模板名，配置缺失/非法/目录不存在时回退到 default
 function get_current_template(): string
 {
+    if (\app\services\TemplateVisualEditor::$previewTheme !== '') {
+        return \app\services\TemplateVisualEditor::$previewTheme;
+    }
     $default = 'default';
 
     try {

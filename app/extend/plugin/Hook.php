@@ -81,6 +81,7 @@ class Hook
 
         // ---- 会员 ----
         'user_register' => '用户注册',
+        'user_registered' => '用户注册成功',
         'user_login'    => '用户登录',
         'user_logout'   => '用户退出',
         'user_update'   => '用户资料修改',

@@ -13,6 +13,7 @@ final class PluginUpdateManager
     private const MAX_PACKAGE_BYTES = 104857600;
     private const MAX_PACKAGE_FILES = 5000;
     private const MAX_UNPACKED_BYTES = 209715200;
+    private const CMS_TOO_OLD = '当前 MiuCMS 版本过低，请先升级 MiuCMS 后再更新此插件。';
 
     public function checkUpdates(): array
     {
@@ -34,14 +35,14 @@ final class PluginUpdateManager
                     continue;
                 }
                 $required = (string) $entry['min_cms_version'];
-                $compatible = $required === '' || version_compare((string) CMS_VERSION, $required, '>=');
+                $compatible = $this->supportsCms($required);
                 $updates[$name] = [
                     'version' => $entry['version'],
                     'changelog' => $entry['changelog'],
                     'min_cms_version' => $required,
                     'compatible' => $compatible,
                     'installed' => (int) ($pluginRows[$name]['installed'] ?? 0) === 1,
-                    'reason' => $compatible ? '' : '当前 MiuCMS 版本过低，请升级后再更新此插件。',
+                    'reason' => $compatible ? '' : self::CMS_TOO_OLD,
                 ];
             }
             return ['code' => 0, 'msg' => '插件更新检查完成', 'data' => ['updates' => $updates]];
@@ -94,8 +95,8 @@ final class PluginUpdateManager
             if (version_compare($entry['version'], $current, '<=')) {
                 throw new \RuntimeException('当前插件已经是官网清单中的最新版本');
             }
-            if ($entry['min_cms_version'] !== '' && version_compare((string) CMS_VERSION, $entry['min_cms_version'], '<')) {
-                throw new \RuntimeException('当前 MiuCMS 版本过低，请升级后再更新此插件。');
+            if (!$this->supportsCms($entry['min_cms_version'])) {
+                throw new \RuntimeException(self::CMS_TOO_OLD);
             }
 
             $packageDir = $runtime . 'packages' . DIRECTORY_SEPARATOR;
@@ -104,7 +105,7 @@ final class PluginUpdateManager
             }
             $package = $packageDir . strtolower($name) . '-' . bin2hex(random_bytes(12)) . '.zip';
             $this->downloadPackage($entry, $package);
-            $archiveInfo = $this->inspectPackage($package, $name, $entry['version'], $entry['min_cms_version']);
+            $archiveInfo = $this->inspectPackage($package, $name, $entry['version']);
             // 未安装的插件只更新本地插件包；数据库迁移由后续正常安装流程执行。
             $migrationFiles = $isInstalled
                 ? $this->selectMigrations($archiveInfo['migrations'], $current, $entry['version'])
@@ -298,7 +299,7 @@ final class PluginUpdateManager
         return $body;
     }
 
-    private function inspectPackage(string $path, string $name, string $version, string $minimumCmsVersion): array
+    private function inspectPackage(string $path, string $name, string $version): array
     {
         if (!class_exists(\ZipArchive::class)) {
             throw new \RuntimeException('服务器未启用 PHP ZIP 扩展，无法更新插件');
@@ -371,9 +372,12 @@ final class PluginUpdateManager
             if ($packageVersion !== $version) {
                 throw new \RuntimeException('插件包声明的版本与官网清单不一致');
             }
-            $packageMinimum = $this->readLiteralProperty($source, 'minCmsVersion') ?? '';
-            if ($packageMinimum !== $minimumCmsVersion) {
-                throw new \RuntimeException('插件包声明的最低 CMS 版本与官网清单不一致');
+            $packageMinimum = trim($this->readLiteralProperty($source, 'minCmsVersion') ?? '');
+            if ($packageMinimum !== '' && !$this->validVersion($packageMinimum)) {
+                throw new \RuntimeException('插件包声明的最低 CMS 版本格式无效');
+            }
+            if (!$this->supportsCms($packageMinimum)) {
+                throw new \RuntimeException(self::CMS_TOO_OLD);
             }
         } finally {
             $zip->close();
@@ -479,6 +483,11 @@ final class PluginUpdateManager
             else @unlink($path);
         }
         @rmdir($directory);
+    }
+
+    private function supportsCms(string $minimum): bool
+    {
+        return $minimum === '' || version_compare((string) CMS_VERSION, $minimum, '>=');
     }
 
     private function validVersion(string $version): bool

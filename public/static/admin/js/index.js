@@ -435,24 +435,32 @@ layui.use(['tool', 'tree', 'admin'], function () {
         upgradeNoticeAvailable = false;
         $('#miuUpgradeNotice').hide();
         syncNoticeCount();
+        checkUpgradeStatus();
     };
 
-    // 每次进入后台首页都检查最新版本，有可升级版本时显示通知。
-    (function () {
+    function publishUpgradeStatus(status) {
+        window.__miuUpgradeStatus = status;
+        var release = status && !status.error && status.available && status.release;
+        upgradeNoticeAvailable = Boolean(release);
+        $('#miuUpgradeNoticeVersion').text(release ? release.version : '');
+        $('#miuUpgradeNotice').toggle(upgradeNoticeAvailable);
+        syncNoticeCount();
+        window.dispatchEvent(new CustomEvent('miu:upgrade-status', {detail: status}));
+    }
+
+    // 概览卡片和消息中心共用同一次版本检查。
+    function checkUpgradeStatus() {
         var $app = $('#MiuApp');
         var checkUrl = $app.attr('data-upgrade-check-url');
         var token = $app.attr('data-upgrade-token');
         if (!checkUrl || !token) return;
-        $.post(checkUrl, {token: token}, function (res) {
-            var status = res && res.data;
-            if (res && res.code === 0 && status && status.available && status.release) {
-                upgradeNoticeAvailable = true;
-                $('#miuUpgradeNoticeVersion').text(status.release.version);
-                $('#miuUpgradeNotice').show();
-                syncNoticeCount();
-            }
-        }, 'json');
-    })();
+        $.ajax({
+            url: checkUrl, method: 'POST', dataType: 'json', data: {token: token}, timeout: 15000
+        }).done(function (res) {
+            publishUpgradeStatus(res && res.code === 0 ? res.data || null : null);
+        }).fail(function () { publishUpgradeStatus(null); });
+    }
+    checkUpgradeStatus();
 
     /* ==================== 顶部「系统通知」：鼠标移入图标显示弹层 ==================== */
     (function () {

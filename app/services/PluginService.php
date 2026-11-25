@@ -206,6 +206,12 @@ class PluginService
         Hook::instance()->trigger('user_register', $data);
     }
 
+    /** 账号写入成功后通知插件。 */
+    public static function userRegistered(int $id): void
+    {
+        Hook::instance()->trigger('user_registered', $id);
+    }
+
     /** 用户登录（$user 可改） */
     public static function userLogin(array &$user): void
     {

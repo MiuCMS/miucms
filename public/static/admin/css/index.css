@@ -513,27 +513,17 @@
             display: none !important;
         }
         .miucms-layout-three .layui-side.layui-side-menu {
-            transform: translate3d(-120px, 0, 0);
-            -webkit-transform: translate3d(-120px, 0, 0);
+            transform: none;
+            -webkit-transform: none;
             width: 120px;
         }
-        .miucms-layout-three .page-tabs,
-        .miucms-layout-three .layui-body,
-        .miucms-layout-three .layui-footer,
-        .miucms-layout-three .layui-layout-left {
-            left: 0 !important;
-        }
-        /* 移动端展开侧边栏时恢复全宽 */
-        .side-spread-sm.miucms-layout-three .layui-side {
-            transform: translate3d(0, 0, 0);
-            width: 200px;
-        }
-        .side-spread-sm.miucms-layout-three .page-tabs,
-        .side-spread-sm.miucms-layout-three .layui-body,
-        .side-spread-sm.miucms-layout-three .layui-footer,
-        .side-spread-sm.miucms-layout-three .layui-layout-left {
-            left: 0 !important;
-            transform: translate3d(200px, 0, 0);
+        #mainLayout .page-tabs,
+        #mainLayout .layui-body,
+        #mainLayout .layui-footer,
+        #mainLayout .layui-layout-left {
+            left: 120px !important;
+            transform: none;
+            -webkit-transform: none;
         }
     }
 

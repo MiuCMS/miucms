@@ -1,0 +1,74 @@
+{extend name="common/base"/}
+
+{block name="title"}<title>可视化编辑模板 · {$theme}</title>{/block}
+
+{block name="style"}
+<style>
+    .tpl-visual{display:flex;min-height:100vh;flex-direction:column;background:#f4f6f8;}
+    .tpl-visual [hidden]{display:none!important;}
+    .tpl-visual-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 16px;background:#fff;border-bottom:1px solid #e5eaf0;}
+    .tpl-visual-bar h1{margin:0 8px 0 0;font-size:17px;font-weight:600;}
+    .tpl-visual-bar .layui-btn+.layui-btn{margin-left:0;}
+    .tpl-visual-field{display:flex;align-items:center;gap:6px;max-width:100%;}
+    label.tpl-visual-field{white-space:nowrap;}
+    .tpl-visual-field select{min-width:0;padding:0 8px;max-width:250px;}
+    .tpl-visual-field input{min-width:0;width:160px;}
+    .tpl-visual-work{display:grid;grid-template-columns:minmax(0,1fr);flex:1;min-height:0;}
+    .tpl-visual-frame{width:100%;height:100%;min-height:72vh;border:0;background:#fff;}
+    .tpl-visual-editor textarea{min-height:132px;resize:vertical;}
+    .tpl-visual-editor-actions{margin-top:12px;}
+    .tpl-visual-image-field{display:flex;flex-wrap:wrap;gap:8px;}
+    .tpl-visual-image-field input{flex:1 1 150px;min-width:0;}
+    .tpl-visual-message{text-align:right;color:#5b6573;font-size:13px;}
+    .tpl-visual-dialog{padding:16px;overflow:auto;}
+    .tpl-visual-picker-form,.tpl-visual-pages{display:flex;align-items:center;gap:8px;}
+    .tpl-visual-results{display:grid;gap:6px;margin:12px 0;}
+    .tpl-visual-result{min-width:0;padding:8px;text-align:left;overflow-wrap:anywhere;background:#fff;border:1px solid #e5eaf0;border-radius:4px;cursor:pointer;}
+    .tpl-visual-result:hover,.tpl-visual-result:focus-visible{border-color:#168bf1;background:#f4faff;}
+    .tpl-visual-record{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;}
+    .tpl-visual-record span{overflow-wrap:anywhere;}
+    .tpl-visual-record-user{display:inline-block;margin-left:8px;padding:0 6px;border:1px solid #d2d2d2;border-radius:2px;color:#5b6573;}
+</style>
+{/block}
+
+{block name="body"}
+<main class="tpl-visual" id="tpl-visual">
+    <div class="tpl-visual-bar">
+        <a class="layui-btn layui-btn-primary layui-btn-sm" href="{:url('admin/template/setting')}">返回模板管理</a>
+        <h1>可视化编辑 · {$theme}</h1>
+        <label class="tpl-visual-field">页面模板 <select class="layui-input" id="visual-file"></select></label>
+        <label class="tpl-visual-field" id="visual-context-field" hidden>预览页面 <select class="layui-input" id="visual-context"></select></label>
+        <label class="tpl-visual-field" id="visual-nav-field" hidden>预览栏目 <select class="layui-input" id="visual-nav"></select></label>
+        <button class="layui-btn layui-btn-primary layui-btn-sm" type="button" id="visual-pick" hidden>选择预览数据</button>
+        <form class="tpl-visual-field" id="visual-search" hidden>
+            <input class="layui-input" id="visual-keyword" type="search" maxlength="50" placeholder="搜索关键词" aria-label="搜索关键词">
+            <button class="layui-btn layui-btn-primary layui-btn-sm" type="submit">预览搜索</button>
+        </form>
+        <button class="layui-btn layui-btn-primary layui-btn-sm" type="button" id="visual-reload">重新载入</button>
+        <button class="layui-btn layui-btn-primary layui-btn-sm" type="button" id="visual-hidden" hidden>显示隐藏内容</button>
+        <button class="layui-btn layui-btn-primary layui-btn-sm" type="button" id="visual-undo" disabled>撤销上次保存</button>
+        <button class="layui-btn layui-btn-primary layui-btn-sm" type="button" id="visual-history" disabled>修改记录</button>
+        <a id="visual-static" class="layui-font-blue" href="{:url('admin/seo/createhtml')}" target="_blank" rel="noopener" hidden>前往重新生成静态页面</a>
+        <div class="tpl-visual-message" id="visual-message" role="status" aria-live="polite"></div>
+    </div>
+    <div class="tpl-visual-work">
+        <iframe title="模板页面预览" id="visual-frame" class="tpl-visual-frame" sandbox="allow-same-origin" referrerpolicy="no-referrer"></iframe>
+    </div>
+</main>
+<div class="tpl-visual-dialog tpl-visual-editor" id="visual-editor" style="display:none;">
+    <textarea class="layui-textarea" id="visual-text" aria-label="修改文字"></textarea>
+    <div class="tpl-visual-image-field" id="visual-image-field">
+        <input class="layui-input" id="visual-image-name" type="text" aria-label="所选图片" readonly>
+        <button class="layui-btn layui-btn-primary" id="visual-image" type="button">从素材库选择图片</button>
+    </div>
+    <div class="tpl-visual-editor-actions">
+        <button class="layui-btn layui-btn-normal" id="visual-save" type="button" disabled>保存到模板</button>
+        <button class="layui-btn layui-btn-primary" id="visual-cancel" type="button">取消</button>
+    </div>
+</div>
+<script type="application/json" id="visual-config">{$visualConfig|raw}</script>
+{/block}
+
+{block name="script"}
+<script src="{__ADMIN__}/js/template-visual.js?v={:filemtime(public_path() . 'static/admin/js/template-visual.js')}"></script>
+{/block}

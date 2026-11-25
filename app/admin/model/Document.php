@@ -206,6 +206,11 @@ class Document extends Model
             //钩子在 handle_params() 之后跑，插件改过的正文要再净化一次（同 addDocument）
             $param = static::purifyContent($param);
 
+            // 标签字段提交空字符串时，随文档保存清除旧关联。
+            if (($param['keyword_names'] ?? null) === '') {
+                $param['tag_ids'] = '';
+            }
+
             if(isset($param['release_time']) && $param['release_time'] !== ''){
                 $param['release_time']=strtotime($param['release_time']);
             }

@@ -19,7 +19,7 @@
  	<link rel="stylesheet" href="{__ADMIN__}/css/miu.css?v={:CMS_VERSION}" media="all">
 {/block}
 {block name="style"}{/block}
-<script src="{__ADMIN__}/i18n.js"></script>
+<script src="{__ADMIN__}/i18n.js?v={:filemtime(public_path() . 'static/admin/i18n.js')}"></script>
 {php}echo \app\services\PluginService::adminI18nScript();{/php}
 <script src="{__ADMIN__}/layui/layui.js?v={:LAYUI_VERSION}"></script>
 <script src="{__ADMIN__}/init.js?v={:CMS_VERSION}"></script>
@@ -28,6 +28,14 @@
 $.ajaxPrefilter(function (options, original, xhr) {
     var target = new URL(options.url, window.location.href);
     if (target.origin === window.location.origin) xhr.setRequestHeader('X-Miu-Csrf', $('meta[name="miu-csrf"]').attr('content') || '');
+});
+$(document).on('ajaxError.miuDemo', function (event, xhr) {
+    var result = xhr.responseJSON;
+    if (xhr.status === 403 && result && result.demo_read_only === true) {
+        layui.use(['layer'], function () {
+            layui.layer.msg('当前为只读演示，无法执行此操作', {icon: 0});
+        });
+    }
 });
 </script>
 </head>

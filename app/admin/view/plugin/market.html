@@ -67,7 +67,7 @@
 		<button class="layui-btn layui-btn-primary" id="marketReset">重置</button>
 		<button class="layui-btn layui-btn-primary" id="marketLogout" style="margin-left:auto">退出官网账号</button>
 	</div>
-	<div id="marketError" class="market-error" role="alert" hidden></div>
+	<div id="marketError" class="market-error miu-i18n-ui-label" role="alert" hidden></div>
 	<div id="marketGrid" class="market-grid" aria-live="polite"></div>
 	<div id="marketPages" class="market-pages"></div>
 	{/if}
@@ -87,11 +87,16 @@ layui.use(['form','laypage'],function(){
 		});
 	}else{
 	var activeKeyword='',activeLimit=20,activePrice='all',activeSource='all',activeCategory='0',activePurchase='all',pendingPrice='all',pendingSource='all',pendingCategory='0',pendingPurchase='all';
+	function renderMarketFilters(){
+		// 先让语言包处理选项文字，再让 Layui 生成选中项的显示文字。
+		requestAnimationFrame(function(){form.render('select');});
+	}
+	$(window).on('miu-admin-locale-change',renderMarketFilters);
 	function openDetails(url){try{var serviceHost=new URL('{:config("official.service")}').hostname;var websiteHost=new URL('{:config("official.website")}').hostname;var u=new URL(url,'{:config("official.service")}');if(u.protocol!=='https:'||![serviceHost,websiteHost].includes(u.hostname))throw new Error();window.open(u.href,'_blank','noopener');}catch(e){layer.msg('官网详情页地址无效',{icon:2});}}
 	function renderCards(items){
 		var $grid=$('#marketGrid').empty();
 		if(!items.length){
-			$grid.append('<div class="market-empty">没有找到符合条件的插件</div>');
+			$grid.append('<div class="market-empty miu-i18n-ui-label">没有找到符合条件的插件</div>');
 			return;
 		}
 		items.forEach(function(item){
@@ -106,16 +111,16 @@ layui.use(['form','laypage'],function(){
 					src:coverUrl,
 					alt:name+'封面'}
 				).on('error',function(){
-					$cover.empty().append('<div class="market-cover-empty">暂无封面图</div>');
+					$cover.empty().append('<div class="market-cover-empty miu-i18n-ui-label">暂无封面图</div>');
 				}));
 			}
-			else $cover.append('<div class="market-cover-empty">暂无封面图</div>');
+			else $cover.append('<div class="market-cover-empty miu-i18n-ui-label">暂无封面图</div>');
 			$cover.append($('<p class="market-card-badge"></p>').append($('<span class="market-tag"></span>').addClass(statusCls).text(statusText)));
 			var $title=$('<div class="market-title"></div>').append($('<h3></h3>').text(name)).append($('<div class="market-id"></div>').text(item.id||''));
 			$head.append($title,$('<span class="market-version"></span>').text('v'+(item.version||'-')));
 			var $desc=$('<p class="market-desc"></p>').text(item.description||'暂无简介');
 			var price=Number(item.price)>0?(item.currency||'')+' '+item.price:'免费';
-			var $meta=$('<div class="market-meta"></div>').append($('<span></span>').text(item.author||'')).append($('<span class="market-price"></span>').toggleClass('free',Number(item.price)<=0).text(price));
+			var $meta=$('<div class="market-meta"></div>').append($('<span></span>').text(item.author||'')).append($('<span class="market-price miu-i18n-ui-label"></span>').toggleClass('free',Number(item.price)<=0).text(price));
 			var $action=$('<div class="market-action"></div>');
 			if(item.downloaded)$action.append($('<span class="layui-badge layui-bg-gray">已下载</span>'));
 			else if(item.can_download)$action.append($('<button type="button" class="layui-btn layui-btn-sm layui-btn-normal">下载</button>').on('click',function(){downloadPlugin(item.id,$action);}));
@@ -142,7 +147,7 @@ layui.use(['form','laypage'],function(){
 		fillFilter($('#marketSource'),sourceOptions,'value','label',pendingSource);
 		fillFilter($('#marketCategory'),categoryOptions,'id','name',pendingCategory);
 		pendingPrice=$('#marketPrice').val()||'all';pendingSource=$('#marketSource').val()||'all';pendingCategory=$('#marketCategory').val()||'0';
-		form.render('select');
+		renderMarketFilters();
 	}
 	function downloadPlugin(id,$action){
 		var $button=$action.find('button').prop('disabled',true).text('下载中…');
@@ -159,7 +164,7 @@ layui.use(['form','laypage'],function(){
 	}
 	function loadMarket(page,keyword,limit,price,source,category,purchase){
 		activeKeyword=keyword;activeLimit=limit;activePrice=price||activePrice;activeSource=source||activeSource;activeCategory=category||activeCategory;activePurchase=purchase||activePurchase;
-		$('#marketGrid').html('<div class="market-empty">正在加载插件…</div>');$('#marketError').prop('hidden',true).text('');
+		$('#marketGrid').html('<div class="market-empty miu-i18n-ui-label">正在加载插件…</div>');$('#marketError').prop('hidden',true).text('');
 		$.getJSON("{:url('admin/plugin/market_list')}",{page:page,per_page:limit,keyword:keyword,price:activePrice,source:activeSource,category_id:activeCategory,purchase_status:activePurchase}).done(function(res){
 			if(Number(res.code)!==0){
 				$('#marketGrid').empty();$('#marketError').text(res.msg||'插件市场请求失败').prop('hidden',false);$('#marketPages').empty();
@@ -175,6 +180,7 @@ layui.use(['form','laypage'],function(){
 	form.on('select(marketSource)',function(data){pendingSource=data.value;});
 	form.on('select(marketCategory)',function(data){pendingCategory=data.value;});
 	form.on('select(marketPurchase)',function(data){pendingPurchase=data.value;});
+	renderMarketFilters();
 	loadMarket(1,'',activeLimit);
 	$('#marketSearch').on('click',function(){loadMarket(1,$('#marketKeyword').val().trim(),activeLimit,pendingPrice,pendingSource,pendingCategory,pendingPurchase);});
 	$('#marketKeyword').on('keydown',function(e){if(e.key==='Enter')$('#marketSearch').trigger('click');});

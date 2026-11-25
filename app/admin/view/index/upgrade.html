@@ -14,11 +14,11 @@
         <div class="layui-card-body">
             <div class="miu-upgrade-version">
                 <span>当前版本：<strong>{$upgradeStatus.current_version}</strong></span>
-                <span>最新版本：<strong>{$upgradeStatus.latest_version|default='—'}</strong></span>
+                <span>最新版本：<strong>{$upgradeStatus.latest_version|default=$upgradeStatus.current_version}</strong>{if condition="$upgradeStatus.latest_version eq '' && $upgradeStatus.error neq ''"} <small>（官网版本未确认）</small>{/if}</span>
             </div>
             <div class="miu-upgrade-note">升级包使用 RSA-SHA256 数字签名和 SHA-256 校验。每次只升级一个连续版本；执行前自动备份数据库和将要变更的程序文件，升级失败时尝试自动恢复。</div>
             {if condition="$upgradeStatus.error neq ''"}
-            <div class="miu-upgrade-error">{$upgradeStatus.error}</div>
+            <div class="miu-upgrade-error">{$upgradeStatus.error|raw}</div>
             {elseif condition="$upgradeStatus.available"}
             <p>发现可用增量升级：<strong>{$upgradeStatus.release.from_version}</strong> → <strong>{$upgradeStatus.release.version}</strong></p>
             <div class="miu-upgrade-actions" style="margin-top:18px">

@@ -70,6 +70,7 @@
             layui.use(['tinymce'], function(){
                 layui.tinymce.render({
                     selector: '#editor-container_' + fieldName,
+                    hidden_input: false, // Submit the named textarea via syncCustomFieldEditors.
                     height: 500,
                     toolbar: 'code undo redo | forecolor backcolor bold italic underline strikethrough removeformat | alignleft aligncenter alignright alignjustify outdent indent | bullist numlist table blockquote myimage myvideo codesample | formatselect fontselect fontsizeselect',
                     setup: function(inst){

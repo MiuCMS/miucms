@@ -36,14 +36,15 @@ class PluginInit
 
         $originalUrl = (string) $request->url(true);
         $response = $next($request);
-        if (app('http')->getName() === 'home' && $response instanceof \think\Response) {
+        if (app('http')->getName() === 'home' && $response instanceof \think\Response
+            && !$request->middleware('template_visual_preview', false)) {
             $hook->trigger('frontend_response', $request, $response, $originalUrl);
         }
 
         //控制器执行后：此时 request 上的 controller / action 已由路由分发填好
         $controller = (string) $request->controller();
         $action     = (string) $request->action();
-        if ($controller !== '') {
+        if ($controller !== '' && !$request->middleware('template_visual_preview', false)) {
             $hook->trigger('action_end', $controller, $action, $response);
         }
 

@@ -101,7 +101,7 @@
 					<div class="layui-col-md12">
 						<div class="layui-form-item">
 							<label class="layui-form-label">文档属性</label>
-							<div class="layui-input-block">
+								<div class="layui-input-block" id="document-attributes">
 								<input type="checkbox" name="is_head" value="1" lay-skin="tag" title="头条" lay-filter="" {if condition="$info.is_head eq 1"}checked{/if}>
 								<input type="checkbox" name="is_recommend" value="1" lay-skin="tag" title="推荐" lay-filter="" {if condition="$info.is_recommend eq 1"}checked{/if}>
 								<input type="checkbox" name="is_special" value="1" lay-skin="tag" title="特荐" lay-filter="" {if condition="$info.is_special eq 1"}checked{/if}>
@@ -503,6 +503,10 @@
 				data.field['docContent-markdown-doc'] = markdownContent;
 				data.field['docContent-html-code'] = markdownEditor.getHTML();
 			}
+			// Layui 会省略未勾选的复选框，编辑时要显式提交 0 才能清除旧状态。
+			$('#document-attributes input[type="checkbox"]').each(function () {
+				data.field[this.name] = this.checked ? 1 : 0;
+			});
 			// 明确提交两个正文处理选项的开关状态，未勾选时也发送 0。
 			data.field.editor_img_download_to_local = $('[name="editor_img_download_to_local"]').prop('checked') ? 1 : 0;
 			data.field.editor_img_clear_link = $('[name="editor_img_clear_link"]').prop('checked') ? 1 : 0;

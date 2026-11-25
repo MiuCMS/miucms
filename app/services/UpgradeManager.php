@@ -24,7 +24,7 @@ final class UpgradeManager
     public function check(): array
     {
         $lock = $this->acquireLock();
-        if (!$lock) return $this->errorStatus('升级任务正在执行，请稍后重试');
+        if (!$lock) return $this->errorStatus('正在检查更新');
         try {
             $recoveryError = $this->recoverInterruptedLocked();
             if ($recoveryError !== null) return $this->errorStatus($recoveryError);
@@ -256,7 +256,7 @@ final class UpgradeManager
         $manifestUrl = rtrim((string) config('official.upgrade'), '/') . '/upgrade/stable/latest.json';
         $body = @file_get_contents($manifestUrl, false, $context, 0, self::MAX_MANIFEST_BYTES + 1);
         $headers = $http_response_header ?? [];
-        if (!is_string($body)) throw new \RuntimeException('无法连接升级服务器，请检查服务器网络和 HTTPS 证书');
+        if (!is_string($body)) throw new \RuntimeException("<i class=\"layui-icon layui-icon-error\"></i> 无法连接升级服务器，请稍候再试~~ <br/><i class=\"layui-icon layui-icon-ok-circle\"></i> 升级服务器暂时不可用，但这并不影响你的站点运行！");
         if (strlen($body) > self::MAX_MANIFEST_BYTES) throw new \RuntimeException('升级清单超过 1MB，已停止读取');
         $statusLine = (string) ($headers[0] ?? '');
         if (!preg_match('/\s200(?:\s|$)/', $statusLine)) throw new \RuntimeException('升级服务器返回异常状态：' . ($statusLine ?: '未知'));

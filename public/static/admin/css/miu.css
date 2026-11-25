@@ -160,7 +160,7 @@ span.miu-btn-color span {
 .layui-card-header .layui-icon,.layui-card-header .pull-right{line-height: initial; position: absolute;right: 12px;top: 50%; margin-top: -9px}
 .layui-card-title,.layui-card-header {font-size: 15px;color:grey;padding: 6px;border-bottom:1px dashed #eee;margin-bottom: 6px;text-indent: 10px;}
 .layui-card-header h3 {font-size: 15px;}
-.layui-card-header a.tab-a,.layui-card-title a.tab-a{font-size: 14px!important;color:grey}
+/*.layui-card-header a.tab-a,.layui-card-title a.tab-a{font-size: 14px!important;color:grey}*/
 .layui-table td, .layui-table th{padding:8px;}
 .miu-picker .layui-layer-btn1{background-color:#f5f5f5}
 .miu-picker .layui-layer-btn2{background-color:#EAFAFF}
@@ -809,11 +809,11 @@ div.layui-table-main::-webkit-scrollbar-thumb:active{background-color:rgba(0,0,0
 /* 修复 TinyMCE 下拉框被父容器截断 */
 .tox-tinymce-aux { z-index: 19891015 !important; }
 .miu-doc-tagpicker{padding:12px 16px;background:#fff}
-.miu-doc-tagpicker .miu-tag-selected{min-height:48px;padding:5px 8px;border-bottom:1px solid #e7e8eb}
-.miu-doc-tagpicker .miu-tag-selected ul{display:inline}
-.miu-doc-tagpicker .miu-tag-selected li{display:inline-block;margin:4px;padding:3px 7px;border:1px solid #69d6fe;border-radius:3px;background:#e1f2ff;color:#01AAED;font-size:12px;line-height:20px}
+.miu-doc-tagpicker .miu-tag-selected{display:flex;align-items:center;flex-wrap:wrap;min-height:48px;padding:5px 8px;border-bottom:1px solid #e7e8eb}
+.miu-doc-tagpicker .miu-tag-selected ul{display:contents}
+.miu-doc-tagpicker .miu-tag-selected li{display:inline-block;box-sizing:border-box;max-width:calc(100% - 8px);overflow-wrap:anywhere;margin:4px;padding:3px 7px;border:1px solid #69d6fe;border-radius:3px;background:#e1f2ff;color:#01AAED;font-size:12px;line-height:20px}
 .miu-doc-tagpicker .miu-tag-selected a{padding-left:6px;color:#333;cursor:pointer}
-.miu-doc-tagpicker .miu-tag-input{width:190px;height:32px;margin:4px;border:0;outline:0}
+.miu-doc-tagpicker .miu-tag-input{flex:1 1 140px;min-width:0;height:32px;margin:4px;border:0;outline:0}
 .miu-doc-tagpicker .layui-tabs{margin-top:10px}
 .miu-doc-tagpicker .layui-tabs-body{max-height:320px;overflow-y:auto}
 .miu-doc-tagpicker .miu-tag-list{padding:14px}
@@ -861,4 +861,109 @@ div.layui-table-main::-webkit-scrollbar-thumb:active{background-color:rgba(0,0,0
   width: 100%;
   min-height: 120px;
   resize: vertical;
+}
+.dashboard-num table {width: 100%;}
+.dashboard-num td {text-align: center; padding: 16px 0; width: 16.6%;border-left: 1px solid #f1f1f1; position: relative;}
+.dashboard-num td:nth-child(1) { border-left: none}
+.dashboard-num .num-title { padding-bottom: 10px; color: #999;}
+.dashboard-num .blue {font-size: 18px; font-weight: 100;padding:6px 0;font-family: Georgia, "Times New Roman", serif;}
+.dashboard-num .blue.tab-a {font-size: 22px; font-weight: 900;}
+.quick-nav{display:flex;flex-wrap:wrap;gap:12px;}
+.quick-nav-item{box-sizing:border-box;display:flex;flex:0 1 calc(16.6667% - 10px);min-width:96px;flex-direction:column;align-items:center;text-align:center;padding:0 8px 12px;cursor:pointer;}
+.dashboard-num.quick .quick-nav-item .blue{display:flex;align-items:center;justify-content:center;min-height:58px;line-height:1;padding:8px 0 4px;}
+.dashboard-num td .badge span { padding: 2px 4px; font-size: 12px; border-radius: 0 0 0 4px;}
+.dashboard-num.quick .quick-nav-item:hover .num-title{color:#1A75FF;}
+.dashboard-num.quick .blue .miuico {
+    font-size: 36px;line-height: 42px;opacity: .65;transition:filter .3s ease,opacity .3s ease,transform .3s ease;
+    -webkit-filter: drop-shadow(4px 4px 4px rgba(97, 97, 97, 0.4));
+    filter: drop-shadow(4px 4px 4px rgba(97, 97, 97, 0.4));
+    background:linear-gradient(85deg,#0062ff -3.15%,#cb50ff 98.89%);background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent
+}
+.dashboard-num.quick .quick-nav-item:hover .miuico{
+    opacity:1;background-image:linear-gradient(85deg,#0056e8 -3.15%,#b13ef0 98.89%);
+}
+.dashboard-num:not(.quick) .blue {
+    opacity:.95;transition:filter .3s ease,opacity .3s ease,transform .3s ease;
+    -webkit-filter:drop-shadow(4px 4px 4px rgba(97,97,97,.4));
+    filter:drop-shadow(4px 4px 4px rgba(97,97,97,.4));
+    background:linear-gradient(85deg,#0062ff -3.15%,#cb50ff 98.89%);background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent
+}
+.dashboard-num:not(.quick) td:hover .blue {
+    opacity:1;transform:scale(1.1);background-image:linear-gradient(85deg,#0056e8 -3.15%,#b13ef0 98.89%)
+}
+.dashboard-total td {border-top: 1px solid #f1f1f1}
+.dashboard-logs .layui-timeline-item {padding-bottom: 1px;}
+.info-td { width: 110px; text-align: right;background-color: #fafafa; color: #999; padding: 5px 3px;}
+.layui-card-body .layui-timeline-title {padding-bottom: 0;font-size: 14px;}
+.layui-card-body .layui-timeline-item {padding-bottom:0;}
+.tab-a{cursor: pointer;}
+.dashboard-help {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+.dashboard-help .layui-btn {margin: 0; padding: 0 6px;}
+.dashboard-help .layui-btn:focus-visible {outline: 2px solid currentColor; outline-offset: 2px;}
+.upgrade-panel {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px; border-radius: 10px;
+    border: 1px solid #ececf1; background: #f7f8fa;
+    transition: background .3s ease, border-color .3s ease;
+}
+.upgrade-panel-icon {
+    flex: 0 0 42px; width: 42px; height: 42px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: #fff; color: #8c9bab;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .06);
+}
+.upgrade-panel-icon .layui-icon {font-size: 22px;}
+.upgrade-panel.is-loading .upgrade-panel-icon .layui-icon {display: inline-block; animation: miu-spin 1s linear infinite;}
+.upgrade-panel.is-latest {background: linear-gradient(135deg, #f0faf8, #e6f5f0); border-color: #c9e8de;}
+.upgrade-panel.is-latest .upgrade-panel-icon {color: #009688;}
+.upgrade-panel.is-update {background: linear-gradient(135deg, #fff8f1, #ffeee4); border-color: #ffd9c2;}
+.upgrade-panel.is-update .upgrade-panel-icon {color: #ff5722;}
+.upgrade-panel-main {flex: 0 1 auto; min-width: 0; margin-right: 116px;}
+.upgrade-panel-title {margin: 0; font-size: 14px; font-weight: 700; color: #333; overflow-wrap: anywhere;}
+.upgrade-panel-title.is-accent {color: #ff5722;}
+.upgrade-panel-title.is-muted {color: #999; font-weight: 500; font-size: 13px;}
+.upgrade-panel-meta {display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 8px;}
+.upgrade-panel-meta[hidden] {display: none;}
+.upgrade-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 1px 10px; border-radius: 999px;
+    font-size: 12px; line-height: 20px;
+    background: #fff; color: #666; border: 1px solid #ececf1;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
+}
+.upgrade-chip.is-new {color: #ff5722; border-color: #ffcdb0; font-weight: 600;}
+.upgrade-arrow {color: #c2c6cc; font-size: 12px;}
+.upgrade-panel-btn {
+    flex: 0 0 auto; display: inline-flex; align-items: center; gap: 4px;
+    padding: 0 16px; height: 32px; border-radius: 999px;
+    font-size: 13px; color: #fff; white-space: nowrap;
+    background: linear-gradient(135deg, #ff9d38, #ff5722);
+    box-shadow: 0 4px 10px rgba(255, 87, 34, .3);
+    transition: filter .2s ease;
+}
+.upgrade-panel-btn .layui-icon {font-size: 12px;}
+.upgrade-panel-btn:hover {color: #fff; filter: brightness(1.06);}
+.upgrade-panel-btn:focus-visible {outline: 2px solid currentColor; outline-offset: 2px;}
+@keyframes miu-spin {to {transform: rotate(360deg);}}
+@media (max-width: 480px) {.upgrade-panel {flex-wrap: wrap;} .upgrade-panel-main {margin-right: 0;}}
+.dashboard-official-news {margin: 0; padding-inline-start: 1.6em;}
+.dashboard-official-news li {list-style: decimal; overflow-wrap: anywhere; font-size: 16px; line-height: 1.75;}
+.dashboard-official-news li + li {margin-top: 6px;}
+@media (max-width: 360px) {
+    .dashboard-help {grid-template-columns: repeat(2, minmax(0, 1fr));}
+}
+.dashboard-access-chart {
+    min-height: 244px;
+    border-left: 1px solid rgba(128, 128, 128, .24);
+    border-bottom: 1px solid rgba(128, 128, 128, .24);
+    background: repeating-linear-gradient(to top, transparent 0 calc(20% - 1px), rgba(128, 128, 128, .12) calc(20% - 1px) 20%);
+}
+.dashboard-access-year {
+    min-height: 220px;
+    background: repeating-linear-gradient(to right, transparent 0 calc(100% / 12 - 1px), rgba(128, 128, 128, .12) calc(100% / 12 - 1px) calc(100% / 12)),
+    repeating-linear-gradient(to top, transparent 0 calc(100% / 7 - 1px), rgba(128, 128, 128, .12) calc(100% / 7 - 1px) calc(100% / 7));
 }

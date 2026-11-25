@@ -55,7 +55,7 @@ abstract class PluginBase
     protected string $description = '';
 
     /**
-     * 插件图标类名（Layui 图标如 layui-icon-star，或米柚自定义图标如 miuai-AI）。
+     * 插件图标类名，如 layui-icon-star、miu-tongji-o 或 miuai-AI。
      * 加后台菜单时会用这个图标；留空则用默认的 layui-icon-star。
      * @var string
      */
@@ -118,14 +118,13 @@ abstract class PluginBase
     }
 
     /**
-     * 插件图标（layui 图标类名）；没设置或格式不对时回退到默认图标
+     * 返回插件图标类名，留空或格式无效时使用默认图标。
      * @return string
      */
     public function getIcon(): string
     {
         $icon = trim($this->icon);
-        //兼容 Layui 图标及当前图标库的 miuai- 自定义图标，同时限制字符避免注入任意 HTML 属性内容。
-        if ($icon === '' || !preg_match('/^(?:layui-icon-[a-z0-9-]+|miuai-[A-Za-z0-9_-]+)$/', $icon)) {
+        if (!preg_match('/\A(?:(?:layui-icon|miu)-[a-z0-9-]+|miuai-[A-Za-z0-9_-]+)\z/', $icon)) {
             return 'layui-icon-star';
         }
         return $icon;
@@ -303,6 +302,9 @@ abstract class PluginBase
 
     /** 用户注册（$data 可修改） */
     public function userRegister(array &$data): void {}
+
+    /** 用户注册成功，参数为已保存的用户 ID。 */
+    public function userRegistered(int $id): void {}
 
     /** 用户登录（$user 可修改） */
     public function userLogin(array &$user): void {}

@@ -8,6 +8,10 @@ return [
     // app/admin/view/index/main.html。
     'website' => 'https://www.miucms.com',
 
+    // 官方动态 JSON 接口，供后台首页异步加载新闻。
+    // 调用：app/admin/controller/Index.php。
+    'news_feed' => 'https://www.miucms.com/api/official-news',
+
     // CMS 版本清单和升级包所在站点。
     // 调用：app/services/UpgradeManager.php。
     'upgrade' => 'https://www.miucms.com',
@@ -16,7 +20,7 @@ return [
     // 调用：app/install/view/index/step1.html。
     'demo' => 'https://demo.miucms.com',
 
-    // MiuCMS 文档站：后台首页“开发文档”入口。
+    // MiuCMS 文档站：后台首页“帮助中心”入口。
     // 调用：app/admin/view/index/main.html。
     'docs' => 'https://docs.miucms.com',
 

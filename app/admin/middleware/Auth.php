@@ -9,6 +9,7 @@ declare (strict_types = 1);
 
 namespace app\admin\middleware;
 
+use app\services\AdminDemo;
 use think\facade\Cache;
 use think\facade\Db;
 use think\facade\Session;
@@ -17,9 +18,30 @@ class Auth
 {
     public function handle($request, \Closure $next)
     {
+        if (AdminDemo::isReadOnly()) {
+            // 路由解析后检查实际执行的操作，兼容后台别名及动态地址。
+            app()->middleware->unshift(function ($request, \Closure $dispatch) {
+                $route = $request->controller(true) . '/' . $request->action(true);
+                if (AdminDemo::blocks($request, $route)) {
+                    return AdminDemo::denied($request);
+                }
+                if ($route === 'think/captcha/captchacontroller/index') {
+                    return $dispatch($request);
+                }
+                return $this->authorize($request, $dispatch, $route);
+            }, 'route');
+
+            return $next($request);
+        }
+
+        return $this->authorize($request, $next);
+    }
+
+    private function authorize($request, \Closure $next, ?string $demoRoute = null)
+    {
         //获取模块名称
         $controller = app('http')->getName();
-        $pathInfo = str_replace('.' . $request->ext(), '', $request->pathInfo());
+        $pathInfo = $demoRoute ?? str_replace('.' . $request->ext(), '', $request->pathInfo());
         $action = explode('/', $pathInfo)[0];
         //dump($controller);exit;
         if ($pathInfo == '' || $action == '') {
@@ -84,43 +106,7 @@ class Auth
      */
     protected function checkAuth($controller, $pathInfo, $action, $uid)
     {
-        //Cache::delete('RulesSrc' . $uid);
-        if (!Cache::get('RulesSrc' . $uid) || !Cache::get('RulesSrc0')) {
-            //用户所在权限组及所拥有的权限
-            // 执行查询
-            $user_groups = Db::name('AdminGroupAccess')
-                ->alias('a')
-                ->join("AdminGroup g", "a.group_id=g.id", 'LEFT')
-                ->where("a.uid='{$uid}' and g.status='1'")
-                ->select()
-                ->toArray();
-            $groups = $user_groups ?: [];
-            $ids = []; //保存用户所属用户组设置的所有权限规则id
-            foreach ($groups as $g) {
-                $ids = array_merge($ids, explode(',', trim($g['rules'], ',')));
-            }
-            $ids = array_unique($ids);
-            //读取所有权限规则
-            $rules_all = Db::name('AdminRule')->field('src')->select();
-            //读取用户组所有权限规则
-            $rules = Db::name('AdminRule')->where('id', 'in', $ids)->field('src')->select();
-            //循环规则，判断结果。
-            $auth_list_all = [];
-            $auth_list = [];
-            foreach ($rules_all as $rule_all) {
-                $auth_list_all[] = strtolower($rule_all['src']);
-            }
-            foreach ($rules as $rule) {
-                $auth_list[] = strtolower($rule['src']);
-            }
-            //规则列表结果保存到Cache
-            Cache::tag('adminRules')->set('RulesSrc0', $auth_list_all, 36000);
-            Cache::tag('adminRules')->set('RulesSrc' . $uid, $auth_list, 36000);
-        } else {
-            $auth_list_all = Cache::get('RulesSrc0');
-            $auth_list = Cache::get('RulesSrc' . $uid);
-        }
-
+        $auth_list = self::allowedRoutes((int) $uid);
         $pathUrl = strtolower($controller . '/' . $pathInfo);
         if (in_array($pathUrl, $auth_list, true)) return true;
         if ($pathUrl !== 'admin/plugin/run') return false;
@@ -131,5 +117,25 @@ class Auth
         $pluginAction = (string) input('a/s', 'index');
         $query = http_build_query(['name' => $plugin, 'c' => $pluginController, 'a' => $pluginAction]);
         return in_array($pathUrl . '?' . strtolower($query), $auth_list, true);
+    }
+
+    public static function allowedRoutes(int $uid): array
+    {
+        $cacheKey = 'RulesSrc' . $uid;
+        $routes = Cache::get($cacheKey);
+        if (is_array($routes)) return $routes;
+
+        $groups = Db::name('AdminGroupAccess')->alias('a')
+            ->join('AdminGroup g', 'a.group_id = g.id')
+            ->where('a.uid', $uid)->where('g.status', 1)->column('g.rules');
+        $ids = [];
+        foreach ($groups as $rules) {
+            $ids = array_merge($ids, explode(',', (string) $rules));
+        }
+        $ids = array_unique(array_filter(array_map('intval', $ids)));
+        $routes = $ids ? Db::name('AdminRule')->whereIn('id', $ids)->column('src') : [];
+        $routes = array_map(static fn($route): string => strtolower((string) $route), $routes);
+        Cache::tag('adminRules')->set($cacheKey, $routes, 36000);
+        return $routes;
     }
 }

@@ -92,7 +92,7 @@ class Template
 
         $response = $next($request);
 
-        if ($response instanceof \think\Response) {
+        if ($response instanceof \think\Response && !$request->middleware('template_visual_preview', false)) {
             $html = (string) $response->getContent();
             if ($html !== '' && stripos($html, '</body>') !== false) {
                 PluginService::templateParse($html);

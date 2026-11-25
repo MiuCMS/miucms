@@ -9,6 +9,7 @@ declare (strict_types = 1);
 
 namespace app\home\controller;
 
+use app\services\AdminDemo;
 use think\facade\Cache;
 use think\facade\Session;
 
@@ -43,6 +44,12 @@ class Createhtml
      */
     public function start()
     {
+        if (request()->method(true) !== 'POST' || !request()->isPost()) {
+            return json(['code' => 1, 'msg' => '请使用 POST 请求'], 405, ['Allow' => 'POST']);
+        }
+        if (AdminDemo::isReadOnly()) {
+            return AdminDemo::denied(request());
+        }
         if (!$this->isAdmin()) {
             return json(['code' => 1, 'msg' => '请先登录后台']);
         }
@@ -80,6 +87,12 @@ class Createhtml
      */
     public function step()
     {
+        if (request()->method(true) !== 'POST' || !request()->isPost()) {
+            return json(['code' => 1, 'msg' => '请使用 POST 请求'], 405, ['Allow' => 'POST']);
+        }
+        if (AdminDemo::isReadOnly()) {
+            return AdminDemo::denied(request());
+        }
         if (!$this->isAdmin()) {
             return json(['code' => 1, 'msg' => '请先登录后台']);
         }

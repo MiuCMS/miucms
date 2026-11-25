@@ -9,6 +9,8 @@ namespace app\admin\controller;
 
 use app\admin\BaseController;
 use app\services\TemplateScaffold;
+use app\services\TemplateVisualEditor as VisualEditor;
+use RuntimeException;
 use think\facade\Db;
 use think\facade\View;
 
@@ -17,6 +19,10 @@ class Template extends BaseController
     /** 模板选择只保存在 config 表的 template 分组，不再写入网站配置。 */
     public function setting()
     {
+        $visual = $this->request->get('visual/s', '');
+        if ($visual !== '') {
+            return $this->visual($visual);
+        }
         // 创建与启用共用模板设置入口，沿用现有后台权限，不另外开放免鉴权的生成接口。
         if (request()->isPost() && request()->post('operation') === 'create') {
             try {
@@ -95,6 +101,7 @@ class Template extends BaseController
 
         View::assign([
             'templates' => $templates,
+            'visualEntries' => VisualEditor::entryKeys($templates),
             'current' => get_current_template(),
             'cmsVersion' => (string) CMS_VERSION,
             'stats' => [
@@ -104,5 +111,77 @@ class Template extends BaseController
             ],
         ]);
         return view();
+    }
+
+    private function visual(string $operation)
+    {
+        $request = $this->request;
+        $this->requireRequestMethod(in_array($operation, ['save', 'undo', 'restore'], true) ? 'POST' : 'GET');
+        if ($operation === 'open') {
+            $ticket = VisualEditor::open($request->get('name/s', ''), $request->get('key/s', ''));
+            return redirect((string) url('admin/template/setting') . '?visual=editor&ticket=' . $ticket);
+        }
+        $ticket = $request->get('ticket/s', '');
+        $entry = VisualEditor::session($ticket);
+        $theme = $entry['theme'];
+        $headers = ['Cache-Control' => 'private, no-store', 'Referrer-Policy' => 'no-referrer'];
+        if ($operation === 'editor') {
+            $pages = VisualEditor::describe($theme);
+            return view('template/visual', [
+                'theme' => $theme,
+                'visualConfig' => json_encode([
+                    'ticket' => $ticket,
+                    'pages' => $pages,
+                    'static' => (int) url_config()['mode'] === 2 && $theme === get_current_template(),
+                ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR),
+            ])->header($headers);
+        }
+        if ($operation === 'files' && !$request->isAjax()) {
+            return view('files/index', [
+                'visualFilePickerUrl' => (string) url('admin/template/setting') . '?visual=files&ticket=' . $ticket,
+            ])->header($headers);
+        }
+        try {
+            if ($operation === 'files') {
+                if ($request->get('groups/d', 0) === 1) {
+                    $data = Db::name('FileGroup')->where('delete_time', 0)->field('id,title')->select()->toArray();
+                } else {
+                    $images = VisualEditor::media($request->get('page/d', 1), $request->get('keywords/s', ''), $request->get('group_id/s', ''));
+                    return json(['code' => 0, 'count' => $images['total'], 'data' => $images['rows']], 200, $headers);
+                }
+            } elseif ($operation === 'history') {
+                $data = VisualEditor::historyFiles($theme);
+            } elseif ($operation === 'lookup') {
+                $keyword = $request->get('keyword/s', '');
+                $page = $request->get('page/d', 1);
+                $data = match ($request->get('type/s', '')) {
+                    'document' => VisualEditor::documents($request->get('nav/d', 0), $page, $keyword),
+                    'tag' => VisualEditor::tags($page, $keyword),
+                    'image' => VisualEditor::media($page, $keyword),
+                    default => throw new RuntimeException('不支持的数据类型'),
+                };
+            } elseif ($operation === 'state' || in_array($operation, ['save', 'undo', 'restore'], true)) {
+                $file = VisualEditor::file($theme, $request->get('file/s', ''));
+                if ($operation === 'state') {
+                    $data = VisualEditor::state($file);
+                } else {
+                    if (!valid_admin_csrf()) {
+                        return json(['code' => 1, 'msg' => '页面令牌已失效，请刷新后再试'], 403, $headers);
+                    }
+                    $data = VisualEditor::change($file, $request->post('revision/s', ''), $operation, $request->post(false), $entry['admin']);
+                    if ($theme === get_current_template()) {
+                        clear_tpl_cache();
+                    }
+                }
+            } else {
+                throw new RuntimeException('不支持的模板编辑操作');
+            }
+            return json(['code' => 0, 'data' => $data], 200, $headers);
+        } catch (\Throwable $error) {
+            if (!$error instanceof RuntimeException) {
+                trace('可视化模板编辑失败：' . $error->getMessage(), 'error');
+            }
+            return json(['code' => 1, 'msg' => $error instanceof RuntimeException ? $error->getMessage() : '模板操作失败，请稍后重试'], 200, $headers);
+        }
     }
 }

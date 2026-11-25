@@ -85,7 +85,7 @@
 							for (var i = 0; i < selected.length; i++) {
 								html += '<li data-id="' + escapeHtml(selected[i].id) + '" data-title="' + escapeHtml(selected[i].title) + '">' + escapeHtml(selected[i].title) + '<a class="miu-tag-remove" title="删除">×</a></li>';
 							}
-							$selectedList.html(html || '<span style="color:#aaa;line-height:32px">请选择标签</span>');
+							$selectedList.html(html || '<span style="color:#aaa;line-height:32px"><span>请选择标签</span>：</span>');
 							layero.find('.miu-tag-list li[data-id]').each(function () {
 								$(this).toggleClass('a_cur', isSelected($(this).attr('data-id')));
 							});

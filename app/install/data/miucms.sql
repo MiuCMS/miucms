@@ -1,71 +1,6 @@
 SET FOREIGN_KEY_CHECKS=0;
 
 -- ----------------------------
--- Table structure for miu_access_bot_stat
--- ----------------------------
-DROP TABLE IF EXISTS `miu_access_bot_stat`;
-CREATE TABLE `miu_access_bot_stat` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `event_key` char(64) CHARACTER SET ascii DEFAULT NULL,
-  `bot_name` varchar(40) NOT NULL,
-  `ip` varchar(45) CHARACTER SET ascii NOT NULL,
-  `page_url` varchar(500) NOT NULL,
-  `status_code` smallint(5) unsigned NOT NULL,
-  `collector` varchar(8) CHARACTER SET ascii NOT NULL,
-  `verified` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `checked_at` int(10) unsigned NOT NULL DEFAULT '0',
-  `create_time` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_event_key` (`event_key`),
-  KEY `idx_create_time` (`create_time`),
-  KEY `idx_bot_verify` (`bot_name`,`checked_at`,`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='爬虫访问统计' AUTO_INCREMENT=1;
-
--- ----------------------------
--- Records of miu_access_bot_stat
--- ----------------------------
-
--- ----------------------------
--- Table structure for miu_access_stat
--- ----------------------------
-DROP TABLE IF EXISTS `miu_access_stat`;
-CREATE TABLE `miu_access_stat` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `visitor_id` varchar(64) NOT NULL DEFAULT '' COMMENT '访客标识（前端 localStorage 生成，用于区分同一个人）',
-  `ip` varchar(64) NOT NULL DEFAULT '' COMMENT '访客IP',
-  `browser` varchar(32) NOT NULL DEFAULT '' COMMENT '浏览器',
-  `os` varchar(32) NOT NULL DEFAULT '' COMMENT '操作系统',
-  `page_url` varchar(500) NOT NULL DEFAULT '' COMMENT '受访页面完整网址',
-  `page_title` varchar(255) NOT NULL DEFAULT '' COMMENT '页面标题',
-  `from_page` varchar(500) NOT NULL DEFAULT '' COMMENT '来源页面地址',
-  `source_site` varchar(255) NOT NULL DEFAULT '' COMMENT '来源站点域名，空=直接访问',
-  `status_code` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'HTTP状态码，0=未知',
-  `is_entry` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否本次会话的入口页',
-  `stay_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '停留时长（秒）',
-  `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '首次打开时间',
-  `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '最后更新时间',
-  `session_id` char(32) CHARACTER SET ascii NOT NULL DEFAULT '',
-  `source_type` varchar(16) CHARACTER SET ascii NOT NULL DEFAULT 'unknown',
-  `session_source` varchar(255) NOT NULL DEFAULT '',
-  `utm_source` varchar(100) NOT NULL DEFAULT '',
-  `utm_medium` varchar(100) NOT NULL DEFAULT '',
-  `utm_campaign` varchar(100) NOT NULL DEFAULT '',
-  `device_type` varchar(16) CHARACTER SET ascii NOT NULL DEFAULT 'unknown',
-  PRIMARY KEY (`id`),
-  KEY `idx_create_time` (`create_time`),
-  KEY `idx_page_url` (`page_url`(191)),
-  KEY `idx_is_entry` (`is_entry`),
-  KEY `idx_ip` (`ip`),
-  KEY `idx_visitor_id` (`visitor_id`),
-  KEY `idx_visitor_time` (`visitor_id`,`create_time`,`id`),
-  KEY `idx_session_time` (`session_id`,`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='前台访问统计' AUTO_INCREMENT=1;
-
--- ----------------------------
--- Records of miu_access_stat
--- ----------------------------
-
--- ----------------------------
 -- Table structure for miu_admin
 -- ----------------------------
 DROP TABLE IF EXISTS `miu_admin`;
@@ -93,6 +28,16 @@ CREATE TABLE `miu_admin` (
 -- ----------------------------
 -- Records of miu_admin
 -- ----------------------------
+
+-- ----------------------------
+-- Table structure for miu_quick_nav
+-- ----------------------------
+DROP TABLE IF EXISTS `miu_quick_nav`;
+CREATE TABLE `miu_quick_nav` (
+  `admin_id` int(11) unsigned NOT NULL,
+  `items` text NOT NULL,
+  PRIMARY KEY (`admin_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='管理员快捷导航';
 
 -- ----------------------------
 -- Table structure for miu_admin_group
@@ -875,19 +820,6 @@ CREATE TABLE `miu_keywords` (
 -- Records of miu_keywords
 -- ----------------------------
 INSERT INTO `miu_keywords` VALUES ('1', '米柚CMS', '0', '4', '1', '3', '0', '0');
-INSERT INTO `miu_keywords` VALUES ('2', '奇点手机', '0', '2', '-1', '0', '1792183235', '1794319741');
-INSERT INTO `miu_keywords` VALUES ('3', 'AI原生', '0', '0', '-1', '0', '1792183235', '1794319741');
-INSERT INTO `miu_keywords` VALUES ('4', '游戏性能', '0', '8', '-1', '0', '1792184883', '1794319741');
-INSERT INTO `miu_keywords` VALUES ('5', '移动影像', '0', '4', '-1', '0', '1792184907', '1794319741');
-INSERT INTO `miu_keywords` VALUES ('6', 'AI功能', '0', '0', '-1', '0', '1792398363', '1794319741');
-INSERT INTO `miu_keywords` VALUES ('7', '操作指南', '0', '1', '-1', '0', '1792398363', '1794319741');
-INSERT INTO `miu_keywords` VALUES ('8', '智能手机', '0', '0', '-1', '0', '1792398363', '1794319741');
-INSERT INTO `miu_keywords` VALUES ('9', '科技生活', '0', '0', '-1', '0', '1792398363', '1794319741');
-INSERT INTO `miu_keywords` VALUES ('10', '端侧AI', '0', '0', '-1', '0', '1793857958', '1794319741');
-INSERT INTO `miu_keywords` VALUES ('11', '智能体', '0', '0', '-1', '0', '1793857958', '1794319741');
-INSERT INTO `miu_keywords` VALUES ('12', '手机AI', '0', '0', '-1', '0', '1793857958', '1794319741');
-INSERT INTO `miu_keywords` VALUES ('13', '移动开发', '0', '0', '-1', '0', '1793904188', '1794319741');
-INSERT INTO `miu_keywords` VALUES ('14', 'AI工程', '0', '1', '-1', '0', '1793904188', '1794319741');
 
 -- ----------------------------
 -- Table structure for miu_keywords_group
@@ -928,45 +860,6 @@ CREATE TABLE `miu_links` (
 -- Records of miu_links
 -- ----------------------------
 INSERT INTO `miu_links` VALUES ('1', '米柚CMS', '0', 'https://www.miucms.com', '1', '1', '1', '1624516962', '1624517078');
-
--- ----------------------------
--- Table structure for miu_miu_comment_comment
--- ----------------------------
-DROP TABLE IF EXISTS `miu_miu_comment_comment`;
-CREATE TABLE `miu_miu_comment_comment` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '评论ID',
-  `doc_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '文章ID',
-  `parent_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '回复的评论ID',
-  `user_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '会员ID，游客为0',
-  `nickname` varchar(40) NOT NULL DEFAULT '' COMMENT '评论昵称',
-  `email` varchar(190) NOT NULL DEFAULT '' COMMENT '游客邮箱，不公开展示',
-  `content` text NOT NULL COMMENT '评论内容',
-  `status` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '状态：0待审核，1通过，2拒绝',
-  `create_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '提交时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_doc_status_id` (`doc_id`,`status`,`id`),
-  KEY `idx_parent` (`parent_id`),
-  KEY `idx_email_time` (`email`,`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='文章评论' AUTO_INCREMENT=1;
-
--- ----------------------------
--- Records of miu_miu_comment_comment
--- ----------------------------
-
--- ----------------------------
--- Table structure for miu_miu_comment_like
--- ----------------------------
-DROP TABLE IF EXISTS `miu_miu_comment_like`;
-CREATE TABLE `miu_miu_comment_like` (
-  `comment_id` int(10) unsigned NOT NULL,
-  `voter_key` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  PRIMARY KEY (`comment_id`,`voter_key`),
-  CONSTRAINT `miu_miu_comment_like_ibfk_1` FOREIGN KEY (`comment_id`) REFERENCES `miu_miu_comment_comment` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='文章评论点赞';
-
--- ----------------------------
--- Records of miu_miu_comment_like
--- ----------------------------
 
 -- ----------------------------
 -- Table structure for miu_nav

@@ -11,7 +11,9 @@ namespace app\admin\controller;
 
 use app\admin\BaseController;
 use app\extend\plugin\PluginManager;
+use app\services\DashboardQuickNav;
 use app\services\UpgradeManager;
+use think\facade\Cache;
 use think\facade\Db;
 use think\facade\Session;
 use think\facade\View;
@@ -117,6 +119,19 @@ class Index extends BaseController
 
     public function main()
     {
+        View::assign('upgradeCsrfToken', $this->isUpgradeAdmin() ? $this->upgradeCsrfToken() : '');
+        $adminId = (int) get_login_admin('id');
+        $quickNavOptions = DashboardQuickNav::options($adminId);
+        $quickNavSelected = array_column(DashboardQuickNav::selected($adminId, $quickNavOptions), null, 'key');
+        $quickNavItems = [];
+        foreach ($quickNavSelected + $quickNavOptions as $key => $item) {
+            $quickNavItems[] = $item + ['selected' => isset($quickNavSelected[$key])];
+        }
+        View::assign([
+            'quickNavItems' => $quickNavItems,
+            'quickNavMin' => DashboardQuickNav::MIN_ITEMS,
+            'quickNavMax' => DashboardQuickNav::MAX_ITEMS,
+        ]);
         $install = false;
         if (file_exists(CMS_ROOT . 'app/install')) {
             $install = true;
@@ -137,6 +152,7 @@ class Index extends BaseController
         View::assign('tagsCount', $tagsCount);
         View::assign('messageCount', $messageCount);
         View::assign('TP_VERSION',\think\facade\App::version());
+        View::assign('MYSQL_VERSION', Db::query('SELECT VERSION() AS version')[0]['version'] ?? '');
         $dashboardWidgets = '';
         $dashboardShortcuts = '';
         \app\extend\plugin\Hook::instance()->trigger('admin_dashboard', $dashboardWidgets, $dashboardShortcuts);
@@ -146,6 +162,107 @@ class Index extends BaseController
         View::assign('dashboardWidgets', $dashboardWidgets);
         View::assign('dashboardShortcuts', $dashboardShortcuts);
         return View();
+    }
+
+    public function save_quick_nav()
+    {
+        $this->requireRequestMethod();
+        if (!valid_admin_csrf()) return to_assign(1, '请求无效，请刷新页面后重试');
+
+        $raw = request()->post('items');
+        $items = is_string($raw) && strlen($raw) <= 4096 ? json_decode($raw) : null;
+        if (!is_array($items)) return to_assign(1, '快捷入口格式不正确');
+        if (count($items) < DashboardQuickNav::MIN_ITEMS) {
+            return to_assign(1, '请至少选择 ' . DashboardQuickNav::MIN_ITEMS . ' 个快捷入口');
+        }
+        if (count($items) > DashboardQuickNav::MAX_ITEMS) {
+            return to_assign(1, '最多选择 ' . DashboardQuickNav::MAX_ITEMS . ' 个快捷入口');
+        }
+
+        $adminId = (int) get_login_admin('id');
+        $options = DashboardQuickNav::options($adminId);
+        $selected = [];
+        foreach ($items as $key) {
+            if (!is_string($key) || !isset($options[$key]) || isset($selected[$key])) {
+                return to_assign(1, '部分快捷入口不可用，请刷新页面后重新选择');
+            }
+            $selected[$key] = $options[$key];
+        }
+
+        try {
+            Db::name('quick_nav')->replace()->insert([
+                'admin_id' => $adminId,
+                'items' => json_encode(array_keys($selected), JSON_THROW_ON_ERROR),
+            ]);
+        } catch (\think\db\exception\PDOException $e) {
+            if (($e->getData()['PDO Error Info']['SQLSTATE'] ?? '') !== '42S02') throw $e;
+            return to_assign(1, '快捷导航数据表尚未创建，请先执行升级 SQL');
+        }
+        return to_assign(0, '快捷导航已保存');
+    }
+
+    public function official_news()
+    {
+        $this->requireRequestMethod('GET');
+        $feed = (string) config('official.news_feed');
+        $cacheKey = 'miucms_official_news_' . md5($feed);
+        if (!Cache::get($cacheKey . '_checked_v2')) {
+            $items = $this->fetchOfficialNews($feed);
+            if ($items !== null) {
+                Cache::set($cacheKey, $items);
+            }
+            // 官网异常时保留上次结果，并避免每次打开首页都重试。
+            Cache::set($cacheKey . '_checked_v2', true, $items === null ? 60 : 1800);
+        }
+
+        $items = Cache::get($cacheKey);
+        return json(['code' => is_array($items) ? 0 : 1, 'data' => $items ?? []]);
+    }
+
+    private function fetchOfficialNews(string $feed): ?array
+    {
+        if (!str_starts_with($feed, 'https://') || !filter_var(ini_get('allow_url_fopen'), FILTER_VALIDATE_BOOLEAN)) {
+            return null;
+        }
+
+        $context = stream_context_create([
+            'http' => ['timeout' => 3, 'follow_location' => 0, 'header' => "Accept: application/json\r\n"],
+            'ssl' => ['verify_peer' => true, 'verify_peer_name' => true],
+        ]);
+        $body = @file_get_contents($feed, false, $context, 0, 16385);
+        $headers = function_exists('http_get_last_response_headers') ? http_get_last_response_headers() : ($http_response_header ?? []);
+        if (!is_string($body) || strlen($body) > 16384 || !preg_match('/\s200(?:\s|$)/', $headers[0] ?? '')) {
+            return null;
+        }
+
+        $payload = json_decode($body, true);
+        if (($payload['code'] ?? null) !== 0 || !is_array($payload['data'] ?? null)) {
+            return null;
+        }
+
+        $hosts = [parse_url($feed, PHP_URL_HOST), parse_url((string) config('official.website'), PHP_URL_HOST)];
+        $items = [];
+        foreach (array_slice($payload['data'], 0, 5) as $row) {
+            $title = $row['title'] ?? null;
+            $url = $row['url'] ?? null;
+            if (!is_string($title) || trim($title) === '' || !is_string($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
+                return null;
+            }
+            $parts = parse_url($url);
+            if (($parts['scheme'] ?? '') !== 'https' || !in_array($parts['host'] ?? '', $hosts, true)
+                || isset($parts['user']) || isset($parts['pass'])) {
+                return null;
+            }
+            $color = is_string($row['title_color'] ?? null) ? trim($row['title_color']) : '';
+            $items[] = [
+                'title' => trim($title),
+                'url' => $url,
+                'title_color' => preg_match('/\A#(?:[0-9a-f]{3}|[0-9a-f]{6})\z/i', $color) ? $color : '',
+                'is_b' => in_array($row['is_b'] ?? 0, [1, '1', true], true),
+            ];
+        }
+
+        return $items;
     }
 	
 	//设置theme

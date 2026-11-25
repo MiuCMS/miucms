@@ -104,10 +104,12 @@ abstract class BaseController
         View::assign('login_top', $login_top);
 
         //插件钩子：控制器执行前（action_end 在 PluginInit 中间件里触发）
-        \app\services\PluginService::actionBegin(
-            (string) app('request')->controller(),
-            (string) app('request')->action()
-        );
+        if (!$this->request->middleware('template_visual_preview', false)) {
+            \app\services\PluginService::actionBegin(
+                (string) app('request')->controller(),
+                (string) app('request')->action()
+            );
+        }
     }
     // 检测用户登录状态
     protected function checkLogin()

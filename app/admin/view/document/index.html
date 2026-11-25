@@ -171,6 +171,7 @@
 		// 从 URL 读取初始 nav_id 筛选条件
 		var initUrlParams = new URLSearchParams(window.location.search);
 		var initNavId = initUrlParams.get('nav_id') || '';
+		var quickPublish = initUrlParams.get('quick_publish') === '1';
 		layui.pageTable = table.render({
 			id:'doc_table',
 			elem: '#article',
@@ -211,6 +212,10 @@
 				],
 			done: function(res, curr, count) {
 				curPage = curr || 1; // layui 官方回调参数，翻页/刷新后始终准确
+				if (quickPublish) {
+					quickPublish = false;
+					$('#article').next('.layui-table-view').find('[lay-event="addBtn"]').trigger('click');
+				}
 				var id = this.id;
 				// 表头批量审核下拉按钮
 				dropdown.render({

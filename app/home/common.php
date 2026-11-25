@@ -1304,7 +1304,7 @@ function miu_doc_flags(string $flag): array
  * 取哪些文档（优先级从高到低）：
  *   1) 当前是「搜索页」→ 用搜索条件（关键词 + 栏目 + 模型）
  *   2) 非搜索页传了 navid / mid / nid → 按指定栏目或模型取文档，不受当前栏目影响
- *   3) 都没传     → 有当前栏目就取当前栏目（含子栏目）的文档；没有（首页）就取所有栏目的文档
+ *   3) 都没传     → 依次按当前标签、当前栏目（含子栏目）或全站取文档
  *
  * 只取「已发布」的：is_del = 0（没进回收站）且 arcrank >= 0（arcrank = -1 是未审核，前台不展示）
  *
@@ -1363,7 +1363,7 @@ function miu_list(array $opt = []): array
     $search = miu_current_search();
 
     //miu_page_info() 只在「要分页的页面」渲染时被填过：
-    //栏目页由 miu_render_nav_list() 填（有 nav），搜索页由 Search::index() 填（没有 nav，但有 base_url）；
+    //栏目页有 nav，搜索页和标签页有 base_url，标签页还带 tag_id。
     //首页、详情页都是空的 —— 用它来判断当前是不是这种页面
     $pageInfo   = miu_page_info();
     $onListPage = !empty($pageInfo) && (!empty($pageInfo['nav']) || !empty($pageInfo['base_url']));
@@ -1386,10 +1386,7 @@ function miu_list(array $opt = []): array
             if ($limit !== '') {
                 //limit=0 沿用“空列表”语义，同时保持分页上下文有效。
                 $newInfo = ['nav' => $pageInfo['nav'] ?? nav_by_id($curNavId), 'page' => 1, 'count' => 1, 'total' => 0, 'size' => max(1, (int) ($pageInfo['size'] ?? 10))];
-                if (!empty($pageInfo['base_url'])) {
-                    $newInfo['base_url'] = $pageInfo['base_url'];
-                }
-                miu_page_info($newInfo);
+                miu_page_info($newInfo + $pageInfo);
                 return [];
             }
             $size = 10;
@@ -1415,10 +1412,17 @@ function miu_list(array $opt = []): array
         }
     }
 
+    // 示例预览中的当前列表使用临时文档，显式指定栏目的标签仍沿用真实数据。
+    $previewDocuments = \app\home\service\TemplateVisualSample::$documents;
+    if ($previewDocuments !== null && $navid === '' && $mid === 0 && $modelNid === '') {
+        return array_slice($previewDocuments, $offset, $onListPage ? $size : $count);
+    }
+
     // ---------------- 取哪些文档：先把「栏目范围 / 模型 / 关键词」定下来 ----------------
     //这几个值既决定 SQL，也进缓存键。栏目树是从 miu_nav_items()（缓存标记 homeNav）里算出来的，
     //后台改了栏目、清了 homeNav 之后这里算出来的 id 就变，缓存键跟着变，自然读不到旧数据。
     $keyword   = '';    //关键词（搜索页才有）
+    $tagId     = 0;     //当前标签页默认用标签限定文档
     $navIds    = null;  //限定的栏目id（含子栏目）；null = 不限栏目
     $channelId = 0;     //限定的模型id；0 = 不限模型
     $channelIds = [];   //nid 显式指定一个或多个内容模型时使用
@@ -1462,6 +1466,9 @@ function miu_list(array $opt = []): array
     } elseif ($mid > 0) {
         //显式指定模型 ID 时不套用当前栏目
         $channelId = $mid;
+    } elseif (!empty($pageInfo['tag_id'])) {
+        $tagId = (int) $pageInfo['tag_id'];
+        $includeHidden = false;
     } elseif ($curNavId > 0) {
         //当前栏目（含子栏目）
         $navIds = miu_nav_ids_with_children($curNavId);
@@ -1475,7 +1482,8 @@ function miu_list(array $opt = []): array
     $noCache = !empty($search) || $randomOrder;
 
     //影响 SQL 的条件全部进缓存键；titlelen 只影响标题截断，不进键（取出来后再截）
-    $cacheKey = 'public_v2_docList_' . md5(json_encode([
+    $cachePrefix = $tagId > 0 ? 'public_v2_docList_tag_' . $tagId . '_' : 'public_v2_docList_';
+    $cacheKey = $cachePrefix . md5(json_encode([
         'locale'  => \app\home\service\ContentI18n::locale(),
         'keyword' => $keyword,
         'navids'  => $navIds,
@@ -1491,11 +1499,15 @@ function miu_list(array $opt = []): array
 
     $cached = $noCache ? null : get_cache($cacheKey);
     if (!is_array($cached) || !array_key_exists('rows', $cached)) {
-        $query = \think\facade\Db::name('document')
-            ->where('is_del', 0)
-            ->where('status', 1)->where('arcrank', '>=', 0);
-        if (!$includeHidden) {
-            miu_exclude_hidden_nav_documents($query);
+        if ($tagId > 0) {
+            $query = miu_tag_document_query($tagId);
+        } else {
+            $query = \think\facade\Db::name('document')
+                ->where('is_del', 0)
+                ->where('status', 1)->where('arcrank', '>=', 0);
+            if (!$includeHidden) {
+                miu_exclude_hidden_nav_documents($query);
+            }
         }
 
         if ($keyword !== '') {
@@ -1565,7 +1577,9 @@ function miu_list(array $opt = []): array
             if (!$includeHidden) {
                 $cacheTags[] = 'homeNav';
             }
-            if ($navIds !== null) {
+            if ($tagId > 0) {
+                $cacheTags[] = 'docTag' . $tagId;
+            } elseif ($navIds !== null) {
                 $tagIds = [];
                 if ($navid !== '') {
                     foreach (array_map('intval', explode(',', $navid)) as $nid) {
@@ -1617,14 +1631,20 @@ function miu_list(array $opt = []): array
             'total' => max(0, $total - $offset),
             'size'  => $size,
         ];
-        //不是栏目页的（搜索页）要把 base_url 带上，否则 {miu:pagelist} 就拼不出分页链接了
-        if (!empty($pageInfo['base_url'])) {
-            $newInfo['base_url'] = $pageInfo['base_url'];
-        }
-        miu_page_info($newInfo);
+        // 保留标签页的 tag_id 和非栏目页的 base_url，供分页链接使用。
+        miu_page_info($newInfo + $pageInfo);
     }
 
-    // ---------------- 补模板常用字段 ----------------
+    return miu_doc_list_rows($rows, $titlelen);
+}
+
+/** 统一 {miu:list} 和标签页列表的文档字段。 */
+function miu_doc_list_rows(array $rows, int $titlelen = 0): array
+{
+    if (!$rows) {
+        return [];
+    }
+
     //栏目信息一次性取出来，避免每条文档都去查一遍
     $navItems = miu_nav_items(true);
     //各文档的标签一次性补齐，避免在循环里逐篇查询关键词表。
@@ -1636,6 +1656,7 @@ function miu_list(array $opt = []): array
 
         //复用列表页那套：补 url / date / add_time_text / nav_name / title_style
         $item = miu_doc_row($row, $nav);
+        $item['litpic'] = (string) ($item['litpic'] ?? '');
         $item['full_url'] = miu_full_url((string) $item['url']);
         $item['nid'] = (string) (get_channel((int) ($row['channel_id'] ?? 0))['nid'] ?? '');
 
@@ -1658,7 +1679,7 @@ function miu_list(array $opt = []): array
  * 只返回 id/title/url/full_url/click；原始标签行按标签 ID 做 homeTag 持久缓存，
  * 点击数复用 60 秒缓存，后台改标签会清 homeTag，文档增删改会清 Document。
  *
- * @param array $docRows miu_list() 已取出的文档行
+ * @param array $docRows 列表查询返回的文档行
  * @return array [文档ID => 标签列表]
  */
 function miu_doc_tag_lists(array $docRows): array
@@ -3247,7 +3268,7 @@ function miu_single_doc(int $navId, array $nav, string $table): array
  * @param int $page  页码，从 1 开始
  * @return \think\response\View|\think\response\Html
  */
-function miu_render_nav_list(int $navId, int $page = 1)
+function miu_render_nav_list(int $navId, int $page = 1, string $previewTemplate = '')
 {
     $navId = (int) $navId;
     $page  = max(1, (int) $page);
@@ -3290,7 +3311,8 @@ function miu_render_nav_list(int $navId, int $page = 1)
 
     //模板文件：栏目单独指定的「栏目模板」优先，否则用 list_<模型nid>
     //这里不做通用兜底模板，没对应文件就直接提示，免得用错模板还看不出来
-    $tplName = miu_nav_list_tpl($nav, $channel);
+    $tplName = $previewTemplate !== '' && \app\services\TemplateVisualEditor::$previewTheme !== ''
+        ? $previewTemplate : miu_nav_list_tpl($nav, $channel);
 
     if ($tplName === '') {
         $expect = miu_expect_list_tpl($nid);
@@ -3475,10 +3497,7 @@ function miu_render_tag_list(int $tagId, int $page = 1, ?array $tag = null)
         \think\facade\Cache::tag(['Document', 'docTag' . $tagId, 'homeNav'])->set($cacheKey, $cached, 86400);
     }
 
-    $list = [];
-    foreach ($cached['rows'] as $row) {
-        $list[] = miu_doc_row($row, nav_by_id((int) $row['nav_id']));
-    }
+    $list = miu_doc_list_rows($cached['rows']);
 
     $total     = (int) $cached['total'];
     $pageCount = max(1, (int) ceil($total / $pageSize));
@@ -3503,6 +3522,9 @@ function miu_render_tag_list(int $tagId, int $page = 1, ?array $tag = null)
         'nav'        => [
             'id'              => 0,
             'title'           => $tagTitle,
+            'title_ext_1'     => '',
+            'title_ext_2'     => '',
+            'litpic'          => '',
             'seo_title'       => $tagTitle,
             'seo_keywords'    => (string) ($tag['title'] ?? ''),
             'seo_description' => '标签「' . (string) ($tag['title'] ?? '') . '」下的所有文章',
@@ -3533,6 +3555,23 @@ function miu_tag_list_page_count(int $tagId): int
     $tagId = (int) $tagId;
     if ($tagId < 1) {
         return 1;
+    }
+
+    // 和栏目页一样，按模板实际使用的分页条数生成静态分页。
+    $previousInfo = miu_page_info();
+    $previousTag = miu_current_tag();
+    $wasBuilding = miu_building_static();
+    miu_building_static(true);
+    try {
+        if (is_string(miu_render_tag_list($tagId))) {
+            return max(1, (int) (miu_page_info()['count'] ?? 0));
+        }
+    } catch (\Throwable $e) {
+        // 模板渲染出错时沿用默认页数，实际生成阶段报告模板错误。
+    } finally {
+        miu_building_static($wasBuilding);
+        miu_current_tag($previousTag);
+        miu_page_info($previousInfo);
     }
 
     $pageSize = (int) (get_config('app.page_size') ?: 20);
@@ -3910,7 +3949,7 @@ function miu_js_str(string $html): string
  * @param int $docId 文档id
  * @return \think\response\View|\think\response\Html
  */
-function miu_render_doc_detail(int $docId)
+function miu_render_doc_detail(int $docId, string $previewTemplate = '')
 {
     $docId = (int) $docId;
 
@@ -3952,7 +3991,8 @@ function miu_render_doc_detail(int $docId)
     $table   = (string) ($channel['table'] ?? '');
 
     //模板文件：栏目单独指定的 > view_<模型nid> > view_default
-    $tplName = miu_doc_view_tpl($nav, $channel);
+    $tplName = $previewTemplate !== '' && \app\services\TemplateVisualEditor::$previewTheme !== ''
+        ? $previewTemplate : miu_doc_view_tpl($nav, $channel);
 
     if ($tplName === '') {
         $expect = miu_expect_view_tpl($nid);
@@ -4876,6 +4916,7 @@ function createhtml_plan(array $opt): array
 
     //这一轮真正要生成列表页的栏目（按日期时就是命中文档所在的那些栏目）
     $targetNavIds = $byDate ? $hitNavIds : $navIds;
+    $detailNavIds = [];
 
     /* ---- 模板预检：缺模板就整体停下，说清是哪个栏目、缺哪个文件 ---- */
     if ($needNav || $needDoc) {
@@ -4894,6 +4935,13 @@ function createhtml_plan(array $opt): array
             foreach ($targetNavIds as $navId) {
                 $nav     = nav_by_id($navId);
                 $channel = get_channel((int) ($nav['channel_id'] ?? 0));
+
+                // 单页和留言栏目的内容在栏目页呈现，不生成独立详情页。
+                if (in_array($channel['nid'] ?? '', ['single', 'clue'], true)) {
+                    continue;
+                }
+                $detailNavIds[$navId] = true;
+
                 if (miu_doc_view_tpl($nav, $channel) === '') {
                     $missing[] = '栏目「' . (string) $nav['title'] . '」缺详情模板 ' . miu_expect_view_tpl((string) ($channel['nid'] ?? ''));
                 }
@@ -4933,7 +4981,7 @@ function createhtml_plan(array $opt): array
     }
 
     /* ---- 文档页 ---- */
-    if ($needDoc) {
+    if ($detailNavIds) {
         if ($byDate) {
             //按日期：只用上面查出来的命中文档
             $docs = $hitDocs;
@@ -4942,7 +4990,7 @@ function createhtml_plan(array $opt): array
                 ->field('id, nav_id')
                 ->where('is_del', 0)
                 ->where('status', 1)->where('arcrank', '>=', 0)
-                ->whereIn('nav_id', $navIds);
+                ->whereIn('nav_id', array_keys($detailNavIds));
 
             try {
                 $docs = $query->order('id desc')->select()->toArray();
@@ -4953,6 +5001,9 @@ function createhtml_plan(array $opt): array
 
         foreach ($docs as $doc) {
             $navId = (int) $doc['nav_id'];
+            if (!isset($detailNavIds[$navId])) {
+                continue;
+            }
             $url   = doc_url(['id' => (int) $doc['id'], 'nav_id' => $navId], $navMap[$navId] ?? null);
             $items[] = [
                 'kind'   => 'doc',
@@ -5158,6 +5209,10 @@ function createhtml_run_item(array $item, ?string &$err = null): bool
         $err = $e->getMessage();
         return false;
     } finally {
+        if ($kind === 'tag') {
+            miu_current_tag([]);
+            miu_page_info([]);
+        }
         if ($hasCurrentUrl) {
             \app\home\service\TemplateI18n::setCurrentUrl($previousUrl);
         }

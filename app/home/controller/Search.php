@@ -41,7 +41,9 @@ class Search extends BaseController
         //插件钩子：搜索前（插件可修改关键词，比如做同义词扩展）
         \app\services\PluginService::searchBefore($keyword);
 
-        add_user_log('view', '搜索页', 0, $param);
+        if (!$this->request->middleware('template_visual_preview', false)) {
+            add_user_log('view', '搜索页', 0, $param);
+        }
 
         //搜索限定了栏目就高亮那个栏目，没限定就不高亮任何菜单。
         //要在 miu_nav_items() 第一次被用到之前设（下面的 miu_doc_row() 会用到它）

@@ -411,7 +411,7 @@ class Document extends BaseController{
                 sitemap_auto_push_document((int) $docId);
                 //生成静态模式下，按勾选重新生成受影响的静态页面（失败静默，不影响保存）
                 $savedDoc = Db::name('document')->field('id,nav_id,tag_ids')->where('id', $docId)->find() ?: [];
-                static_update_after_doc($savedDoc, 'edit', $oldNavId, (array) ($oldDoc['tag_ids'] ?? []), $oldDocUrl);
+                static_update_after_doc($savedDoc, 'edit', $oldNavId, static_tag_id_list($oldDoc['tag_ids'] ?? ''), $oldDocUrl);
                 return to_assign(0,'修改成功',['id'=>$docId]);
             }else{
                 return to_assign(1,'修改失败');

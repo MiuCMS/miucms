@@ -1,53 +1,15 @@
 {extend name="common/base"/}
 {block name="style"}
-
 <style>
-    .dashboard-num table {width: 100%;}
-    .dashboard-num td {text-align: center; padding: 16px 0; width: 16.6%;border-left: 1px solid #f1f1f1; position: relative;}
-    .dashboard-num td:nth-child(1) { border-left: none}
-    .dashboard-num .num-title { padding-bottom: 10px; color: #999;}
-    .dashboard-num .blue {font-size: 18px; font-weight: 100;padding:6px 0;font-family: Georgia, "Times New Roman", serif;}
-    .dashboard-num .blue.tab-a {font-size: 22px; font-weight: 900;}
-	.quick-nav{display:flex;flex-wrap:wrap;gap:12px;}
-	.quick-nav-item{box-sizing:border-box;display:flex;flex:0 1 calc(16.6667% - 10px);min-width:96px;flex-direction:column;align-items:center;text-align:center;padding:0 8px 12px;cursor:pointer;}
-	.dashboard-num.quick .quick-nav-item .blue{display:flex;align-items:center;justify-content:center;min-height:58px;line-height:1;padding:8px 0 4px;}
-    .dashboard-num td .badge span { padding: 2px 4px; font-size: 12px; border-radius: 0 0 0 4px;}
-	.dashboard-num.quick .quick-nav-item:hover .num-title{color:#1A75FF;}
-	.dashboard-num.quick .blue .miuico {
-		font-size: 36px;line-height: 42px;opacity: .65;transition:filter .3s ease,opacity .3s ease,transform .3s ease;
-		-webkit-filter: drop-shadow(4px 4px 4px rgba(97, 97, 97, 0.4));
-		filter: drop-shadow(4px 4px 4px rgba(97, 97, 97, 0.4));
-		background:linear-gradient(85deg,#0062ff -3.15%,#cb50ff 98.89%);background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent
-	}
-	.dashboard-num.quick .quick-nav-item:hover .miuico{
-		opacity:1;background-image:linear-gradient(85deg,#0056e8 -3.15%,#b13ef0 98.89%);
-	}
-	.dashboard-num:not(.quick) .blue {
-		opacity:.95;transition:filter .3s ease,opacity .3s ease,transform .3s ease;
-		-webkit-filter:drop-shadow(4px 4px 4px rgba(97,97,97,.4));
-		filter:drop-shadow(4px 4px 4px rgba(97,97,97,.4));
-		background:linear-gradient(85deg,#0062ff -3.15%,#cb50ff 98.89%);background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent
-	}
-	.dashboard-num:not(.quick) td:hover .blue {
-		opacity:1;transform:scale(1.1);background-image:linear-gradient(85deg,#0056e8 -3.15%,#b13ef0 98.89%)
-	}
-    .dashboard-total td {border-top: 1px solid #f1f1f1}
-    .dashboard-logs .layui-timeline-item {padding-bottom: 1px;}
-    .info-td { width: 110px; text-align: right;background-color: #fafafa; color: #999; padding: 5px 3px;}
-	.layui-card-body .layui-timeline-title {padding-bottom: 0;font-size: 14px;}
-	.layui-card-body .layui-timeline-item {padding-bottom:0;}
-	.tab-a{cursor: pointer;}
-	.dashboard-access-chart {
-		min-height: 244px;
-		border-left: 1px solid rgba(128, 128, 128, .24);
-		border-bottom: 1px solid rgba(128, 128, 128, .24);
-		background: repeating-linear-gradient(to top, transparent 0 calc(20% - 1px), rgba(128, 128, 128, .12) calc(20% - 1px) 20%);
-	}
-	.dashboard-access-year {
-		min-height: 220px;
-		background: repeating-linear-gradient(to right, transparent 0 calc(100% / 12 - 1px), rgba(128, 128, 128, .12) calc(100% / 12 - 1px) calc(100% / 12)),
-			repeating-linear-gradient(to top, transparent 0 calc(100% / 7 - 1px), rgba(128, 128, 128, .12) calc(100% / 7 - 1px) calc(100% / 7));
-	}
+	#dashboard-quick-nav-items {display: contents;}
+	#dashboard-quick-nav-items [hidden] {display: none;}
+	#custom_quick_bar {border: 0; background: transparent; font: inherit;}
+	#custom_quick_bar:focus-visible {outline: 2px solid currentColor; outline-offset: 2px;}
+	.dashboard-quick-nav-picker {padding: 16px 20px; max-height: max(80px, calc(100vh - 155px)); overflow: auto;}
+	.dashboard-quick-nav-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(min(120px, 100%), 1fr)); gap: 12px 8px;}
+	.dashboard-quick-nav-grid::before, .dashboard-quick-nav-grid::after {display: none;}
+	.dashboard-quick-nav-grid .layui-form-checkbox[lay-skin="primary"] {display: block; top: 0; margin-left: 0;}
+	.dashboard-quick-nav-grid .layui-form-checkbox[lay-skin="primary"] > div {display: block; padding: 0; white-space: normal; overflow-wrap: anywhere;}
 </style>
 {/block}
 <!-- 主体 -->
@@ -58,53 +20,17 @@
 		<div class="layui-row layui-col-space12">
 			<div class="layui-col-md12">
 				<div class="layui-card dashboard-num quick">
-					<div class="layui-card-title"><i class="layui-icon layui-icon-flag"></i> 快捷导航</div>
+					<div class="layui-card-title"><i class="layui-icon layui-icon-flag"></i> 快捷导航<a title="自定义快捷栏" id="custom_quick_bar" data-min="{$quickNavMin}" data-max="{$quickNavMax}" href="javascript:;" class="layui-font-12 right" style="padding: 5px 15px 0 0"> <i class="layui-font-12 layui-icon layui-icon-set"></i> </a></div>
 					<div class="quick-nav">
-						<div class="quick-nav-item tab-a" data-title="网站配置" data-id="1015" data-href="{:url('admin/conf/index')}">
-							<div class="blue"><i class="layui-icon miu-quanju-f miuico"></i></div>
-							<div class="num-title">网站配置</div>
-						</div>
-						<div class="quick-nav-item tab-a" data-title="URL配置" data-id="1026" data-href="{:url('admin/seo/index')}">
-							<div class="blue"><i class="layui-icon miuai-seo miuico"></i></div>
-							<div class="num-title">SEO设置</div>
-						</div>
-						<div class="quick-nav-item tab-a" data-title="Sitemap" data-id="55" data-href="{:url('admin/seo/sitemap')}">
-							<div class="blue"><i class="layui-icon miu-ditu-f miuico"></i></div>
-							<div class="num-title">Sitemap</div>
-						</div>
-						<div class="quick-nav-item tab-a" data-title="栏目" data-id="49" data-href="{:url('admin/nav/index')}">
-							<div class="blue"><i class="layui-icon miu-guanggao-f miuico"></i></div>
-							<div class="num-title">栏目管理</div>
-						</div>
-						<div class="quick-nav-item tab-a" data-title="内容" data-id="1000" data-href="{:url('admin/document/index')}">
-							<div class="blue"><i class="layui-icon miu-neirong-f miuico"></i></div>
-							<div class="num-title">文档管理</div>
+						<div id="dashboard-quick-nav-items">
+							{volist name="quickNavItems" id="quickNav"}
+							<div class="quick-nav-item tab-a" data-quick-nav="{$quickNav.key}" data-picker-order="{$quickNav.picker_order}" data-title="{$quickNav.title}" data-id="{$quickNav.id}" data-href="{$quickNav.href}" {if condition="!$quickNav.selected"}hidden{/if}>
+								<div class="blue"><i class="layui-icon {$quickNav.icon} miuico" aria-hidden="true"></i></div>
+								<div class="num-title" data-label="{$quickNav.label}">{$quickNav.label}</div>
+							</div>
+							{/volist}
 						</div>
 						{$dashboardShortcuts|raw}
-						<div class="quick-nav-item tab-a" data-title="留言管理" data-id="1038" data-href="{:url('admin/form/message')}">
-							<div class="blue"><i class="layui-icon miu-liuyan-f miuico"></i></div>
-							<div class="num-title">留言管理</div>
-						</div>
-						<div class="quick-nav-item tab-a" data-title="模型管理" data-id="119" data-href="{:url('admin/channel/index')}">
-							<div class="blue"><i class="layui-icon miu-xitong-f miuico"></i></div>
-							<div class="num-title">模型管理</div>
-						</div>
-						<div class="quick-nav-item tab-a" data-title="页面生成" data-id="1031" data-href="{:url('admin/seo/createhtml')}">
-							<div class="blue"><i class="layui-icon miuai-shengchengyemian miuico"></i></div>
-							<div class="num-title">页面生成</div>
-						</div>
-						<div class="quick-nav-item tab-a" data-title="插件" data-id="1051" data-href="{:url('admin/plugin/index')}">
-							<div class="blue"><i class="layui-icon layui-icon-app miuico"></i></div>
-							<div class="num-title">插件</div>
-						</div>
-						<div class="quick-nav-item tab-a" data-title="文件管理器" data-id="42" data-href="{:url('admin/files/index')}">
-							<div class="blue"><i class="layui-icon miu-wenjianjia-f miuico"></i></div>
-							<div class="num-title">文件管理器</div>
-						</div>
-						<div class="quick-nav-item tab-a" data-title="模板管理" data-id="1097" data-href="{:url('admin/tplmanage/index')}">
-							<div class="blue"><i class="layui-icon layui-icon-template-1 miuico"></i></div>
-							<div class="num-title">模板管理</div>
-						</div>
 					</div>
 				</div>
 				<div class="layui-card dashboard-num">
@@ -176,27 +102,26 @@
 					<tr>
 						<td class="info-td">服务器系统</td>
 						<td>{:get_system_info('os')}</td>
-						<td class="info-td">PHP版本</td>
-						<td>{:get_system_info('php')}</td>
-					</tr>
-					<tr>
-						<td class="info-td">上传附件限制</td>
-						<td>{:get_system_config('upload_max_filesize')}M / {:get_system_info('upload_max_filesize')}</td>
 						<td class="info-td">执行超时时间</td>
 						<td class="info-value">{:get_system_info('max_execution_time')}</td>
 					</tr>
 					<tr>
+						<td class="info-td">上传附件限制</td>
+						<td>{:get_system_config('upload_max_filesize')}M / {:get_system_info('upload_max_filesize')}</td>
+						<td class="info-td">PHP版本</td>
+						<td>{:get_system_info('php')}</td>
+					</tr>
+					<tr>
 						<td class="info-td">米柚CMS版本</td>
-						<td colspan="3">{:CMS_VERSION}<a class="layui-badge layui-bg-blue" style="margin-left:8px"
-							href="{:config('official.docs')}/" target="_blank">开发文档</a></td>
+						<td>{:CMS_VERSION}</td>
+						<td class="info-td">MySQL版本</td>
+						<td>{$MYSQL_VERSION}</td>
 					</tr>
 					<tr>
 						<td class="info-td">ThinkPHP版本</td>
-						<td colspan="3">{$TP_VERSION}</td>
-					</tr>
-					<tr>
+						<td>{$TP_VERSION}</td>
 						<td class="info-td">Layui版本</td>
-						<td colspan="3">{:LAYUI_VERSION}</td>
+						<td>{:LAYUI_VERSION}</td>
 					</tr>
 					<tr>
 						<td class="info-td">MiuCMS官网</td>
@@ -215,8 +140,43 @@
 			</div>
 		</div>
 
+		{if condition="$upgradeCsrfToken neq ''"}
+		<div class="layui-card" id="dashboard-upgrade" data-check-url="{:url('admin/index/upgrade_check')}" data-token="{$upgradeCsrfToken}">
+			<div class="layui-card-title"><i class="layui-icon layui-icon-upload-drag" aria-hidden="true"></i> 版本更新<a href="javascript:;" data-title="版本更新" data-id="1166" data-href="{:url('admin/index/upgrade')}" class="layui-font-12 right tab-a">版本更新 <i class="layui-font-12 layui-icon layui-icon-right"></i></a></div>
+			<div class="layui-card-body" style="padding:15px 25px 25px 25px">
+				<div id="dashboard-upgrade-panel" class="upgrade-panel is-loading">
+					<span id="dashboard-upgrade-badge" class="upgrade-panel-icon" aria-hidden="true"><i class="layui-icon layui-icon-loading"></i></span>
+					<div class="upgrade-panel-main">
+						<p id="dashboard-upgrade-status" class="upgrade-panel-title" role="status">正在检查版本…</p>
+						<div id="dashboard-upgrade-meta" class="upgrade-panel-meta" hidden></div>
+					</div>
+					<a id="dashboard-upgrade-link" class="upgrade-panel-btn tab-a" data-title="版本更新" data-id="1166" data-href="{:url('admin/index/upgrade')}" style="display:none">前往升级<i class="layui-icon layui-icon-right" aria-hidden="true"></i></a>
+				</div>
+			</div>
+		</div>
+		{/if}
+		<div class="layui-card" id="official-news-card" hidden>
+			<div class="layui-card-title"><i class="layui-icon layui-icon-speaker" aria-hidden="true"></i> 官方动态<a href="{:config('official.website')}/sitenews/" target="_blank" rel="noopener" class="layui-font-12 right" title="官方动态">查看更多 <i class="layui-font-12 layui-icon layui-icon-right"></i></a></div>
+			<div class="layui-card-body" style="padding:15px 0 25px 25px">
+				<p id="official-news-status" class="layui-font-gray" role="status">暂无官方动态</p>
+				<ol id="official-news" class="dashboard-official-news" hidden></ol>
+			</div>
+		</div>
 		<div class="layui-card">
-			<div class="layui-card-title"><i class="layui-icon layui-icon-list"></i> 后台日志<a class="layui-icon layui-icon-eye layui-font-12 right tab-a" data-title="后台日志" data-id="29" data-href="{:url('admin/api/log_list')}" title="后台日志">&emsp;</a></div>
+			<div class="layui-card-title"><i class="layui-icon miu-wenti-o"></i> 帮助中心<a href="{:config('official.docs')}/miucms/" target="_blank" rel="noopener" class="layui-font-12 right" title="帮助中心">查看更多 <i class="layui-font-12 layui-icon layui-icon-right"></i></a></div>
+			<div class="layui-card-body">
+				<nav class="dashboard-help" aria-label="帮助中心快捷入口" style="margin:5px 0 10px 0">
+					<a class="layui-btn layui-btn-primary layui-border" href="{:config('official.website')}/question" target="_blank" rel="noopener">常见问题</a>
+					<a class="layui-btn layui-btn-primary layui-border" href="{:config('official.docs')}/miucms/635430729/271158019" target="_blank" rel="noopener">文档发布</a>
+					<a class="layui-btn layui-btn-primary layui-border" href="{:config('official.docs')}/miucms/635430729/271158031" target="_blank" rel="noopener">常见问题</a>
+					<a class="layui-btn layui-btn-primary layui-border" href="{:config('official.docs')}/miucms/636562423/271158037" target="_blank" rel="noopener">模板开发</a>
+					<a class="layui-btn layui-btn-primary layui-border" href="{:config('official.docs')}/miucms/636562423/271158045" target="_blank" rel="noopener">标签参考</a>
+					<a class="layui-btn layui-btn-primary layui-border" href="{:config('official.docs')}/miucms/636719503/271158072" target="_blank" rel="noopener">插件开发</a>
+				</nav>
+			</div>
+		</div>
+		<div class="layui-card">
+			<div class="layui-card-title"><i class="layui-icon layui-icon-list"></i> 后台日志<a class="layui-icon layui-icon-eye layui-font-14 right tab-a" data-title="后台日志" data-id="29" data-href="{:url('admin/api/log_list')}" title="后台日志">&emsp;</a></div>
 			<div class="layui-card-body">
 				<ul class="layui-timeline" id="logs"></ul>
 			</div>
@@ -230,13 +190,113 @@
 <!-- 脚本 -->
 {block name="script"}
 <script>
+	function loadUpgradeStatus() {
+		var $card = $('#dashboard-upgrade');
+		if (!$card.length) return;
+		var $status = $('#dashboard-upgrade-status'), $link = $('#dashboard-upgrade-link');
+		var ICONS = {latest: 'layui-icon-ok-circle', update: 'layui-icon-upload', error: 'layui-icon-notice'};
+
+		function esc(s) {
+			return String(s).replace(/[&<>"']/g, function (c) {
+				return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c];
+			});
+		}
+
+		function chip(label, version, isNew) {
+			return '<span class="upgrade-chip' + (isNew ? ' is-new' : '') + '">' + label + ' v' + esc(version) + '</span>';
+		}
+
+		function render(status) {
+			var release = status && !status.error && status.available && status.release;
+			$link.toggle(Boolean(release));
+			var $badge = $('#dashboard-upgrade-badge'), $meta = $('#dashboard-upgrade-meta'), $panel = $('#dashboard-upgrade-panel');
+			$meta.prop('hidden', true).empty();
+			if (!status || status.error || !status.current_version) {
+				$panel.attr('class', 'upgrade-panel is-error');
+				$badge.find('.layui-icon').attr('class', 'layui-icon ' + ICONS.error);
+				$status.attr('class', 'upgrade-panel-title is-muted')
+					.text('暂时无法连接服务器，请稍候再试~~这并不影响你站点的运行');
+			} else if (release) {
+				$panel.attr('class', 'upgrade-panel is-update');
+				$badge.find('.layui-icon').attr('class', 'layui-icon ' + ICONS.update);
+				$status.attr('class', 'upgrade-panel-title is-accent').text('发现新版本');
+				$meta.html(chip('当前版本', status.current_version)
+					+ '<i class="layui-icon layui-icon-right upgrade-arrow" aria-hidden="true"></i>'
+					+ chip('最新版本', release.version, true)).prop('hidden', false);
+			} else {
+				$panel.attr('class', 'upgrade-panel is-latest');
+				$badge.find('.layui-icon').attr('class', 'layui-icon ' + ICONS.latest);
+				$status.attr('class', 'upgrade-panel-title').text('当前已是最新版本');
+				$meta.html(chip('当前版本', status.current_version)).prop('hidden', false);
+			}
+		}
+
+		var shell = window.parent;
+		try {
+			if (shell !== window && shell.document.getElementById('MiuApp')) {
+				var onStatus = function (event) { render(event.detail); };
+				shell.addEventListener('miu:upgrade-status', onStatus);
+				window.addEventListener('pagehide', function () {
+					shell.removeEventListener('miu:upgrade-status', onStatus);
+				}, {once: true});
+				if (shell.__miuUpgradeStatus !== undefined) render(shell.__miuUpgradeStatus);
+				return;
+			}
+		} catch (e) {
+			// 独立打开或外层页面不同源时，使用当前页的检查入口。
+		}
+
+		$.ajax({
+			url: $card.attr('data-check-url'),
+			method: 'POST',
+			dataType: 'json',
+			data: {token: $card.attr('data-token')},
+			timeout: 15000
+		}).done(function (res) {
+			render(res && res.code === 0 ? res.data : null);
+		}).fail(function () { render(null); });
+	}
+
+	function loadOfficialNews() {
+		var $list = $('#official-news'), $status = $('#official-news-status');
+		var cacheKey = 'miucms.officialNews';
+
+		function renderNews(items) {
+			if (!Array.isArray(items) || items.length > 5 || !items.every(function (item) {
+				return item && typeof item.title === 'string' && item.title.trim()
+					&& typeof item.url === 'string' && /^https:\/\//i.test(item.url);
+			})) return false;
+
+			$list.empty();
+			$.each(items, function (_, item) {
+				var $link = $('<a>', {
+					href: item.url, target: '_blank', rel: 'noopener'
+				}).text(item.title);
+				if (typeof item.title_color === 'string' && item.title_color) $link.css('color', item.title_color);
+				if (item.is_b === true) $link.css('font-weight', 'bold');
+				$('<li>').append($link).appendTo($list);
+			});
+			var hasNews = items.length > 0;
+			$list.prop('hidden', !hasNews);
+			$status.prop('hidden', hasNews);
+			$('#official-news-card').prop('hidden', false);
+			return true;
+		}
+
+		try { renderNews(JSON.parse(localStorage.getItem(cacheKey))); } catch (e) {}
+		$.getJSON("{:url('admin/index/official_news')}").done(function (res) {
+			if (!res || res.code !== 0 || !renderNews(res.data)) return;
+			try { localStorage.setItem(cacheKey, JSON.stringify(res.data)); } catch (e) {}
+		});
+	}
+
 	function getLogs() {
 		$.ajax({
 			url: "{:url('admin/api/get_log_list')}" ,
-			type: 'post',
+			type: 'get',
 			data: {
 				page: 1,
-				limit: 20
+				limit: 5
 			},
 			success: function (e) {
 				if (e.code == 0) {
@@ -255,8 +315,88 @@
 		})
 	}
 
-	layui.use(['tool'],function(){
-		var table = layui.table,tool = layui.tool;
+	loadOfficialNews();
+	loadUpgradeStatus();
+	layui.use(['tool', 'form'],function(){
+		var table = layui.table,tool = layui.tool, form = layui.form;
+		var $quickNav = $('#dashboard-quick-nav-items');
+		var $choices = $quickNav.children('[data-quick-nav]');
+		var pickerChoices = $choices.toArray().sort(function (a, b) {
+			return Number(a.dataset.pickerOrder) - Number(b.dataset.pickerOrder);
+		});
+		var $custom = $('#custom_quick_bar');
+		var minQuickNav = Number($custom.attr('data-min'));
+		var maxQuickNav = Number($custom.attr('data-max'));
+		var chosen = [];
+
+		form.on('checkbox(dashboard-quick-nav-choice)', function (data) {
+			var key = data.elem.value;
+			if (!data.elem.checked) {
+				chosen = chosen.filter(function (value) { return value !== key; });
+				return;
+			}
+			if (chosen.length >= maxQuickNav) {
+				data.elem.checked = false;
+				form.render('checkbox', 'dashboard-quick-nav-picker');
+				layer.msg('最多选择 ' + maxQuickNav + ' 个快捷入口');
+				return;
+			}
+			chosen.push(key);
+		});
+
+		$custom.on('click', function () {
+			chosen = $quickNav.children('[data-quick-nav]:not([hidden])').map(function () {
+				return $(this).attr('data-quick-nav');
+			}).get();
+			var $picker = $('<div>', {class: 'layui-form dashboard-quick-nav-picker', 'lay-filter': 'dashboard-quick-nav-picker'});
+			var $grid = $('<div>', {class: 'layui-row dashboard-quick-nav-grid'}).appendTo($picker);
+			$.each(pickerChoices, function (_, entry) {
+				var $entry = $(entry);
+				var key = $entry.attr('data-quick-nav');
+				$('<div>').append($('<input>', {
+					type: 'checkbox', name: 'quick_nav', value: key, title: $entry.find('.num-title').attr('data-label'),
+					'lay-skin': 'primary', 'lay-filter': 'dashboard-quick-nav-choice'
+				}).attr('checked', chosen.indexOf(key) !== -1 ? 'checked' : null)).appendTo($grid);
+			});
+
+			var saving = false;
+			layer.open({
+				id: 'dashboard-quick-nav-dialog',
+				type: 1,
+				title: '快捷导航管理',
+				area: [Math.min(720, $(window).width() - 24) + 'px', 'auto'],
+				content: $picker.prop('outerHTML'),
+				btn: ['保存'],
+				btnAlign: 'c',
+				success: function () { form.render('checkbox', 'dashboard-quick-nav-picker'); },
+				cancel: function () { return !saving; },
+				yes: function (index) {
+					if (saving) return;
+					if (chosen.length < minQuickNav) {
+						layer.msg('请至少选择 ' + minQuickNav + ' 个快捷入口');
+						return;
+					}
+					saving = true;
+					var submitted = chosen.slice();
+					tool.post(MIU_ADMIN + '/index/save_quick_nav', {items: JSON.stringify(submitted)}, function (res) {
+						if (!res || res.code !== 0) {
+							layer.msg((res && res.msg) || '快捷导航保存失败');
+							return;
+						}
+						$choices.prop('hidden', true);
+						submitted.forEach(function (key) {
+							$choices.filter(function () { return $(this).attr('data-quick-nav') === key; })
+								.prop('hidden', false).appendTo($quickNav);
+						});
+						layer.close(index);
+						layer.msg(res.msg);
+					}, {
+						complete: function () { saving = false; },
+						error: function (xhr) { layer.msg(tool.responseMessage(xhr) || '快捷导航保存失败'); }
+					});
+				}
+			});
+		});
 		$('body').on('click','[data-event="pay"]',function(){
 			var src=$(this).attr('src');
 			layer.open({
