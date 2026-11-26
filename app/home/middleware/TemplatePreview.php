@@ -194,14 +194,17 @@ final class TemplatePreview
             TemplateVisualView::$fragment = TemplateVisualView::$marker = '';
             miu_building_static($wasBuilding);
             app()->config->set(['type' => $previousDriver], 'view');
-            foreach (array_merge($copies, $workspace === '' ? [] : (glob($workspace . '*.php') ?: [])) as $copy) {
-                @unlink($copy);
-            }
-            foreach (array_reverse($directories) as $dir) {
-                @rmdir($dir);
-            }
             if ($workspace !== '') {
-                @rmdir($workspace);
+                // 外层 Trace 中间件还会读取已加载的预览编译文件。
+                register_shutdown_function(static function () use ($workspace, $copies, $directories): void {
+                    foreach (array_merge($copies, glob($workspace . '*.php') ?: []) as $copy) {
+                        @unlink($copy);
+                    }
+                    foreach (array_reverse($directories) as $dir) {
+                        @rmdir($dir);
+                    }
+                    @rmdir($workspace);
+                });
             }
         }
     }

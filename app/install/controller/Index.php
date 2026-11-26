@@ -446,7 +446,7 @@ class Index
             $schema->store_result();
             $databaseExists = $schema->num_rows > 0;
             $schema->close();
-            if (!$databaseExists && !$link->query("CREATE DATABASE `{$data['DB_NAME']}` DEFAULT CHARACTER SET utf8mb4")) {
+            if (!$databaseExists && !$link->query("CREATE DATABASE `{$data['DB_NAME']}` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")) {
                 throw new \RuntimeException('无法创建数据库，请检查账号的建库权限');
             }
             if (!$link->select_db($data['DB_NAME'])) {

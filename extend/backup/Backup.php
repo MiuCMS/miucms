@@ -456,12 +456,13 @@ class Backup
      */
     private function write($sql)
     {
-        $size = strlen($sql);
+        $length = strlen($sql);
         //由于压缩原因，无法计算出压缩后的长度，这里假设压缩率为50%，
         //一般情况压缩率都会高于50%；
-        $size = $this->config['compress'] ? $size / 2 : $size;
+        $size = $this->config['compress'] ? $length / 2 : $length;
         $this->open($size);
-        return $this->config['compress'] ? @gzwrite($this->fp, $sql) : @fwrite($this->fp, $sql);
+        $written = $this->config['compress'] ? @gzwrite($this->fp, $sql) : @fwrite($this->fp, $sql);
+        return $written === $length ? $written : false;
     }
     /**
      * 打开一个卷，用于写入数据

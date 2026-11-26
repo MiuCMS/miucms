@@ -475,7 +475,7 @@ class Channel extends BaseController
                     $sql .= "`delete_time` int(11) unsigned DEFAULT '0' COMMENT '删除时间',";
                     $sql .= "PRIMARY KEY (`id`),";
                     $sql .= "KEY `doc_id` (`doc_id`) USING BTREE";
-                    $sql .= ") ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COMMENT='{$table}模型附加表,cms创建';";
+                    $sql .= ") ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='{$table}模型附加表,cms创建';";
                 }else{
                     $oldTable = (string) ChannelModel::where('id', (int) ($param['id'] ?? 0))->value('table');
                     if (!preg_match('/\A[a-z][a-z0-9_]{2,15}\z/', $oldTable)) {

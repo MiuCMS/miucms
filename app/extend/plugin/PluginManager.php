@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS `{$table}` (
   UNIQUE KEY `uk_name` (`name`),
   KEY `idx_status` (`status`),
   KEY `idx_installed` (`installed`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='插件表';
 SQL;
             Db::execute($sql);
         } catch (\Throwable $e) {
