@@ -86,7 +86,7 @@ GROUP_ID = 2
 
 请将网站入口指向项目的 `public` 目录，并配置 URL 重写。以下规则把不存在的文件和目录交给 ThinkPHP 前端入口处理。
 
-### Nginx
+### Nginx 
 
 
 ```nginx
