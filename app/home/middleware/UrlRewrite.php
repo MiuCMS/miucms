@@ -58,7 +58,7 @@ class UrlRewrite
     const DYNAMIC_PATHS = [
         'login', 'login_submit', 'login_out', 'reg', 'reg_submit', 'send_register_code',
         'forgot', 'forgot_submit', 'reset', 'reset_submit', 'user', 'search', 'tag',
-        'form', 'createhtml', 'sitemap', 'api',
+        'form', 'createhtml', 'sitemap', 'api', 'captcha', 'captcha.html',
     ];
 
     public function handle($request, \Closure $next)

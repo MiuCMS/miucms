@@ -23,7 +23,7 @@ CREATE TABLE `miu_admin` (
   `status` int(1) NOT NULL DEFAULT '1' COMMENT '1正常,0禁止登录,-1删除',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='管理员表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='管理员表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_admin
@@ -37,7 +37,7 @@ CREATE TABLE `miu_quick_nav` (
   `admin_id` int(11) unsigned NOT NULL,
   `items` text NOT NULL,
   PRIMARY KEY (`admin_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='管理员快捷导航';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='管理员快捷导航';
 
 -- ----------------------------
 -- Table structure for miu_admin_group
@@ -53,7 +53,7 @@ CREATE TABLE `miu_admin_group` (
   `update_time` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COMMENT='权限分组表';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='权限分组表';
 
 -- ----------------------------
 -- Records of miu_admin_group
@@ -70,7 +70,7 @@ CREATE TABLE `miu_admin_group_access` (
   `create_time` int(11) NOT NULL DEFAULT '0',
   `update_time` int(11) NOT NULL DEFAULT '0',
   UNIQUE KEY `uid_group_id` (`uid`,`group_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='权限分组和管理员的关联表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='权限分组和管理员的关联表';
 
 -- ----------------------------
 -- Records of miu_admin_group_access
@@ -100,7 +100,7 @@ CREATE TABLE `miu_admin_log` (
   `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0删除 1正常',
   `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='后台操作日志表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='后台操作日志表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_admin_log
@@ -125,7 +125,7 @@ CREATE TABLE `miu_admin_rule` (
   `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1242 DEFAULT CHARSET=utf8mb4 COMMENT='菜单及权限表';
+) ENGINE=InnoDB AUTO_INCREMENT=1242 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='菜单及权限表';
 
 -- ----------------------------
 -- Records of miu_admin_rule
@@ -274,7 +274,7 @@ CREATE TABLE `miu_adv` (
   `add_time` int(11) DEFAULT '0',
   `update_time` int(11) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='广告表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='广告表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_adv
@@ -293,7 +293,7 @@ CREATE TABLE `miu_article` (
   `update_time` int(11) unsigned DEFAULT '0' COMMENT '更新时间',
   `delete_time` int(11) unsigned DEFAULT '0' COMMENT '删除时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='文章模型附加表 cms创建' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文章模型附加表 cms创建' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_article
@@ -325,7 +325,7 @@ CREATE TABLE `miu_channel` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idention` (`nid`) USING BTREE,
   UNIQUE KEY `ctl_name` (`ctl_name`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COMMENT='系统模型表';
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统模型表';
 
 -- ----------------------------
 -- Records of miu_channel
@@ -367,7 +367,7 @@ CREATE TABLE `miu_channel_field` (
   `set_type` tinyint(3) DEFAULT '0' COMMENT '区域选择时使用是否为三级联动,1-是',
   `unit` varchar(10) DEFAULT NULL COMMENT '默认单位',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1087 DEFAULT CHARSET=utf8mb4 COMMENT='自定义字段表';
+) ENGINE=InnoDB AUTO_INCREMENT=1087 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='自定义字段表';
 
 -- ----------------------------
 -- Records of miu_channel_field
@@ -427,7 +427,7 @@ CREATE TABLE `miu_clue` (
   `delete_time` int(11) unsigned DEFAULT '0' COMMENT '删除时间',
   PRIMARY KEY (`id`),
   KEY `doc_id` (`doc_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='clue模型附加表,cms创建' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='clue模型附加表,cms创建' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_clue
@@ -446,7 +446,7 @@ CREATE TABLE `miu_config` (
   `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COMMENT='系统配置表';
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统配置表';
 
 -- ----------------------------
 -- Records of miu_config
@@ -499,7 +499,7 @@ CREATE TABLE `miu_custom` (
   `add_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='自定义变量表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='自定义变量表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_custom
@@ -556,7 +556,7 @@ CREATE TABLE `miu_document` (
   KEY `add_time` (`add_time`) USING BTREE,
   KEY `id` (`id`),
   KEY `delete_time` (`delete_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='文档主表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文档主表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_document
@@ -584,7 +584,7 @@ CREATE TABLE `miu_download` (
   `authorurl` varchar(255) DEFAULT NULL COMMENT '开发者官网',
   PRIMARY KEY (`id`),
   KEY `doc_id` (`doc_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='模型附加表,cms创建' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='模型附加表,cms创建' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_download
@@ -604,7 +604,7 @@ CREATE TABLE `miu_field_type` (
   `define` varchar(255) DEFAULT NULL COMMENT '字段定义',
   `is_require_value` tinyint(1) DEFAULT '0' COMMENT 'channel_field表是否要填写默认值',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of miu_field_type
@@ -655,7 +655,7 @@ CREATE TABLE `miu_file` (
   `use` varchar(255) DEFAULT NULL COMMENT '用处',
   `download` int(11) NOT NULL DEFAULT '0' COMMENT '下载量',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='文件表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文件表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_file
@@ -674,7 +674,7 @@ CREATE TABLE `miu_file_group` (
   `delete_time` int(11) NOT NULL DEFAULT '0' COMMENT '删除时间',
   `is_system` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否系统分组，系统分组不能删除',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COMMENT='文件分组表';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文件分组表';
 
 -- ----------------------------
 -- Records of miu_file_group
@@ -699,7 +699,7 @@ CREATE TABLE `miu_form` (
   `add_time` int(11) NOT NULL DEFAULT '0' COMMENT '新增时间',
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='表单管理表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='表单管理表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_form
@@ -724,7 +724,7 @@ CREATE TABLE `miu_form_field` (
   `update_time` int(11) DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`id`),
   KEY `form_id` (`form_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='表单字段表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='表单字段表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_form_field
@@ -753,7 +753,7 @@ CREATE TABLE `miu_form_message` (
   PRIMARY KEY (`id`),
   KEY `form_id` (`form_id`) USING BTREE,
   KEY `is_read` (`is_read`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='留言主表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='留言主表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_form_message
@@ -773,7 +773,7 @@ CREATE TABLE `miu_form_message_attr` (
   PRIMARY KEY (`id`),
   KEY `aid` (`aid`) USING BTREE,
   KEY `attr_id` (`attr_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='留言字段值表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='留言字段值表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_form_message_attr
@@ -794,7 +794,7 @@ CREATE TABLE `miu_image` (
   `imgs` mediumtext COMMENT '图片集',
   PRIMARY KEY (`id`),
   KEY `doc_id` (`doc_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='模型附加表,cms创建' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='模型附加表,cms创建' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_image
@@ -814,7 +814,7 @@ CREATE TABLE `miu_keywords` (
   `add_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COMMENT='关键字表';
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='关键字表';
 
 -- ----------------------------
 -- Records of miu_keywords
@@ -832,7 +832,7 @@ CREATE TABLE `miu_keywords_group` (
   `add_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COMMENT='标签分组表';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='标签分组表';
 
 -- ----------------------------
 -- Records of miu_keywords_group
@@ -854,7 +854,7 @@ CREATE TABLE `miu_links` (
   `create_time` int(11) NOT NULL DEFAULT '0',
   `update_time` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COMMENT='友情链接';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='友情链接';
 
 -- ----------------------------
 -- Records of miu_links
@@ -892,7 +892,7 @@ CREATE TABLE `miu_nav` (
   `update_time` int(11) DEFAULT '0',
   `delete_time` int(11) DEFAULT '0' COMMENT '逻辑删除时间，和is_del相关',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='导航详情表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='导航详情表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_nav
@@ -919,7 +919,7 @@ CREATE TABLE `miu_plugin` (
   UNIQUE KEY `uk_name` (`name`),
   KEY `idx_status` (`status`),
   KEY `idx_installed` (`installed`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='插件表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_plugin
@@ -942,7 +942,7 @@ CREATE TABLE `miu_product` (
   `buy_url` varchar(255) DEFAULT NULL COMMENT '购买地址',
   PRIMARY KEY (`id`),
   KEY `doc_id` (`doc_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='模型附加表,cms创建' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='模型附加表,cms创建' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_product
@@ -967,7 +967,7 @@ CREATE TABLE `miu_recruit` (
   `recruit_num` varchar(255) DEFAULT NULL COMMENT '招聘人数',
   PRIMARY KEY (`id`),
   KEY `doc_id` (`doc_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='模型附加表,cms创建' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='模型附加表,cms创建' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_recruit
@@ -983,7 +983,7 @@ CREATE TABLE `miu_search_keywords` (
   `times` int(11) NOT NULL DEFAULT '1' COMMENT '搜索次数',
   `type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '1,2',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='搜索关键字表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='搜索关键字表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_search_keywords
@@ -1003,7 +1003,7 @@ CREATE TABLE `miu_single` (
   `delete_time` int(11) unsigned DEFAULT '0' COMMENT '删除时间',
   PRIMARY KEY (`id`),
   KEY `doc_id` (`doc_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='single模型附加表,cms创建' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='single模型附加表,cms创建' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_single
@@ -1024,7 +1024,7 @@ CREATE TABLE `miu_special` (
   `delete_time` int(11) unsigned DEFAULT '0' COMMENT '删除时间',
   PRIMARY KEY (`id`),
   KEY `doc_id` (`doc_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='special模型附加表,cms创建' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='special模型附加表,cms创建' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_special
@@ -1072,7 +1072,7 @@ CREATE TABLE `miu_user` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_user_username_unique` (`username_unique`),
   UNIQUE KEY `uq_user_active_email` (`active_email_unique`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_user
@@ -1091,7 +1091,7 @@ CREATE TABLE `miu_user_collect` (
   UNIQUE KEY `uid_doc_id` (`uid`,`doc_id`),
   KEY `doc_id` (`doc_id`),
   KEY `uid_create_time` (`uid`,`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='会员收藏表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会员收藏表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_user_collect
@@ -1109,7 +1109,7 @@ CREATE TABLE `miu_user_level` (
   `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COMMENT='会员等级表';
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会员等级表';
 
 -- ----------------------------
 -- Records of miu_user_level
@@ -1141,7 +1141,7 @@ CREATE TABLE `miu_user_log` (
   `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0删除 1正常',
   `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户操作日志表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户操作日志表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_user_log
@@ -1162,7 +1162,7 @@ CREATE TABLE `miu_user_password_reset` (
   UNIQUE KEY `token_hash` (`token_hash`),
   KEY `uid` (`uid`),
   KEY `expire_time` (`expire_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='会员密码重置表' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会员密码重置表' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_user_password_reset
@@ -1183,7 +1183,7 @@ CREATE TABLE `miu_video` (
   `videos` mediumtext COMMENT '视频集',
   PRIMARY KEY (`id`),
   KEY `doc_id` (`doc_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='video模型附加表,cms创建' AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='video模型附加表,cms创建' AUTO_INCREMENT=1;
 
 -- ----------------------------
 -- Records of miu_video
